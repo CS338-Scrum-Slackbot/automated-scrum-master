@@ -2,24 +2,26 @@
 
 ## How to run the bot
 
-Git clone the repository and `cd` into it\
-Run the following in the command line:
+1. Git clone the repository and `cd` into it. 
+2. Create a python virtual environment and activate it with:
 ```
+python3 -m venv .venv/slackbot
 source .venv/slackbot/bin/activate
 ```
-
+3. Install package dependencies with:
 ```
 pip3 install -r requirements.txt
 ```
 
+4. Run the bot with:
 ```
 python3 slack_interface.py
 ```
 
-You must also set up a .env file in the root directory with the parameters \
+You must also set up a .env file in the root directory with the parameters 
 ```
-BOT_TOKEN=<your slack app bot token>
-SIGNING_SECRET=<your slack app signing secret>
+BOT_TOKEN=your slack app bot token
+SIGNING_SECRET=your slack app signing secret
 ```
 
 Both of these parameters can be found on the Slack API portal
