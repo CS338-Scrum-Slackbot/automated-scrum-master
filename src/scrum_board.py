@@ -12,11 +12,26 @@ SCRUM_BOARD = './data/scrum_board.json'
 class ScrumBoard:
     def __init__(self):
         # Can do this with other backlogs as well
-        with open(SCRUM_BOARD, 'r') as pb:
-            self.pb = json.load(pb)
+        self.sb = {}
+        with open(SCRUM_BOARD, 'r') as f:
+            self.sb = json.load(f)
 
-    def create_story(self):
-        pass
+    def create_story(self, id, sprint, user_type, story_desc):
+        story = {
+            "id": id,
+            "priority": -1,
+            "estimate": -1,
+            "sprint": sprint,
+            "status": "",
+            "assigned_to": "",
+            "user_type": user_type,
+            "story": story_desc
+        }
+
+        self.sb['product_backlog'].append(story)
+        print(self.sb['product_backlog'])
+        with open(SCRUM_BOARD, 'w') as f:
+            json.dump(self.sb, f, indent=4)
 
     def read_story(self):
         pass
