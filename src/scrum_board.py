@@ -6,20 +6,31 @@ Scrum board API for simple interfacing with data
     td: to-do
 """
 import json
+import json_reader
 
 SCRUM_BOARD = './data/scrum_board.json'
 
 class ScrumBoard:
     def __init__(self):
         # Can do this with other backlogs as well
-        with open(SCRUM_BOARD, 'r') as pb:
-            self.pb = json.load(pb)
+        """with open(SCRUM_BOARD, 'r') as pb:
+            self.pb = json.load(pb)"""
 
     def create_story(self):
         pass
 
-    def read_story(self):
-        pass
+    def read_story(self, params: list): # id: int, log: str = None)
+        reader = json_reader(file_path="../data/scrum_board.json")  # Open reader
+        id = int(params[0])                                         # Get id, log from params
+        log = None
+        if len(params) > 1:
+            log = params[1]
+        obj, log_str = json_reader.read(id=id, log=log)             # Read from json
+        json_reader.close()                                         # Close json reader
+        if obj is None or log_str is None:
+            return "Story not found."
+        return "Reading story from "+log_str+json.dumps(obj)
+
     
     def update_story(self):
         pass

@@ -30,6 +30,10 @@ class ScrumMaster:
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         """
         self.text = text
+        l = text.split()                        # input string -> list of words
+        action = ScrumMaster.commands[l[0]]     # Element 0 = command (eg read, update, etc)
+        self.text = action(l[1:len(l)])         # Element 1:len = parameters (eg ID, log, etc)
+        """ Using self.text for the return string - Caspar """
         pass
 
     def get_response(self):
