@@ -8,6 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask 
 from slackeventsapi import SlackEventAdapter
+from .json_reader import json_reader
 
 from scrum_master import ScrumMaster
 

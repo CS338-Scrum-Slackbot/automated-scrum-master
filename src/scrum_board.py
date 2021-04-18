@@ -21,8 +21,8 @@ class ScrumBoard:
     def read_story(self):
         pass
     
-    def update_story(self):
-        pass
+    def update_story(self, id, field, value):
+        return json_reader(SCRUM_BOARD).update(id, field, value)
 
     def delete_story(self):
         pass
