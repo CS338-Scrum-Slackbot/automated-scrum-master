@@ -38,8 +38,11 @@ def send_modal(trigger_id, modal):
 def handle_interaction():
     data = json.loads(request.form["payload"])
     if data['type'] == 'block_actions':
-        if data['message']['blocks'][0]['elements'][0]['action_id'] == 'create-story':
-            send_modal(data['trigger_id'], modal=scrum_master.create_story_modal())
+        try:
+            if data['message']['blocks'][0]['elements'][0]['action_id'] == 'create-story':
+                send_modal(data['trigger_id'], modal=scrum_master.create_story_modal())
+        except KeyError:
+            print("Unexpected payload. Doing nothing...")
     elif data['type'] == 'view_submission':
         scrum_master.process_story_submission(data)
     else:

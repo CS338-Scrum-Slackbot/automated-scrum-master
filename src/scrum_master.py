@@ -57,14 +57,15 @@ class ScrumMaster:
     def process_story_submission(self, payload: dict):
         payload_values = list(payload['view']['state']['values'].values())
         
-        priority = int(payload_values[0]['static_select-action']['selected_option']['text']['text'])
-        estimate = int(payload_values[1]['static_select-action']['selected_option']['text']['text'])
-        sprint = int(payload_values[2]['plain_text_input-action']['value'])
-        assigned_to = payload_values[3]['users_select-action']['selected_user']
-        user_type = payload_values[4]['plain_text_input-action']['value']
-        story_desc = payload_values[5]['plain_text_input-action']['value']
+        board = payload_values[0]['static_select-action']['selected_option']['text']['text']
+        priority = int(payload_values[1]['static_select-action']['selected_option']['text']['text'])
+        estimate = int(payload_values[2]['static_select-action']['selected_option']['text']['text'])
+        sprint = int(payload_values[3]['plain_text_input-action']['value'])
+        assigned_to = payload_values[4]['users_select-action']['selected_user']
+        user_type = payload_values[5]['plain_text_input-action']['value']
+        story_desc = payload_values[6]['plain_text_input-action']['value']
 
-        print(priority, estimate, sprint, assigned_to, user_type, story_desc)
+        print(board, priority, estimate, sprint, assigned_to, user_type, story_desc)
         
 
     def get_response(self):
