@@ -37,7 +37,7 @@ class json_reader(json_interface):
     
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log
-        def _read_log(self, r_log: str) -> object:
+        def read_log(r_log: str) -> object:
             entries = self._j[r_log]
             for e in entries:
                 if e["id"] == id:
@@ -45,10 +45,10 @@ class json_reader(json_interface):
             return None
         # Read specified log
         if log is not None:
-            return self._read_log(id, log), log
+            return read_log(log), log
         # Scan over logs
         for l in self.list_logs():
-            result = self._read_log(id, l)
+            result = read_log(l)
             if (result != None):
                 return result, l
         return None, None
@@ -91,7 +91,7 @@ class json_reader(json_interface):
 """# Tests:
 my_json_reader = json_reader(file_path="../data/scrum_board_copy.json")
 
-obj, log = my_json_reader.delete(id=4)
+obj, log = my_json_reader.read(id=4, log="current_sprint")
 print(str(obj))
 
 my_json_reader.close()"""
