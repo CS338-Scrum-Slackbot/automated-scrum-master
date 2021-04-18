@@ -1,32 +1,67 @@
 import json
 from os import read
 
+"""
+#### README
+The sample code below shows usage of json_reader.
+- You should use an import-as statement.
+- The file_path starts with 'data/' NOT '../data/' or './data/'
+- You should probably call reader.close to close the opened file after your operation. I can't guarantee what happens if you don't.
+- The reader implements hard-deletion.
+
+#### CODE:
+import json_reader as jr
+
+def my_func:
+    reader = jr.json_reader(file_path="data/scrum_board.json")
+
+    ...
+
+    my_obj = ...
+    my_log = ... 
+    reader.create(entry=my_obj, log=my_log)
+    
+    ...
+
+    my_id = ...
+    my_log = ... optional if the user does not provide one. read() will return the log where it found the entry
+    my_obj, my_log = reader.read(id=my_id, log=my_log)
+
+    ...
+
+    my_id = ...
+    my_log = ... optional (same as above)
+    my_obj, my_log = reader.delete(self, id=my_id, log=my_log)
+
+    ...
+
+    my_logs = reader.list_logs()
+    print(str(my_logs)) --> ["product_backlog",""sprint_backlog","current_sprint","archived"]
+
+    ...
+
+    reader.close()
+"""
+
+
 class json_interface():
     def __init__(self, file_path):
-        pass # Opens file_name in data directory
+        pass
     def create(self, entry: object, log: str):
         pass # Adds the entry to specified log
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
-        pass # Returns entry obj and log str. If input log if None (default), must scan all logs.
-             # If id# is not in log or file, returns None.
+        pass # If id# is found in the log or file (log=None), returns entry, log.
+             # Otherwise, returns None, None
     def delete(self, id: int, log: str = None): # Return Tuple[obj, str]
-        pass # Removes id# from log (!!HARD DELETE!!). Use for update operations.
-    def search_string(self, lookup: str, log: str = None) -> object:
-        pass # lookup by string
+        pass # Removes id# from log or file (log=None). (!!HARD DELETE!!)
     def list_logs(self) -> list:
         pass # Returns a list of logs in file_name: ["product_backlog","sprint_backlog",...]
     def close(self):
         pass # Closes the file reader
 
-"""
-TODO: implement search by status, priority, etc
-may be coupled with id search
-repeated code in read, delete - can be abstracted if you have time
-"""
-
 class json_reader(json_interface):
     def __init__(self, file_path: str):
-        self._f = open(file=file_path, mode="r+") # access mode: read and write. TODO: slashes
+        self._f = open(file=file_path, mode="r+")     # RW mode
         self._j = json.load(self._f)
     
     def create(self, entry: object, log: str):
@@ -77,9 +112,6 @@ class json_reader(json_interface):
             result, _ = delete_from_log(log_list[idx])
             idx = idx + 1
         return result, log_list[idx-1]
-
-    def search_string(self, lookup: str, log: str = None) -> object:
-        pass # TODO: lookup by string
 
     def list_logs(self) -> list:
         return list(self._j.keys())
