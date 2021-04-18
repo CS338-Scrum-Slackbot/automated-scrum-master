@@ -31,7 +31,11 @@ class ScrumMaster:
         """
         self.text = text
         l = text.split()                        # input string -> list of words
-        action = ScrumMaster.commands[l[0]]     # Element 0 = command (eg read, update, etc)
+        cmd = l[0]                              # Element 0 = command (eg read, update, etc)
+        if cmd not in list(ScrumMaster.commands.keys()):
+            self.text = "scrum_master: process_text expected first word to be command (create, read, update, or delete"
+            return
+        action = ScrumMaster.commands[l[0]]
         self.text = action(l[1:len(l)])         # Element 1:len = parameters (eg ID, log, etc)
         """ Using self.text for the return string - Caspar """
         pass

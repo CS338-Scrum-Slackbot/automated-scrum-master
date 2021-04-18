@@ -11,7 +11,7 @@ from slackeventsapi import SlackEventAdapter
 
 from scrum_master import ScrumMaster
 
-env_path = Path('..') / '.env'
+env_path = Path('.') / '.env' # Changed to one dot
 load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
@@ -35,6 +35,7 @@ def get_app_mention(payload):
     event = payload.get('event', {})
     channel_id = event['channel']
     user_id = event['user']
+    print("\n\n"+str(event['text']) + "\n\n")
     text = event['text'].split(f'<@{BOT_ID}> ')[1]
 
     if BOT_ID != user_id:
@@ -43,5 +44,17 @@ def get_app_mention(payload):
         response = scrum_master.get_response()
         send_message(response)
 
+@slack_event_adapter.on('message')      # Added dm event tracker from Neha's branch: sends message to #test channel
+def get_dm_mention(payload):
+    event = payload.get('event', {})
+    user_id = event['user']
+    text = event['text']
+    print("\n\n"+str(event['text']) + "\n\n")
+    if BOT_ID != user_id:
+        scrum_master.process_text(text)
+        # Potentially more scrum bot logic to follow here
+        response = scrum_master.get_response()
+        send_message(response)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True) # Added port #
