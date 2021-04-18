@@ -12,8 +12,6 @@ from slackeventsapi import SlackEventAdapter
 
 from scrum_master import ScrumMaster
 
-from block_ui.create_story_ui import CREATE_STORY_MODAL
-
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
@@ -29,20 +27,21 @@ CHANNEL = "#app_mention"
 # Class to handle bot logic
 scrum_master = ScrumMaster()
 
-def send_message(text, blocks=None):
+def send_message(text_msg, interactive_msg=None):
     """ Sends a message to the slack channel """
-    client.chat_postMessage(channel=CHANNEL, text=text, blocks=blocks)
+    client.chat_postMessage(channel=CHANNEL, text=text_msg, blocks=interactive_msg)
 
-def create_modal(trigger_id):
-    client.views_open(trigger_id=trigger_id, view=CREATE_STORY_MODAL) 
+def send_modal(trigger_id, modal):
+    client.views_open(trigger_id=trigger_id, view=modal) 
 
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
     if data['type'] == 'block_actions':
-        create_modal(data['trigger_id'])
+        if data['message']['blocks'][0]['elements'][0]['action_id'] == 'create-story':
+            send_modal(data['trigger_id'], modal=scrum_master.create_story_modal())
     elif data['type'] == 'view_submission':
-        scrum_master.process_modal(data)
+        scrum_master.process_story_submission(data)
     else:
         print("Unknown interactive request.")
     return ''
@@ -57,8 +56,8 @@ def get_app_mention(payload):
     if BOT_ID != user_id:
         scrum_master.process_text(text)
         # Potentially more scrum bot logic to follow here
-        text, blocks = scrum_master.get_response()
-        send_message(text, blocks)
+        text_msg, interactive_msg = scrum_master.get_response()
+        send_message(text_msg, interactive_msg)
 
 if __name__ == '__main__':
     app.run(debug=True)

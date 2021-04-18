@@ -3,6 +3,7 @@ Class to wrap the logic of the scrum master bot
 """
 
 from scrum_board import ScrumBoard
+import block_ui.create_story_ui as block_ui
 
 class ScrumMaster:
     
@@ -18,33 +19,19 @@ class ScrumMaster:
 
          # Interface with JSON data
         scrum_board = ScrumBoard()
+        
 
-        # Command keyword list (CRUD)
-        # e.g. action = commands[keyword]
-        #      action(story)
-        self.commands = { 
-            "create": "",
-            "read": scrum_board.read_story,
-            "update": scrum_board.update_story,
-            "delete": scrum_board.delete_story
-        }
-
-    def process_modal(self, payload):
-        print(payload)
-
-
-    def process_text(self, text):
+    def process_text(self, text: str):
         """ 
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         """
-        command = text.lower().split(' ')[1]
-        if command == "create":
-            self._create_story()
+        if "create a story" in text:
+            self._create_story_btn()
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
 
-    def _create_story(self):
+    def _create_story_btn(self):
         self.blocks = [
             {
                 "type": "actions",
@@ -53,17 +40,34 @@ class ScrumMaster:
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Create Modal",
-                            "emoji": True
+                            "text": "Create a Story",
                         },
                         "value": "click_me_123",
-                        "action_id": "create-modal"
+                        "action_id": "create-story"
                     },
                 ]
             }
         ]
         self.text = ""
+
+    @staticmethod
+    def create_story_modal():
+        return block_ui.CREATE_STORY_MODAL
+
+    def process_story_submission(self, payload: dict):
+        payload_values = list(payload['view']['state']['values'].values())
+        
+        priority = int(payload_values[0]['static_select-action']['selected_option']['text']['text'])
+        estimate = int(payload_values[1]['static_select-action']['selected_option']['text']['text'])
+        sprint = int(payload_values[2]['plain_text_input-action']['value'])
+        assigned_to = payload_values[3]['users_select-action']['selected_user']
+        user_type = payload_values[4]['plain_text_input-action']['value']
+        story_desc = payload_values[5]['plain_text_input-action']['value']
+
+        print(priority, estimate, sprint, assigned_to, user_type, story_desc)
         
 
     def get_response(self):
+        # self.text is the textual message to be displayed by bot
+        # self.blocks is the interactive message (e.g. modal) to be displayed in JSON
         return (self.text, self.blocks)

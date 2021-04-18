@@ -16,14 +16,14 @@ class ScrumBoard:
         with open(SCRUM_BOARD, 'r') as f:
             self.sb = json.load(f)
 
-    def create_story(self, id, sprint, user_type, story_desc):
+    def create_story(self, id, sprint, assigned_to, user_type, story_desc):
         story = {
             "id": id,
-            "priority": -1,
-            "estimate": -1,
+            "priority": priority,
+            "estimate":estimate,
             "sprint": sprint,
             "status": "",
-            "assigned_to": "",
+            "assigned_to": assigned_to,
             "user_type": user_type,
             "story": story_desc
         }

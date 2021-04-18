@@ -1,4 +1,5 @@
 CREATE_STORY_MODAL = {
+            "type": "modal",
             "title": {
                 "type": "plain_text",
                 "text": "Create a Story"
@@ -22,6 +23,65 @@ CREATE_STORY_MODAL = {
                         "type": "static_select",
                         "placeholder": {
                             "type": "plain_text",
+                            "text": "Select an item",
+                            "emoji": True
+                        },
+                        "options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Product Backlog",
+                                    "emoji": True
+                                },
+                                "value": "board-1"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Sprint Backlog",
+                                    "emoji": True
+                                },
+                                "value": "board-2"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Current Sprint",
+                                    "emoji": True
+                                },
+                                "value": "board-3"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Previous Sprints",
+                                    "emoji": True
+                                },
+                                "value": "board-4"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Archived",
+                                    "emoji": True
+                                },
+                                "value": "board-5"
+                            }
+                        ],
+                        "action_id": "static_select-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Board",
+                        "emoji": True
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "static_select",
+                        "placeholder": {
+                            "type": "plain_text",
                             "text": "Select an number",
                             "emoji": True
                         },
@@ -32,7 +92,7 @@ CREATE_STORY_MODAL = {
                                     "text": "1",
                                     "emoji": True
                                 },
-                                "value": "value-0"
+                                "value": "priority-1"
                             },
                             {
                                 "text": {
@@ -40,7 +100,7 @@ CREATE_STORY_MODAL = {
                                     "text": "2",
                                     "emoji": True
                                 },
-                                "value": "value-1"
+                                "value": "priority-2"
                             },
                             {
                                 "text": {
@@ -48,7 +108,7 @@ CREATE_STORY_MODAL = {
                                     "text": "3",
                                     "emoji": True
                                 },
-                                "value": "value-2"
+                                "value": "priority-3"
                             }
                         ],
                         "action_id": "static_select-action"
@@ -75,7 +135,7 @@ CREATE_STORY_MODAL = {
                                     "text": "1",
                                     "emoji": True
                                 },
-                                "value": "value-0"
+                                "value": "estimate-1"
                             },
                             {
                                 "text": {
@@ -83,7 +143,7 @@ CREATE_STORY_MODAL = {
                                     "text": "2",
                                     "emoji": True
                                 },
-                                "value": "value-1"
+                                "value": "estimate-2"
                             },
                             {
                                 "text": {
@@ -91,7 +151,7 @@ CREATE_STORY_MODAL = {
                                     "text": "3",
                                     "emoji": True
                                 },
-                                "value": "value-2"
+                                "value": "estimate-3"
                             }
                         ],
                         "action_id": "static_select-action"
@@ -156,5 +216,4 @@ CREATE_STORY_MODAL = {
                     }
                 }
             ],
-            "type": "modal"
 }
