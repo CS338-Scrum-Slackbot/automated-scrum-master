@@ -132,9 +132,19 @@ class json_reader(json_interface):
         return result, log_list[idx-1]
 
     def update(self, id: int, new_entry: object, log: str = None) -> bool:
-        pass # Updates id# with new_entry. Log is optional.
+        o, dest_log = self.delete(id, log)
+        if o is None or dest_log is None:
+            return False # Deletion failed
+        self.create(new_entry, dest_log)
+        return True
+
     def move(self, id: int, dest_log: str, src_log: str = None) -> bool:
-        pass # Moves id# to the destination log. Source log of entry is optional.
+        entry, src_log = self.delete(id, src_log)
+        if entry is None or src_log is None:
+            return False # Deletion failed
+        self.create(entry, dest_log)
+        return True
+        
     def search(self, lookup:str, log:str = None) -> object:
         pass # Lookup string in log (optional)
 
