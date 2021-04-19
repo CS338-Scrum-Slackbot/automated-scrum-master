@@ -1,8 +1,9 @@
 CREATE_STORY_MODAL = {
             "type": "modal",
+            "callback_id": "create-story-modal",
             "title": {
                 "type": "plain_text",
-                "text": "Create a Story"
+                "text": "Create a Story",
             },
             "submit": {
                 "type": "plain_text",
