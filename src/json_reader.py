@@ -47,6 +47,8 @@ def my_func:
 class json_interface():
     def __init__(self, file_path):
         pass
+
+    # Entry-based ops
     def create(self, entry: object, log: str):
         pass # Adds the entry to specified log
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
@@ -54,16 +56,32 @@ class json_interface():
              # Otherwise, returns None, None
     def delete(self, id: int, log: str = None): # Return Tuple[obj, str]
         pass # Removes id# from log or file (log=None). (!!HARD DELETE!!)
+    def update(self, id: int, new_entry: object, log: str = None) -> bool:
+        pass # Updates id# with new_entry. Log is optional.
+    def move(self, id: int, dest_log: str, src_log: str = None) -> bool:
+        pass # Moves id# to the destination log. Source log of entry is optional.
+    def search(self, lookup:str, log:str = None) -> object:
+        pass # Lookup string in log (optional)
+
+    # Log-based ops
     def list_logs(self) -> list:
         pass # Returns a list of logs in file_name: ["product_backlog","sprint_backlog",...]
+    def read_log(self, log: str = None) -> list:
+        pass # Returns all entries in the log, or all entries in the file if log=None
+    
     def close(self):
         pass # Closes the file reader
+
+
+
 
 class json_reader(json_interface):
     def __init__(self, file_path: str):
         self._f = open(file=file_path, mode="r+")     # RW mode
         self._j = json.load(self._f)
     
+    # Entry-based ops
+
     def create(self, entry: object, log: str):
         self._j[log].append(entry)                   # Add to python obj
         self._f.seek(0)
@@ -113,17 +131,36 @@ class json_reader(json_interface):
             idx = idx + 1
         return result, log_list[idx-1]
 
+    def update(self, id: int, new_entry: object, log: str = None) -> bool:
+        pass # Updates id# with new_entry. Log is optional.
+    def move(self, id: int, dest_log: str, src_log: str = None) -> bool:
+        pass # Moves id# to the destination log. Source log of entry is optional.
+    def search(self, lookup:str, log:str = None) -> object:
+        pass # Lookup string in log (optional)
+
+    # Log-based ops
+
     def list_logs(self) -> list:
         return list(self._j.keys())
+
+    def read_log(self, log: str = None) -> list:
+        if log is None:
+            return self._j
+        elif log not in self.list_logs():
+            return None # error
+        else:
+            return self._j[log]
 
     def close(self):
         self._f.close()
 
 
-"""# Tests:
-my_json_reader = json_reader(file_path="../data/scrum_board_copy.json")
+
+
+# Tests:
+my_json_reader = json_reader(file_path="data/scrum_board_copy.json")
 
 obj, log = my_json_reader.read(id=4, log="current_sprint")
 print(str(obj))
 
-my_json_reader.close()"""
+my_json_reader.close()
