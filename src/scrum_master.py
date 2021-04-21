@@ -20,9 +20,9 @@ class ScrumMaster:
     }
 
     priorities = {
-        "high" = 3,
-        "medium" = 2,
-        "low" = 1
+        "high": 3,
+        "medium": 2,
+        "low": 1 
     }
 
     fields = {
@@ -59,12 +59,17 @@ class ScrumMaster:
         if command == "update":
             id, field, value = words[1], words[2], ' '.join(words[3:])
             # rudimentary input checks
-            if fields not in self.fields: self.text = f"Invalid field {field}. Must be one of [{', '.join(self.fields)}]"; return
-            if field == 'priority': value = priorities[value]
+            if field not in self.fields: 
+                self.text = f"Invalid field \'{field}\'. Must be one of [{', '.join(self.fields)}]"
+                return
+            if field == 'priority': value = self.priorities[value]
             elif field in ['estimate','sprint']: 
                 try: value = int(value) 
-                except: self.text = f"Invalid input type for {field}. Given {type(value)}; expected int."; return
+                except: 
+                    self.text = f"Invalid input type for {field}. Given {type(value)}; expected int."
+                    return
             success = action(id, field, value)
+            print(success)
             self.text = "Successfully updated story." if success else f"Could not find story with id {id}."
         else:
             self.text = "Sorry, I don't recognize that command."

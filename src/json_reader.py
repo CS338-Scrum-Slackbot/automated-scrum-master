@@ -55,11 +55,12 @@ class json_reader(json_interface):
 
     def update(self, id, field, value):
         # loop through each log
+        print(id, field, value)
         for k, v in self._j.items():
             # loop through each story in a log
             for i in v:
                 # if id matches
-                if i['id'] == id:
+                if i['id'] == int(id):
                     # update field with value
                     i[field] = value
                     # and write updated json to file
@@ -67,7 +68,7 @@ class json_reader(json_interface):
                     self._f.write(json.dumps(self._j, indent=4))
                     self._f.truncate()
                     return i # success
-        return 0 # failure
+        return None # failure
 
     def delete(self, id: int, log: str = None): # Returns Tuple[object, str]
         # Helper function for deleting from specific log

@@ -6,6 +6,7 @@ Scrum board API for simple interfacing with data
     td: to-do
 """
 import json
+import json_reader
 
 SCRUM_BOARD = './data/scrum_board.json'
 
@@ -22,7 +23,7 @@ class ScrumBoard:
         pass
     
     def update_story(self, id, field, value):
-        return json_reader(SCRUM_BOARD).update(id, field, value)
+        return json_reader.json_reader(SCRUM_BOARD).update(id, field, value)
 
     def delete_story(self):
         pass
