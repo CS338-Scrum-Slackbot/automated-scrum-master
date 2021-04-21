@@ -47,18 +47,17 @@ def get_app_mention(payload):
         response = scrum_master.get_response()
         send_message(response)
 
+
 # For local development and debugging - testing the scrum_board logic
+# @slack_event_adapter.on('message')
+# def get_dm_mention(payload):
+#     print('\n', payload, '\n')
+#     event = payload.get('event', {})
+#     user_id = event['user']
+#     text = event['text']
 
-
-@slack_event_adapter.on('message')
-def get_dm_mention(payload):
-    print('\n', payload, '\n')
-    event = payload.get('event', {})
-    user_id = event['user']
-    text = event['text']
-
-    if BOT_ID != user_id:
-        scrum_master.process_text(text)
+#     if BOT_ID != user_id:
+#         scrum_master.process_text(text)
 
 
 if __name__ == '__main__':
