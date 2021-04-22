@@ -32,7 +32,13 @@ class ScrumBoard:
 
     
     def update_story(self, id, field, value):
-        return json_reader.json_reader(SCRUM_BOARD).update(id, field, value)
+        reader = jr.json_reader(SCRUM_BOARD)
+        story, log = reader.read(id)
+        if story: 
+            story[field] = value
+            return reader.update(id, story, log)
+        else: return None
+
 
     def delete_story(self):
         pass

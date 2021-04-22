@@ -69,7 +69,6 @@ class ScrumMaster:
                     self.text = f"Invalid input type for {field}. Given {type(value)}; expected int."
                     return
             success = action(id, field, value)
-            print(success)
             self.text = "Successfully updated story." if success else f"Could not find story with id {id}."
         else:
             self.text = "Sorry, I don't recognize that command."
