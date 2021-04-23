@@ -78,6 +78,7 @@ class ScrumMaster:
             self._process_story_submission(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
+            # e.g. self._process_example_submission(payload_values)
             pass
         else:
             pass
