@@ -14,46 +14,40 @@ import json_reader as jr
 
 def my_func:
     reader = jr.json_reader(file_path="data/scrum_board.json")
-
     ...
-
     my_obj = ...
     my_log = ... 
     reader.create(entry=my_obj, log=my_log)
-    
     ...
-
     my_id = ...
     my_log = ... optional if the user does not provide one. read() will return the log where it found the entry
     my_obj, my_log = reader.read(id=my_id, log=my_log)
-
     ...
-
     my_id = ...
-    my_log = ... optional (same as above)
+    my_log = ... optional
     my_obj, my_log = reader.delete(id=my_id, log=my_log)
-
-    ...
-    
+    ...    
     my_id = ...
-    my_log = ... optional (same as above)
+    my_log = ... optional
     new_obj = ... # update() returns the old object
     old_obj, my_log = reader.update(id=my_id, new_entry=new_obj, log=my_log)
-
-    ...
-    
+    ...    
     my_id = ...
-    my_log = ... optional (same as above)
+    my_log = ... optional
     move_to_log = ...
     my_obj, my_log = reader.move(id=my_id, dest_log=move_to_log, src_log=my_log)
-
     ...
-
+    my_lookup_term = ...
+    my_log = ... optional
+    my_field = ... optional
+    found_tuples = reader.search(lookup=my_lookup_term, log=my_log, field=my_field):
+    num_entries_found = len(found_tuples)
+    ith_obj_found = found_tuples[i][0]
+    log_of_ith_obj = found_tuples[i][1]
+    ...
     my_logs = reader.list_logs()
     print(str(my_logs)) --> ["product_backlog",""sprint_backlog","current_sprint","archived"]
-
     ...
-
     my_log = ... optional
     result = read_log(log=my_log) -> list:
     # Returns all entries in the log, or all entries in the file if my_log=None
@@ -78,8 +72,8 @@ class json_interface():
         pass # Updates id# with new_entry. Log is optional. Returns the old object, log if update was successful.
     def move(self, id: int, dest_log: str, src_log: str = None): # Return Tuple[object, str]
         pass # Moves id# to the destination log. Source log of entry is optional. Returns the object, src_log if move was successful.
-    def search_story(self, lookup:str, log:str = None) -> object:
-        pass # Lookup string in the story field. log (optional)
+    def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
+        pass # Lookup any contents: the field and log are optional.
 
     # Log-based ops
     def list_logs(self) -> list:
@@ -88,11 +82,6 @@ class json_interface():
         pass # Returns the list of fields for each story: ["id","priority","estimate",...]
     def read_log(self, log: str = None) -> list:
         pass # Returns all entries in the log, or all entries in the file if log=None
-    
-    def close(self):
-        pass # Closes the file reader
-
-
 
 
 class json_reader(json_interface):
@@ -123,7 +112,7 @@ class json_reader(json_interface):
                     return e
             return None
         # Read specified log
-        if log is not None:
+        if log is not None and log in self._list_logs:
             return read_log(log), log
         # Scan over logs
         for l in self.list_logs():
@@ -134,30 +123,26 @@ class json_reader(json_interface):
 
     def delete(self, id: int, log: str = None): # Returns Tuple[object, str]
         with open(file=self._file_path, mode="r+") as f:
-            j = json.load(f)
             # Helper function for deleting from specific log
             def delete_from_log(l: str):
-                entries = j[l] # Array of objs
+                entries = self._j[l] # Array of objs
                 for idx in range(0, len(entries)):
                     if entries[idx]["id"] == id:
-                        e = j[l].pop(idx) # Remove from python obj
+                        e = self._j[l].pop(idx) # Remove from python obj
                         f.seek(0)
-                        f.write(json.dumps(j, indent=4)) # Write python obj to file
+                        f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                         f.truncate()
-                        return e, l
-                return None, None
+                        return e
+                return None
             # Remove from specified log
-            if log is not None:
-                return delete_from_log(log)
+            if log is not None and log in self._list_logs:
+                return delete_from_log(log), log
             # Iterate over all logs if not specified
-            log_list = self.list_logs()
-            num_logs = len(log_list)
-            idx = 0
-            result = None
-            while idx < num_logs and result is None:
-                result, _ = delete_from_log(log_list[idx])
-                idx = idx + 1
-            return result, log_list[idx-1]
+            for l in self.list_logs():
+                result = delete_from_log(l)
+                if (result != None):
+                    return result, l
+            return None, None
 
     def update(self, id: int, new_entry: object, log: str = None): # Return Tuple[object, str]
         o, this_log = self.delete(id, log)
@@ -192,7 +177,7 @@ class json_reader(json_interface):
                 else: # scan over all fields
                     for f in self._list_fields:
                         if compare_field(f): break # If any field matches, stop comparing fields
-        if log is not None: # Read specified log
+        if log is not None and log in self._list_logs: # Read specified log
             read_log(log)
         else:  # Scan over logs
             for l in self.list_logs():
