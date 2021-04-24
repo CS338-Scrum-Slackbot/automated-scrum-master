@@ -78,12 +78,14 @@ class json_interface():
         pass # Updates id# with new_entry. Log is optional. Returns the old object, log if update was successful.
     def move(self, id: int, dest_log: str, src_log: str = None): # Return Tuple[object, str]
         pass # Moves id# to the destination log. Source log of entry is optional. Returns the object, src_log if move was successful.
-    def search(self, lookup:str, log:str = None) -> object:
-        pass # Lookup string in log (optional)
+    def search_story(self, lookup:str, log:str = None) -> object:
+        pass # Lookup string in the story field. log (optional)
 
     # Log-based ops
     def list_logs(self) -> list:
         pass # Returns a list of logs in file_name: ["product_backlog","sprint_backlog",...]
+    def list_fields(self) -> list:
+        pass # Returns the list of fields for each story: ["id","priority","estimate",...]
     def read_log(self, log: str = None) -> list:
         pass # Returns all entries in the log, or all entries in the file if log=None
     
@@ -100,8 +102,9 @@ class json_reader(json_interface):
         with open(file=self._file_path, mode="r") as f:
             j = json.load(f)
             self._list_logs = list(j.keys())
-        #self._f = open(file=file_path, mode="r+")     # RW mode
-        #self._j = json.load(self._f)
+            # Hard coded fields because it's hard to read them in (in case file is empty)
+            self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
+            # TODO: implement indexing by users or team members here
     
     # Entry-based ops
 
@@ -174,13 +177,42 @@ class json_reader(json_interface):
         self.create(entry, dest_log)
         return entry, src_log
         
-    def search(self, lookup:str, log:str = None) -> object:
-        pass # Lookup string in log (optional)
+    def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
+        if field is not None and field not in self._list_fields or log is not None and log not in self.list_logs():
+            return [] # Invalid field or log
+
+        # TODO: take this out of the WITH block. reason: don't need to open file
+        with open(file=self._file_path, mode="r") as f:
+            j = json.load(f)
+            lookup = str(lookup)    # Cast to string
+            found = []              # Will hold the found entries
+            # Helper function for reading specific log
+            def read_log(r_log: str):
+                entries = j[r_log]
+                for e in entries:
+                    def compare_field(field_):
+                        if lookup in str(e[field_]): # Cast the value to a string as well
+                            found.append([e, r_log])
+                    if field is not None:
+                        compare_field(field)
+                    else: # scan over all fields
+                        for f in self._list_fields:
+                            compare_field(f)
+
+            if log is not None: # Read specified log
+                read_log(log)
+            else:  # Scan over logs
+                for l in self.list_logs():
+                    read_log(l)
+            return found
 
     # Log-based ops
 
     def list_logs(self) -> list:
         return self._list_logs
+
+    def list_fields(self) -> list:
+        return self._list_fields
 
     def read_log(self, log: str = None) -> list:
         if log is not None and log not in self.list_logs():
