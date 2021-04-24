@@ -19,7 +19,7 @@ class ScrumMaster:
         self.sid = 6
 
          # Interface with JSON data
-        scrum_board = ScrumBoard()
+        self.scrum_board = ScrumBoard()
         
 
     def process_user_msg(self, text: str):
@@ -33,6 +33,18 @@ class ScrumMaster:
         elif "example modal" in text:
             self._create_modal_btn(text="Example Modal", action_id="example")
         # End example
+        elif "read" in text:
+            read_text = " ".join(text.split()[1:])
+            id_text  = text.split()[1]
+            log = None
+            from_idx = read_text.find("from")
+            if from_idx != -1:
+                log_idx = from_idx + 6
+                log = read_text[log_idx:]
+            self.txt = self.scrum_board.read(id=id_text, log=log)
+            """elif "search" in text:
+                lookup_text = " ".join(text.split()[1:])
+                self.txt = self.scrum_board.search(lookup_text)"""
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
