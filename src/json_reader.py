@@ -98,43 +98,39 @@ class json_interface():
 class json_reader(json_interface):
     def __init__(self, file_path: str):
         self._file_path = file_path
-        self._list_logs = None
-        with open(file=self._file_path, mode="r") as f:
-            j = json.load(f)
-            self._list_logs = list(j.keys())
-            # Hard coded fields because it's hard to read them in (in case file is empty)
-            self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
-            # TODO: implement indexing by users or team members here
-    
+        # Hard coded logs, field because it's hard to read them in (in case file is empty)
+        self._list_logs = ["product_backlog","sprint_backlog","current_sprint","previous_sprints","archived"]
+        self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
+        self._j = None # Load file into memory   
+        with open(file=self._file_path, mode="r+") as f:
+            self._j = json.load(f)
+
     # Entry-based ops
 
     def create(self, entry: object, log: str):
         with open(file=self._file_path, mode="r+") as f:
-            j = json.load(f)
-            j[log].append(entry)                   # Add to python obj
+            self._j[log].append(entry)             # Add to python obj
             f.seek(0)
-            f.write(json.dumps(j, indent=4)) # Write python obj to file
+            f.write(json.dumps(self._j, indent=4)) # Write python obj to file
             f.truncate()
     
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
-        with open(file=self._file_path, mode="r") as f:
-            j = json.load(f)
-            # Helper function for reading specific log
-            def read_log(r_log: str) -> object:
-                entries = j[r_log]
-                for e in entries:
-                    if e["id"] == id:
-                        return e
-                return None
-            # Read specified log
-            if log is not None:
-                return read_log(log), log
-            # Scan over logs
-            for l in self.list_logs():
-                result = read_log(l)
-                if (result != None):
-                    return result, l
-            return None, None
+        # Helper function for reading specific log
+        def read_log(r_log: str) -> object:
+            entries = self._j[r_log]
+            for e in entries:
+                if e["id"] == id:
+                    return e
+            return None
+        # Read specified log
+        if log is not None:
+            return read_log(log), log
+        # Scan over logs
+        for l in self.list_logs():
+            result = read_log(l)
+            if (result != None):
+                return result, l
+        return None, None
 
     def delete(self, id: int, log: str = None): # Returns Tuple[object, str]
         with open(file=self._file_path, mode="r+") as f:
@@ -179,32 +175,29 @@ class json_reader(json_interface):
         
     def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
         if field is not None and field not in self._list_fields or log is not None and log not in self.list_logs():
-            return [] # Invalid field or log
-
-        # TODO: take this out of the WITH block. reason: don't need to open file
-        with open(file=self._file_path, mode="r") as f:
-            j = json.load(f)
-            lookup = str(lookup)    # Cast to string
-            found = []              # Will hold the found entries
-            # Helper function for reading specific log
-            def read_log(r_log: str):
-                entries = j[r_log]
-                for e in entries:
-                    def compare_field(field_):
-                        if lookup in str(e[field_]): # Cast the value to a string as well
-                            found.append([e, r_log])
-                    if field is not None:
-                        compare_field(field)
-                    else: # scan over all fields
-                        for f in self._list_fields:
-                            compare_field(f)
-
-            if log is not None: # Read specified log
-                read_log(log)
-            else:  # Scan over logs
-                for l in self.list_logs():
-                    read_log(l)
-            return found
+            return None # Invalid field or log
+        lookup = str(lookup)    # Cast to string
+        found = []              # Will hold the found entries
+        # Helper function for reading specific log
+        def read_log(r_log: str):
+            entries = self._j[r_log]
+            for e in entries:
+                def compare_field(field_):
+                    if lookup in str(e[field_]): # Cast the value to a string as well
+                        found.append([e, r_log])
+                        return True
+                    return False
+                if field is not None:
+                    compare_field(field)
+                else: # scan over all fields
+                    for f in self._list_fields:
+                        if compare_field(f): break # If any field matches, stop comparing fields
+        if log is not None: # Read specified log
+            read_log(log)
+        else:  # Scan over logs
+            for l in self.list_logs():
+                read_log(l)
+        return found
 
     # Log-based ops
 
@@ -214,12 +207,10 @@ class json_reader(json_interface):
     def list_fields(self) -> list:
         return self._list_fields
 
-    def read_log(self, log: str = None) -> list:
+    def read_log(self, log: str = None): # Returns if log=None: object else: list
         if log is not None and log not in self.list_logs():
             return None # error
-        with open(file=self._file_path, mode="r+") as f:
-            j = json.load(f)
-            if log is None:
-                return j
-            else:
-                return j[log]
+        if log is None:
+            return self._j
+        else:
+            return self._j[log]

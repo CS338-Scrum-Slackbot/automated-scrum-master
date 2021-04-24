@@ -152,6 +152,15 @@ def test_search():
     for tuple in list3:
         actual_ids.append(tuple[0]["id"])
     assert actual_ids == [3,4,5]
+
+    ### test a bad search: you can find 4 in the ID field or estimate field
+    list4= reader.search(lookup=4)
+    assert len(list4) == 3
+    # Extract IDs
+    actual_ids = []
+    for tuple in list4:
+        actual_ids.append(tuple[0]["id"])
+    assert actual_ids == [3,4,5]
     
 
 def test_read_log():
