@@ -44,15 +44,8 @@ class ScrumBoard:
             return "Story not found."
         return "Reading story from "+log_str+": "+json.dumps(obj)
 
-    
-    def update_story(self, id, field, value):
-        reader = jr.json_reader(SCRUM_BOARD)
-        story, log = reader.read(id)
-        if story: 
-            story[field] = value
-            return reader.update(id, story, log)
-        else: return None
-
+    def update_story(self, story, log):
+        return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
 
     def delete_story(self):
         pass

@@ -16,7 +16,8 @@ UPDATE_STORY_MODAL = {
 				"placeholder": {
 					"type": "plain_text",
 					"text": "Hours"
-				}
+				},
+                "initial_value": "0"
 			},
 			"label": {
 				"type": "plain_text",
@@ -36,7 +37,7 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "High",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "high"
 					},
@@ -44,7 +45,7 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "Medium",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "medium"
 					},
@@ -52,17 +53,25 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "Low",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "low"
 					}
 				],
+                "initial_option": {
+					"text": {
+						"type": "plain_text",
+						"text": "Low",
+						"emoji": True
+					},
+					"value": "low"
+				},
 				"action_id": "radio_buttons-action"
 			},
 			"label": {
 				"type": "plain_text",
 				"text": "Priority",
-				"emoji": true
+				"emoji": True
 			}
 		},
 		{
@@ -74,7 +83,7 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "None",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "none"
 					},
@@ -82,7 +91,7 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "To-do",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "to-do"
 					},
@@ -90,7 +99,7 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "In-progress",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "in-progress"
 					},
@@ -98,17 +107,25 @@ UPDATE_STORY_MODAL = {
 						"text": {
 							"type": "plain_text",
 							"text": "Completed",
-							"emoji": true
+							"emoji": True
 						},
 						"value": "completed"
 					}
 				],
+                "initial_option": {
+					"text": {
+						"type": "plain_text",
+						"text": "None",
+						"emoji": True
+					},
+					"value": "none"
+				},
 				"action_id": "radio_buttons-action"
 			},
 			"label": {
 				"type": "plain_text",
 				"text": "Status",
-				"emoji": true
+				"emoji": True
 			}
 		},
 		{
@@ -119,7 +136,8 @@ UPDATE_STORY_MODAL = {
 				"placeholder": {
 					"type": "plain_text",
 					"text": "End user, administrator, etc."
-				}
+				},
+                "initial_value": "0"
 			},
 			"label": {
 				"type": "plain_text",
@@ -134,7 +152,8 @@ UPDATE_STORY_MODAL = {
 				"placeholder": {
 					"type": "plain_text",
 					"text": "I want to..."
-				}
+				},
+                "initial_value": "0"
 			},
 			"label": {
 				"type": "plain_text",
@@ -148,14 +167,15 @@ UPDATE_STORY_MODAL = {
 				"placeholder": {
 					"type": "plain_text",
 					"text": "Select users",
-					"emoji": true
+					"emoji": True
 				},
+                "initial_user": "0",
 				"action_id": "users_select-action"
 			},
 			"label": {
 				"type": "plain_text",
 				"text": "Assigned To",
-				"emoji": true
+				"emoji": True
 			},
 			"hint": {
 				"type": "plain_text",
@@ -166,12 +186,3 @@ UPDATE_STORY_MODAL = {
 	"type": "modal",
     "callback_id": "update-story-modal",
 }
-
-# "initial_option": {
-#     "text": {
-#         "type": "plain_text",
-#         "text": "Completed",
-#         "emoji": true
-#     },
-#     "value": "value-3"
-# },
