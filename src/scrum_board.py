@@ -34,16 +34,22 @@ class ScrumBoard:
         with open(SCRUM_BOARD, 'w') as f:
             json.dump(self.sb, f, indent=4)
 
-    def read_story(self, params: list): # [id: int, log: str = None]
-        id = int(params[0])  # Get id
-        log = None
-        if len(params) > 1:
-            log = params[1]  # Get user-specified log is possible
+    def read(self, id, log): # [id: int, log: str = None]
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
         if obj is None or log_str is None:
             return "Story not found."
         return "Reading story from "+log_str+": "+json.dumps(obj)
 
+    def search(self, lookup_text, log, field):
+        tuples = self.reader.search(lookup=lookup_text, log=log, field=field)
+        if len(tuples) == 0:
+            return "Didn't find anything for that search."
+        result = "Found these: "
+        for tuple in tuples:
+            id = tuple[0]["id"]
+            log = tuple[1]
+            result.append("ID "+str(id)+" in "+str(log)+". ")
+        return result
     
     def update_story(self):
         pass
