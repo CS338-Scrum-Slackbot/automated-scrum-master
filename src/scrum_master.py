@@ -4,6 +4,7 @@ Class to wrap the logic of the scrum master bot
 
 from scrum_board import ScrumBoard
 from block_ui.create_story_ui import CREATE_STORY_MODAL
+from block_ui.delete_story_ui import DELETE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 
 
@@ -30,16 +31,16 @@ class ScrumMaster:
 
         self.text = text
 
-        processed_text = text.split(" ")
-        print(processed_text)
-
-        if processed_text[0] == "delete":
-            self.scrum_board.delete_story()
-            print("deleted")
-
         if "create a story" in text:
             self._create_modal_btn(text="Create a Story",
                                    action_id="create-story")
+        elif "delete story" in text:
+            self._create_modal_btn(text="Delete a Story",
+                                   action_id="delete-story")
+            # processed_text = text[14:]
+            # response = self.scrum_board.delete_story()
+            # print("deleted")
+            # self.text = response
         # Example
         elif "example modal" in text:
             self._create_modal_btn(text="Example Modal", action_id="example")
@@ -75,6 +76,9 @@ class ScrumMaster:
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
             return CREATE_STORY_MODAL
+        # TODO: Figure out flow for delete story
+        elif action_id == "delete-story":
+            return DELETE_STORY_MODAL
         elif action_id == "example":
             return EXAMPLE_MODAL
         else:
@@ -86,6 +90,8 @@ class ScrumMaster:
         # Add an if-clause here with your callback_id used in the modal
         if callback_id == "create-story-modal":
             self._process_story_submission(payload_values)
+        elif callback_id == "delete-story-modal":
+            self._return_swimlane_stories(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -107,16 +113,39 @@ class ScrumMaster:
         self.text = str([board, priority, estimate, sprint,
                          assigned_to, user_type, story_desc])
 
+    def _return_swimlane_stories(self, payload_values):
+        swimlane = self._get_dropdown_select_item(payload_values, 0)
+        print(swimlane)
+        self.text = "updated_modal"
+        self.blocks = {
+            "view": {
+                "type": "modal",
+                "title": {
+                    "type": "plain_text",
+                    "text": "Updated view"
+                },
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "I've changed and I'll never be the same. You must believe me."
+                        }
+                    }
+                ]
+            }
+        }
+
     # Methods to help parse modal submission payload fields
-    @staticmethod
+    @ staticmethod
     def _get_userselect_item(payload_values, index):
         return payload_values[index]['users_select-action']['selected_user']
 
-    @staticmethod
+    @ staticmethod
     def _get_dropdown_select_item(payload_values, index):
         return payload_values[index]['static_select-action']['selected_option']['text']['text']
 
-    @staticmethod
+    @ staticmethod
     def _get_plaintext_input_item(payload_values, index):
         return payload_values[index]['plain_text_input-action']['value']
 

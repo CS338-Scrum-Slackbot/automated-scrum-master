@@ -77,5 +77,16 @@
             "story": "I want to update a story."
         }
     ],
-    "archived": []
+    "archived": [
+        {
+            "id": 7,
+            "priority": -1,
+            "estimate": -1,
+            "sprint": 2,
+            "status": "",
+            "assigned_to": "Jane Doe",
+            "user_type": "customer",
+            "story": "I want to update a story."
+        }
+    ]
 }

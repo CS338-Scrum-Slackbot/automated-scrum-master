@@ -23,7 +23,8 @@ slack_event_adapter = SlackEventAdapter(
 
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
-CHANNEL = "#app_mention"
+# CHANNEL = "#app_mention"
+CHANNEL = "#neha-test"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -54,6 +55,7 @@ def send_modal(trigger_id, modal):
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
+    print(data)
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
@@ -62,7 +64,6 @@ def handle_interaction():
         except KeyError:
             print("Unexpected payload. Doing nothing...")
             return ''
-
         # Send a modal with our obtained trigger_id
         # Which modal to send is evaluated in scrum_master based on the provided action_id
         send_modal(data['trigger_id'],
@@ -72,9 +73,15 @@ def handle_interaction():
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
-            scrum_master.process_modal_submission(data, callback_id)
+            scrum_master.process_modal_submission(
+                data, callback_id)
             text_msg, interactive_msg = scrum_master.get_response()
-            send_message(text_msg, interactive_msg)
+
+            if text_msg == "updated_modal":
+                client.views_update(
+                    trigger_id=data['trigger_id'], view_id=data['view']['id'], view=interactive_msg)
+            else:
+                send_message(text_msg, interactive_msg)
         except KeyError:
             print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")
     else:

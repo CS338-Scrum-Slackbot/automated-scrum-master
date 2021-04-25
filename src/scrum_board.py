@@ -18,11 +18,11 @@ class ScrumBoard:
             self.pb = json.load(pb)
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
-    def create_story(self, id, sprint, assigned_to, user_type, story_desc):
+    def create_story(self, id, sprint, assigned_to, user_type, story_desc, priority=-1, estimate=-1):
         story = {
             "id": id,
             "priority": priority,
-            "estimate":estimate,
+            "estimate": estimate,
             "sprint": sprint,
             "status": "",
             "assigned_to": assigned_to,
@@ -30,10 +30,10 @@ class ScrumBoard:
             "story": story_desc
         }
 
-        self.sb['product_backlog'].append(story)
-        print(self.sb['product_backlog'])
+        self.pb['product_backlog'].append(story)
+        print(self.pb['product_backlog'])
         with open(SCRUM_BOARD, 'w') as f:
-            json.dump(self.sb, f, indent=4)
+            json.dump(self.pb, f, indent=4)
 
     def read_story(self, params: list):  # [id: int, log: str = None]
         id = int(params[0])  # Get id
@@ -48,10 +48,16 @@ class ScrumBoard:
     def update_story(self):
         pass
 
-    def delete_story(self):
-        scrum_reader = jr.json_reader(
-            file_path="./data/scrum_board.json")
-        logs = scrum_reader.list_logs()
-        print(*logs)
-        scrum_reader.close()
-        pass
+    def delete_story(self, story_id=3, source_log='product_backlog'):
+        story_obj, log = self.reader.read(
+            id=id, log=source_log)  # Read from json
+        if story_obj is None or log is None:
+            return "Story does not exist in this swimlane."
+        moved_story, new_log = self.reader.move(
+            story_id, 'archived', source_log)
+        if moved_story == None or new_log == None:
+            return "Could not delete this story."
+        else:
+            logs = self.reader.read_log()
+            print(logs, '\n', moved_story, '\n', new_log)
+            return "Successfully deleted " + moved_story.story + "from " + source_log
