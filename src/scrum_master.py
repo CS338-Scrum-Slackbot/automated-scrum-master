@@ -187,6 +187,7 @@ class ScrumMaster:
         try: estimate = int(self._get_plaintext_input_item(payload_values, 0))
         except: 
             self.text = "Estimate must be an integer."
+            self.blocks = None
             return
         priority = self.priorities[self._get_radio_group_item(payload_values, 1).capitalize()]
         status = self._get_radio_group_item(payload_values, 2)
