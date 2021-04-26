@@ -179,7 +179,7 @@ class ScrumMaster:
         modal['title']['text'] = f'Update Story {self.story_update["id"]}'
         for b in modal['blocks']:
             if b['label']['text'] == 'Estimate':
-                b['element']['initial_value'] = str(self.story_update['estimate'])
+                b['element']['initial_value'] = str(self.story_update['estimate']) if self.story_update['estimate'] != -1 else "0"
             elif b['label']['text'] == 'Priority':
                 if self.story_update['priority'] != -1: 
                     p = list(self.priorities.keys())[list(self.priorities.values()).index(self.story_update['priority'])]
