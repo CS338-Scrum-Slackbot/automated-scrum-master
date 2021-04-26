@@ -70,6 +70,7 @@ def handle_interaction():
             callback_id = data['view']['callback_id']
             scrum_master.process_modal_submission(data, callback_id)
             text_msg, interactive_msg = scrum_master.get_response()
+            print(f'text_msg: {text_msg}')
             send_message(text_msg, interactive_msg)
         except KeyError:
             print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")

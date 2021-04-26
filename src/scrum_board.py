@@ -45,6 +45,7 @@ class ScrumBoard:
         return "Reading story from "+log_str+": "+json.dumps(obj)
 
     def update_story(self, story, log):
+        print(f'UPDATING STORY: {story}')
         return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
 
     def delete_story(self):

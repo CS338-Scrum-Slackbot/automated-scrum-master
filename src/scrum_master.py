@@ -7,6 +7,7 @@ import json_reader as jr
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
+import json
 
 class ScrumMaster:
     # Interface with JSON data
@@ -48,7 +49,7 @@ class ScrumMaster:
         self.sid = 6
 
         # Interface with JSON data
-        scrum_board = ScrumBoard()
+        self.scrum_board = ScrumBoard()
 
         # log of story being updated:
         self.update_log = ''
@@ -102,8 +103,6 @@ class ScrumMaster:
                 self.text = "Story ID must be an int."
                 return
             self.story_update, self.update_log = jr.json_reader("data/scrum_board.json").read(id)
-            print(self.story_update)
-            print(self.update_log)
             self._create_modal_btn(text=f"Update Story {id}", action_id="update-story")
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
@@ -114,7 +113,6 @@ class ScrumMaster:
         
         IMPOTANT!!! Remember what action_id you used because you will need to use it in create_modal
         """
-        print(f'Action id: {action_id}\n')
         self.blocks = [
             {
                 "type": "actions",
@@ -133,38 +131,41 @@ class ScrumMaster:
         ] if text != "" else None
         self.text = ""
 
-    @staticmethod
-    def create_modal(action_id):
-        print('Creating modal...', action_id)
+    # @staticmethod
+    def create_modal(self, action_id):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
             return CREATE_STORY_MODAL
         elif action_id == "example":
             return EXAMPLE_MODAL
         elif action_id == "update-story":
-            return fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
+            return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
         else:
             return ""
 
-    @staticmethod
-    def fill_update_modal(modal, id):
-        print('Filling update modal...\n')
+    def fill_update_modal(self, modal, id):
         self.story_update, self.update_log = jr.json_reader("data/scrum_board.json").read(id)
         modal['title']['text'] = f'Update Story {self.story_update["id"]}'
         for b in modal['blocks']:
             if b['label']['text'] == 'Estimate':
-                b['element']['intial_value'] = self.story_update['estimate']
+                b['element']['initial_value'] = str(self.story_update['estimate'])
             elif b['label']['text'] == 'Priority':
-                b['element']['initial_option']['text'] = list(self.priorities.keys())[list(self.priorities.values()).index(self.story_update['priority'])]
+                if self.story_update['priority'] != -1: 
+                    p = list(self.priorities.keys())[list(self.priorities.values()).index(self.story_update['priority'])]
+                    b['element']['initial_option']['text']['text'] = p
+                    b['element']['initial_option']['value'] = p.lower()
+                else:
+                    b['element']['initial_option']['text']['text'] = 'Low'
+                    b['element']['initial_option']['value'] = 'low'
             elif b['label']['text'] == 'Status':
-                b['element']['initial_option']['text'] = self.story_update['status'].capitalize()
+                b['element']['initial_option']['text']['text'] = self.story_update['status'].capitalize() if self.story_update['status'] else 'None'
+                b['element']['initial_option']['value'] = self.story_update['status'] if self.story_update['status'] else 'none'
             elif b['label']['text'] == 'User Type':
-                b['element']['intial_value'] = self.story_update['user_type'].capitalize()
+                b['element']['initial_value'] = self.story_update['user_type'].capitalize()
             elif b['label']['text'] == 'User Story':
-                b['element']['intial_value'] = self.story_update['story'].capitalize()
+                b['element']['initial_value'] = self.story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
                 b['element']['initial_user'] = self.story_update['assigned_to']
-        print(modal)
         return modal
         
     def process_modal_submission(self, payload, callback_id):
@@ -182,18 +183,17 @@ class ScrumMaster:
         else:
             pass
 
-    def _process_update_submission(self, payload):
-        try: estimate = int(self._get_plaintext_input_item(payload_values, 1))
+    def _process_update_submission(self, payload_values):
+        try: estimate = int(self._get_plaintext_input_item(payload_values, 0))
         except: 
             self.text = "Estimate must be an integer."
             return
-        priority = priorities[self._get_radio_group_item(payload_values, 2)]
-        status = self._get_radio_group_item(payload_values, 3)
-        assigned_to = self._get_userselect_item(payload_values, 4)
-        user_type = self._get_plaintext_input_item(payload_values, 5)
-        story_desc = self._get_plaintext_input_item(payload_values, 6)
-        self.text = f"Story {self.story_update['id']} updated successfully!" \
-            if scrum_board.update_story({
+        priority = self.priorities[self._get_radio_group_item(payload_values, 1).capitalize()]
+        status = self._get_radio_group_item(payload_values, 2)
+        assigned_to = self._get_userselect_item(payload_values, 5)
+        user_type = self._get_plaintext_input_item(payload_values, 3)
+        story_desc = self._get_plaintext_input_item(payload_values, 4)
+        update = self.scrum_board.update_story({
                 "id": self.story_update['id'],
                 "priority": priority,
                 "estimate": estimate,
@@ -202,8 +202,9 @@ class ScrumMaster:
                 "assigned_to": assigned_to,
                 "user_type": user_type,
                 "story": story_desc
-            }, self.update_log) \
-            else "Failed to update story."
+            }, self.update_log)
+        self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
+        self.blocks = None
 
 
 
@@ -219,6 +220,7 @@ class ScrumMaster:
         story_desc = self._get_plaintext_input_item(payload_values, 6)
 
         self.text = str([board, priority, estimate, sprint, assigned_to, user_type, story_desc])
+        self.blocks = None
     
     # Methods to help parse modal submission payload fields
     @staticmethod
@@ -235,7 +237,7 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
-        return payload_values[index]['radio_buttons-action']['value']
+        return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     def get_response(self):
         # self.text is the textual message to be displayed by bot

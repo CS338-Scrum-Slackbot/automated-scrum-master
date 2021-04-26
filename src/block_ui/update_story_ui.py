@@ -12,7 +12,7 @@ UPDATE_STORY_MODAL = {
 			"type": "input",
 			"element": {
 				"type": "plain_text_input",
-				"action_id": "sl_input",
+				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
 					"text": "Hours"
@@ -132,7 +132,7 @@ UPDATE_STORY_MODAL = {
 			"type": "input",
 			"element": {
 				"type": "plain_text_input",
-				"action_id": "sl_input",
+				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
 					"text": "End user, administrator, etc."
@@ -148,7 +148,7 @@ UPDATE_STORY_MODAL = {
 			"type": "input",
 			"element": {
 				"type": "plain_text_input",
-				"action_id": "sl_input",
+				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
 					"text": "I want to..."
