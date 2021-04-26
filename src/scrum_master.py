@@ -48,13 +48,12 @@ class ScrumMaster:
         # Next story id
         self.sid = 6
 
-        # Interface with JSON data
-        self.scrum_board = ScrumBoard()
-
         # log of story being updated:
         self.update_log = ''
         # story object being updated:
         self.story_update = {}
+         # Interface with JSON data
+        self.scrum_board = ScrumBoard()
         
 
     def process_user_msg(self, text: str):
@@ -104,6 +103,38 @@ class ScrumMaster:
                 return
             self.story_update, self.update_log = jr.json_reader("data/scrum_board.json").read(id)
             self._create_modal_btn(text=f"Update Story {id}", action_id="update-story")
+        elif "read" in text:
+            # Sample message: @Miyagi read 1 from product_backlog
+            # @Miyagi read 1
+            read_text = " ".join(text.split()[1:])
+            id_text  = int(text.split()[1])
+            log = None
+            from_idx = read_text.find("from")
+            if from_idx != -1:
+                log_idx = from_idx + 5
+                log = read_text[log_idx:]
+            self.text = self.scrum_board.read(id=id_text, log=log)
+        elif "search" in text:
+            # Sample message: @Miyagi search x field in log: want to update
+            colon_idx = text.find(":")
+            lookup_text = text[colon_idx+2:] # everything after ": "
+            
+            parameter_text = text[:colon_idx] # everything before the colon
+            parameter_text = " ".join(parameter_text.split()[1:]) # everything between "search " and the colon
+            
+            field_idx = parameter_text.find("field")
+            field = None
+            if field_idx != -1:
+                field = parameter_text[:field_idx-1] # field is param_text before " field"
+
+            in_idx = parameter_text.find("in")
+            log = None
+            if in_idx != -1:
+                log = parameter_text[in_idx+3:colon_idx] # log is param_text between "in " and the colon (end)
+
+            self.text = "field="+str(field)+"    log="+str(log)
+            #self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
+            # TODO: replace self.text with the call to search once json search is merged to main
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
