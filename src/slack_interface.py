@@ -9,6 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, request
 from slackeventsapi import SlackEventAdapter
+import json_reader
 
 from scrum_master import ScrumMaster
 
@@ -22,7 +23,7 @@ slack_event_adapter = SlackEventAdapter(os.environ.get('SIGNING_SECRET'),'/slack
 
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
-CHANNEL = "#app_mention"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -69,6 +70,7 @@ def handle_interaction():
             callback_id = data['view']['callback_id']
             scrum_master.process_modal_submission(data, callback_id)
             text_msg, interactive_msg = scrum_master.get_response()
+            print(f'text_msg: {text_msg}')
             send_message(text_msg, interactive_msg)
         except KeyError:
             print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")

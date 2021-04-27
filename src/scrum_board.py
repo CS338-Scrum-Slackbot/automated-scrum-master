@@ -40,6 +40,10 @@ class ScrumBoard:
             return "Story not found."
         return "Reading story from "+log_str+": "+json.dumps(obj)
 
+    def update_story(self, story, log):
+        print(f'UPDATING STORY: {story}')
+        return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
+
     def search(self, lookup_text, log, field):
         tuples = self.reader.search(lookup=lookup_text, log=log, field=field)
         if len(tuples) == 0:
@@ -51,9 +55,6 @@ class ScrumBoard:
             result.append("ID "+str(id)+" in "+str(log)+". ")
         return result
     
-    def update_story(self):
-        pass
-
     def delete_story(self):
         pass
 
