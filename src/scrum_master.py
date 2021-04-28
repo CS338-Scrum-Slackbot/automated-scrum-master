@@ -55,7 +55,6 @@ class ScrumMaster:
          # Interface with JSON data
         self.scrum_board = ScrumBoard()
         
-
     def process_user_msg(self, text: str):
         """ 
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
@@ -238,8 +237,6 @@ class ScrumMaster:
         self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
         self.blocks = None
 
-
-
     # Parses the payload of the create-story modal submission
     # To parse different modals, you need to create a new function that handles your modal
     def _process_story_submission(self, payload_values):        
@@ -251,12 +248,23 @@ class ScrumMaster:
         user_type = self._get_plaintext_input_item(payload_values, 5)
         story_desc = self._get_plaintext_input_item(payload_values, 6)
 
-        self.text = str([board, priority, estimate, sprint, assigned_to, user_type, story_desc])
+        create_story = self.scrum_board.create_story({
+            "id": self.story_update["id"],
+            "priority": priority,
+            "estimate": estimate,
+            "sprint": sprint,
+            "status": status,
+            "assigned_to": assigned_to,
+            "user_type": user_type,
+            "story": story_desc
+        }, board)
+
+        self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
         self.blocks = None
     
     # Methods to help parse modal submission payload fields
     @staticmethod
-    def _get_userselect_item(payload_values, index):
+    def _get_userselect_item(payload_values, index): 
         return payload_values[index]['users_select-action']['selected_user']
 
     @staticmethod
