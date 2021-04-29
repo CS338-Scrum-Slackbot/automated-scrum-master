@@ -1,0 +1,28 @@
+call .lower() on the user input string for matching 
+
+#Example usage of create (must include story keyword):
+create story
+
+#Example usage of read, read x many. the FROM keyword is optional, supports single ID:
+read story 1 from product_backlog
+
+#Example usage of read swimlane (log) / FUTURE:
+#read swimlane product_backlog
+
+#Example usage of search (optional fields):
+search story
+[enter text]
+[drop down of swimlanes]
+[drop down of fields]
+
+#Example usage of update - takes in single ID
+update story 1
+
+#Example usage of delete, delete x many. the FROM keyword is optional:
+delete story
+[display (checklist or multiselect) of ALL stories]
+
+#Example usage of move, move x many. the FROM keyword is optional, TO keyword is required:
+move story
+[display (checklist or multiselect) of ALL stories]
+[drop down of destination swimlanes]
