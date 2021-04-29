@@ -140,8 +140,8 @@ def test_search():
     assert len(list2) == 4
     # Extract IDs
     actual_ids = []
-    for tuple in list2:
-        actual_ids.append(tuple[0]["id"])
+    for tup in list2:
+        actual_ids.append(tup[0]["id"])
     assert actual_ids == [2,3,4,5]
 
     ## test search using integer
@@ -149,8 +149,8 @@ def test_search():
     assert len(list3) == 3
     # Extract IDs
     actual_ids = []
-    for tuple in list3:
-        actual_ids.append(tuple[0]["id"])
+    for tup in list3:
+        actual_ids.append(tup[0]["id"])
     assert actual_ids == [3,4,5]
 
     ### test a bad search: you can find 4 in the ID field or estimate field
@@ -158,8 +158,8 @@ def test_search():
     assert len(list4) == 3
     # Extract IDs
     actual_ids = []
-    for tuple in list4:
-        actual_ids.append(tuple[0]["id"])
+    for tup in list4:
+        actual_ids.append(tup[0]["id"])
     assert actual_ids == [3,4,5]
     
 

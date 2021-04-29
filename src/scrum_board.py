@@ -42,13 +42,15 @@ class ScrumBoard:
 
     def search(self, lookup_text, log, field):
         tuples = self.reader.search(lookup=lookup_text, log=log, field=field)
+        if tuples is None:
+            return "Invalid field or log"
         if len(tuples) == 0:
             return "Didn't find anything for that search."
-        result = "Found these: "
-        for tuple in tuples:
-            id = tuple[0]["id"]
-            log = tuple[1]
-            result.append("ID "+str(id)+" in "+str(log)+". ")
+        result = "Found these for "+lookup_text+"\n"
+        for t in tuples[]:
+            id = t[0]["id"]
+            log = t[1]
+            result = result + "ID "+str(id)+" in "+str(log)+"\n"
         return result
     
     def update_story(self):
