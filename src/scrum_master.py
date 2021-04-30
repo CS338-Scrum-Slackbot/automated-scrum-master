@@ -105,14 +105,27 @@ class ScrumMaster:
         elif "read" in text:
             # Sample message: @Miyagi read 1 from product_backlog
             # @Miyagi read 1
-            read_text = " ".join(text.split()[1:])
-            id_text  = int(text.split()[1])
+            try:
+                read_text = " ".join(text.split()[1:])
+            except ValueError:
+                self.text = "Could not understand read command."
+                return
+
+            try:
+                id_text  = int(text.split()[1])
+            except (ValueError, IndexError):
+                id_text = None
+                
             log = None
             from_idx = read_text.find("from")
             if from_idx != -1:
                 log_idx = from_idx + 5
                 log = read_text[log_idx:]
-            self.text = self.scrum_board.read(id=id_text, log=log)
+
+            if id_text:
+                self.text = self.scrum_board.read(id=id_text, log=log)
+            else:
+                self.text = self.scrum_board.read_all(log=log)
         elif "search" in text:
             # Sample message: @Miyagi search x field in log: want to update
             colon_idx = text.find(":")
@@ -236,6 +249,7 @@ class ScrumMaster:
             }, self.update_log)
         self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
         self.blocks = None
+
 
     # Parses the payload of the create-story modal submission
     # To parse different modals, you need to create a new function that handles your modal

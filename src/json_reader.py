@@ -121,6 +121,9 @@ class json_reader(json_interface):
                 return result, l
         return None, None
 
+    def read_all(self, log: str = None):
+        return ([e for e in self._j[log]], log) if log in self._j.keys() else (None, log)
+            
     def delete(self, id: int, log: str = None): # Returns Tuple[object, str]
         with open(file=self._file_path, mode="r+") as f:
             # Helper function for deleting from specific log
