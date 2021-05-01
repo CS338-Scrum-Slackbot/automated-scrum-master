@@ -51,7 +51,7 @@ class ScrumBoard:
         if len(tuples) == 0:
             return "Didn't find anything for that search."
         result = "Found these for "+lookup_text+"\n"
-        for t in tuples[]:
+        for t in tuples:
             id = t[0]["id"]
             log = t[1]
             result = result + "ID "+str(id)+" in "+str(log)+"\n"

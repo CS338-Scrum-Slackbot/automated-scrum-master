@@ -7,6 +7,7 @@ import json_reader as jr
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
+from block_ui.search_story_ui import SEARCH_STORY_MODAL
 import json
 
 class ScrumMaster:
@@ -113,24 +114,8 @@ class ScrumMaster:
                 log_idx = from_idx + 5
                 log = read_text[log_idx:]
             self.text = self.scrum_board.read(id=id_text, log=log)
-        elif "search" in text:
-            # Sample message: @Miyagi search x field in log: want to update
-            colon_idx = text.find(":")
-            lookup_text = text[colon_idx+2:] # everything after ": "
-            
-            parameter_text = text[:colon_idx] # everything before the colon
-            parameter_text = " ".join(parameter_text.split()[1:]) # everything between "search " and the colon
-            
-            field_idx = parameter_text.find("field")
-            field = None
-            if field_idx != -1:
-                field = parameter_text[:field_idx-1] # field is param_text before " field"
-
-            in_idx = parameter_text.find("in")
-            log = None
-            if in_idx != -1:
-                log = parameter_text[in_idx+3:colon_idx] # log is param_text between "in " and the colon (end)
-            self.text = self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
+        elif "search story" in text:
+            self._create_modal_btn(text="Search story", action_id="search-story")
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -167,6 +152,8 @@ class ScrumMaster:
             return EXAMPLE_MODAL
         elif action_id == "update-story":
             return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
+        elif action_id == "search-story":
+            return SEARCH_STORY_MODAL
         else:
             return ""
 
@@ -207,6 +194,8 @@ class ScrumMaster:
             pass
         elif callback_id == "update-story-modal":
             self._process_update_submission(payload_values)
+        elif callback_id == "search-story-modal":
+            self._process_search_story(payload_values)
         else:
             pass
 
@@ -257,6 +246,14 @@ class ScrumMaster:
         }, board)
 
         self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
+        self.blocks = None
+
+    def _process_search_story(self, payload_values):
+        lookup_text = self._get_plaintext_input_item(payload_values, 0)
+        swimlanes = self._get_dropdown_select_item(payload_values, 1) # how to get multiple?
+        #fields = self._get_dropdown_select_item(payload_values, 2)
+
+        self.text = "got this swimlane: "+str(swimlanes)
         self.blocks = None
     
     # Methods to help parse modal submission payload fields
