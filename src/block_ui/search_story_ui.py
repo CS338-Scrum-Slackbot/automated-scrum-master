@@ -19,145 +19,69 @@ SEARCH_STORY_MODAL = {
 				}
 		},
 		{
-                    "type": "input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "multiline": False,
-                        "action_id": "plain_text_input-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Story description",
-                        "emoji": True
-                    }
-                },
-		{
-			"type": "input",
-			"element": {
-				"type": "static_select",
-				"placeholder": {
-					"type": "plain_text",
-					"text": "Select an item",
-					"emoji": True
+				"type": "input",
+				"element": {
+					"type": "plain_text_input",
+					"multiline": False,
+					"action_id": "plain_text_input-action"
 				},
-				"options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Product Backlog",
-                                    "emoji": True
-                                },
-                                "value": "board-1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Sprint Backlog",
-                                    "emoji": True
-                                },
-                                "value": "board-2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Current Sprint",
-                                    "emoji": True
-                                },
-                                "value": "board-3"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Previous Sprints",
-                                    "emoji": True
-                                },
-                                "value": "board-4"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Archived",
-                                    "emoji": True
-                                },
-                                "value": "board-5"
-                            }
-                        ],
-				"action_id": "static_select-action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Swimlane (optional)",
-				"emoji": True
-			}
-		},
-
-
-		{
-			"type": "input",
-			"element": {
-				"type": "static_select",
-				"placeholder": {
+				"label": {
 					"type": "plain_text",
-					"text": "Select an item",
+					"text": "Story description",
 					"emoji": True
-				},
-				"options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Product Backlog",
-                                    "emoji": True
-                                },
-                                "value": "board-1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Sprint Backlog",
-                                    "emoji": True
-                                },
-                                "value": "board-2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Current Sprint",
-                                    "emoji": True
-                                },
-                                "value": "board-3"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Previous Sprints",
-                                    "emoji": True
-                                },
-                                "value": "board-4"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Archived",
-                                    "emoji": True
-                                },
-                                "value": "board-5"
-                            }
-                        ],
-				"action_id": "static_select-action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Swimlane (optional)",
-				"emoji": True
-			}
-		},
-
+				}
+        },
+		
 
 		{
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "third block"
+				"text": "Field (optional)"
+			},
+			"accessory": {
+				"type": "multi_static_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select something here",
+					"emoji": True
+				},
+				"options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "user",
+                                    "emoji": True
+                                },
+                                "value": "field-1"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "id",
+                                    "emoji": True
+                                },
+                                "value": "field-2"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "customer",
+                                    "emoji": True
+                                },
+                                "value": "field-3"
+                            }
+                        ],
+				"action_id": "multi_static_select-action"
+			}
+		},
+
+
+	{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Swimlane (optional)"
 			},
 			"accessory": {
 				"type": "multi_static_select",
@@ -173,7 +97,7 @@ SEARCH_STORY_MODAL = {
                                     "text": "Product Backlog",
                                     "emoji": True
                                 },
-                                "value": "board-1"
+                                "value": "swimlane-1"
                             },
                             {
                                 "text": {
@@ -181,7 +105,7 @@ SEARCH_STORY_MODAL = {
                                     "text": "Sprint Backlog",
                                     "emoji": True
                                 },
-                                "value": "board-2"
+                                "value": "swimlane-2"
                             },
                             {
                                 "text": {
@@ -189,10 +113,10 @@ SEARCH_STORY_MODAL = {
                                     "text": "Current Sprint",
                                     "emoji": True
                                 },
-                                "value": "board-3"
+                                "value": "swimlane-3"
                             }
                         ],
-				"action_id": "multi_static_select-block-three"
+				"action_id": "multi_static_select-action"
 			}
 		}
 

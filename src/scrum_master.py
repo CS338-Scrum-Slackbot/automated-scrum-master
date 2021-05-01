@@ -250,10 +250,10 @@ class ScrumMaster:
 
     def _process_search_story(self, payload_values):
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
-        swimlanes = self._get_dropdown_select_item(payload_values, 1) # how to get multiple?
-        #fields = self._get_dropdown_select_item(payload_values, 2)
-
-        self.text = "got this swimlane: "+str(swimlanes)
+        fields = self._get_static_multi_select_item(payload_values, 1)
+        swimlanes = self._get_static_multi_select_item(payload_values, 2)
+        
+        self.text = str(fields) + "\t" + str(swimlanes)
         self.blocks = None
     
     # Methods to help parse modal submission payload fields
@@ -272,6 +272,14 @@ class ScrumMaster:
     @staticmethod
     def _get_radio_group_item(payload_values, index):
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
+
+    @staticmethod
+    def _get_static_multi_select_item(payload_values, index):
+        selected_text = []
+        selected_options = payload_values[index]['multi_static_select-action']['selected_options']
+        for x in selected_options:
+            selected_text.append(x['value'])
+        return selected_text
 
     def get_response(self):
         # self.text is the textual message to be displayed by bot
