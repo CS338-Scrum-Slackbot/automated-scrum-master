@@ -161,14 +161,14 @@ class json_reader(json_interface):
     def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
         if field is not None and field not in self._list_fields or log is not None and log not in self.list_logs():
             return None # Invalid field or log
-        lookup = str(lookup)    # Cast to string
-        found = []              # Will hold the found entries
+        lookup = str(lookup).lower()    # Cast to string and convert to lowercase
+        found = []                      # Will hold the found entries
         # Helper function for reading specific log
         def read_log(r_log: str):
             entries = self._j[r_log]
             for e in entries:
                 def compare_field(field_):
-                    if lookup in str(e[field_]): # Cast the value to a string as well
+                    if lookup in str(e[field_]).lower(): # Cast field's value to string and convert to lowercase
                         found.append([e, r_log])
                         return True
                     return False

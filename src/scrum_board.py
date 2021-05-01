@@ -47,14 +47,12 @@ class ScrumBoard:
     def search(self, lookup_text, log, field):
         tuples = self.reader.search(lookup=lookup_text, log=log, field=field)
         if tuples is None:
-            return "Invalid field or log"
+            return "Internal error: Fields or swimlanes did not match JSON."
         if len(tuples) == 0:
-            return "Didn't find anything for that search."
+            return "Didn't find anything for "+lookup_text+", try again?"
         result = "Found these for "+lookup_text+"\n"
         for t in tuples:
-            id = t[0]["id"]
-            log = t[1]
-            result = result + "ID "+str(id)+" in "+str(log)+"\n"
+            result = result + str(t[0]) + "\n"
         return result
     
     def delete_story(self):
