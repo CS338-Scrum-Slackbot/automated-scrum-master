@@ -130,10 +130,7 @@ class ScrumMaster:
             log = None
             if in_idx != -1:
                 log = parameter_text[in_idx+3:colon_idx] # log is param_text between "in " and the colon (end)
-
-            self.text = "field="+str(field)+"    log="+str(log)
-            #self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
-            # TODO: replace self.text with the call to search once json search is merged to main
+            self.text = self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
