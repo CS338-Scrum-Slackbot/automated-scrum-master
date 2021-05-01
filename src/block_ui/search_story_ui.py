@@ -27,7 +27,7 @@ SEARCH_STORY_MODAL = {
 				},
 				"label": {
 					"type": "plain_text",
-					"text": "Story description",
+					"text": "Search text",
 					"emoji": True
 				}
         },
@@ -43,33 +43,17 @@ SEARCH_STORY_MODAL = {
 				"type": "multi_static_select",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "Select something here",
+					"text": "Select fields",
 					"emoji": True
 				},
 				"options": [
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "user",
+                                    "text": "Default field",
                                     "emoji": True
                                 },
                                 "value": "field-1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "id",
-                                    "emoji": True
-                                },
-                                "value": "field-2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "customer",
-                                    "emoji": True
-                                },
-                                "value": "field-3"
                             }
                         ],
 				"action_id": "multi_static_select-action"
@@ -87,33 +71,17 @@ SEARCH_STORY_MODAL = {
 				"type": "multi_static_select",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "Select something here",
+					"text": "Select swimlanes",
 					"emoji": True
 				},
 				"options": [
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "Product Backlog",
+                                    "text": "Default swimlane",
                                     "emoji": True
                                 },
                                 "value": "swimlane-1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Sprint Backlog",
-                                    "emoji": True
-                                },
-                                "value": "swimlane-2"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Current Sprint",
-                                    "emoji": True
-                                },
-                                "value": "swimlane-3"
                             }
                         ],
 				"action_id": "multi_static_select-action"

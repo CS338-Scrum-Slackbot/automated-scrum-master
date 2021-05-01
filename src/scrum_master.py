@@ -4,10 +4,10 @@ Class to wrap the logic of the scrum master bot
 
 from scrum_board import ScrumBoard
 import json_reader as jr
+from modal_editor import ModalEditor
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
-from block_ui.search_story_ui import SEARCH_STORY_MODAL
 import json
 
 class ScrumMaster:
@@ -55,6 +55,8 @@ class ScrumMaster:
         self.story_update = {}
          # Interface with JSON data
         self.scrum_board = ScrumBoard()
+        # Modal editor
+        self.editor = ModalEditor()
         
     def process_user_msg(self, text: str):
         """ 
@@ -153,7 +155,7 @@ class ScrumMaster:
         elif action_id == "update-story":
             return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
         elif action_id == "search-story":
-            return SEARCH_STORY_MODAL
+            return self.editor.edit_search_story_modal()
         else:
             return ""
 
@@ -252,8 +254,13 @@ class ScrumMaster:
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
-        
-        self.text = str(fields) + "\t" + str(swimlanes)
+        # TODO: support multi-log or multi-field search
+        if len(fields) == 0:    fields = None
+        else:                   fields = fields[0]
+        if len(swimlanes) == 0: swimlanes = None
+        else:                   swimlanes = swimlanes[0]
+        #
+        self.text = self.scrum_board.search(lookup_text=lookup_text, log=swimlanes, field=fields )
         self.blocks = None
     
     # Methods to help parse modal submission payload fields
@@ -278,7 +285,7 @@ class ScrumMaster:
         selected_text = []
         selected_options = payload_values[index]['multi_static_select-action']['selected_options']
         for x in selected_options:
-            selected_text.append(x['value'])
+            selected_text.append(x['text']['text'])
         return selected_text
 
     def get_response(self):
