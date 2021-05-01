@@ -254,13 +254,7 @@ class ScrumMaster:
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
-        # TODO: support multi-log or multi-field search
-        if len(fields) == 0:    fields = None
-        else:                   fields = fields[0]
-        if len(swimlanes) == 0: swimlanes = None
-        else:                   swimlanes = swimlanes[0]
-        #
-        self.text = self.scrum_board.search(lookup_text=lookup_text, log=swimlanes, field=fields )
+        self.text = self.scrum_board.search(lookup_text=lookup_text, logs=swimlanes, fields=fields )
         self.blocks = None
     
     # Methods to help parse modal submission payload fields

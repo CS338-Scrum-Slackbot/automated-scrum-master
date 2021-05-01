@@ -44,8 +44,8 @@ class ScrumBoard:
         print(f'UPDATING STORY: {story}')
         return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
 
-    def search(self, lookup_text, log, field):
-        tuples = self.reader.search(lookup=lookup_text, log=log, field=field)
+    def search(self, lookup_text: str, logs: list, fields: list):
+        tuples = self.reader.search(lookup=lookup_text, logs=logs, fields=fields)
         if tuples is None:
             return "Internal error: Fields or swimlanes did not match JSON."
         if len(tuples) == 0:
