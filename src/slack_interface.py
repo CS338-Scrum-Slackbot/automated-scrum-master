@@ -23,7 +23,7 @@ slack_event_adapter = SlackEventAdapter(os.environ.get('SIGNING_SECRET'),'/slack
 
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
-CHANNEL = "#nathan"
+CHANNEL = "#app_mention"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -53,6 +53,7 @@ def handle_interaction():
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
+        print(data)
         try:
             action_id = data['message']['blocks'][0]['elements'][0]['action_id']
         except KeyError:
@@ -63,7 +64,6 @@ def handle_interaction():
         # Which modal to send is evaluated in scrum_master based on the provided action_id
         send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id))
         
-
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
         try:
@@ -92,4 +92,4 @@ def get_app_mention(payload):
         send_message(text_msg, interactive_msg)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

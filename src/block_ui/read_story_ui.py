@@ -17,7 +17,7 @@ READ_STORY_BLOCK = [
 						"type": "plain_text",
 						"text": "Edit"
 					},
-					"value": "click_me_123"
+					"value": "edit-story"
 				},
 				{
 					"type": "button",
@@ -26,7 +26,7 @@ READ_STORY_BLOCK = [
 						"type": "plain_text",
 						"text": "Move"
 					},
-					"value": "click_me_123"
+					"value": "move-story"
 				},
 				{
 					"type": "button",
@@ -35,7 +35,7 @@ READ_STORY_BLOCK = [
 						"type": "plain_text",
 						"text": "Delete"
 					},
-					"value": "click_me_123"
+					"value": "delete-story"
 				}
 			]
 		}

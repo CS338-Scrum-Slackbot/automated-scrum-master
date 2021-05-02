@@ -49,7 +49,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 6
+        self.sid = 7
 
         # log of story being updated:
         self.update_log = ''
@@ -132,8 +132,8 @@ class ScrumMaster:
             else:
                 stories = self.scrum_board.read_all(log=log)
                 self.blocks = []
-                for i in range(len(stories)):
-                    self.blocks += self._story_to_msg(stories[i])
+                for story in stories:
+                    self.blocks += self._story_to_msg(story)
                 self.text = "Story:"
         elif "search story" in text:
             self._create_modal_btn(text="Search story", action_id="search-story")
@@ -231,7 +231,7 @@ class ScrumMaster:
         user_type = self._get_plaintext_input_item(payload_values, 3)
         story_desc = self._get_plaintext_input_item(payload_values, 4)
         update = self.scrum_board.update_story({
-                "id": self.story_update['id'],
+                "id": self.story_update["id"],
                 "priority": priority,
                 "estimate": estimate,
                 "sprint": self.story_update['sprint'],
@@ -240,28 +240,40 @@ class ScrumMaster:
                 "user_type": user_type,
                 "story": story_desc
             }, self.update_log)
+
         self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
         self.blocks = None
 
     def _story_to_msg(self, story):
         block = copy.deepcopy(READ_STORY_BLOCK)
         story_content = block[0]['fields']
+        actions = block[1]['elements']
+
         for k, v in story.items():
             if k == "id":
                 story_content[0]['text'] = f"*ID: * {v}"
             else:
-                story_content.append({
-                    "type": "mrkdwn",
-                    "text": f"*{k[0].upper() + k[1:]}:* {v}"
-                })
+                if v:
+                    story_content.append({
+                        "type": "mrkdwn",
+                        "text": f"*{k[0].upper() + k[1:]}:* {v}",
+                    })
+
+        for action in actions:
+            if action['value'] == 'edit-story':
+                action['action_id'] = f"edit-story-{story['id']}"
+            elif action['value'] == 'move-story':
+                action['action_id'] = f"move-story-{story['id']}"
+            else:
+                action['action_id'] = f"delete-story-{story['id']}"
         return block
 
 
     # Parses the payload of the create-story modal submission
     # To parse different modals, you need to create a new function that handles your modal
     def _process_story_submission(self, payload_values):        
-        board = self._get_dropdown_select_item(payload_values, 0)
-        priority = int(self._get_dropdown_select_item(payload_values, 1))
+        log = self._get_dropdown_select_item(payload_values, 0).lower().join("_")
+        priority = self.priorities[self._get_dropdown_select_item(payload_values, 1)]
         estimate = int(self._get_dropdown_select_item(payload_values, 2))
         sprint = self._get_plaintext_input_item(payload_values, 3)
         assigned_to = self._get_userselect_item(payload_values, 4)
@@ -269,17 +281,18 @@ class ScrumMaster:
         story_desc = self._get_plaintext_input_item(payload_values, 6)
 
         create_story = self.scrum_board.create_story({
-            "id": self.story_update["id"],
+            "id": self.sid,
             "priority": priority,
             "estimate": estimate,
             "sprint": sprint,
-            "status": status,
+            "status": "",
             "assigned_to": assigned_to,
             "user_type": user_type,
             "story": story_desc
-        }, board)
+        }, log)
 
-        self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
+        self.sid += 1
+        self.text = f"Story {self.sid} created successfully!"
         self.blocks = None
 
     def _process_search_story(self, payload_values):
