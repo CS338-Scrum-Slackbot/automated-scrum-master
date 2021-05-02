@@ -102,9 +102,6 @@ class ScrumMaster:
         elif "delete story" in text:
             self._create_modal_btn(text="Delete a Story",
                                    action_id="delete-story")
-        # Example
-        elif "example modal" in text:
-            self._create_modal_btn(text="Example Modal", action_id="example")
         # End example
         elif "update story" in text:
             try:
@@ -130,6 +127,9 @@ class ScrumMaster:
         elif "search story" in text:
             self._create_modal_btn(text="Search story",
                                    action_id="search-story")
+        # Example
+        elif "example modal" in text:
+            self._create_modal_btn(text="Example Modal", action_id="example")
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -161,7 +161,6 @@ class ScrumMaster:
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
             return CREATE_STORY_MODAL
-        # TODO: Figure out flow for delete story
         elif action_id == "delete-story":
             return DELETE_STORY_MODAL
         elif action_id == "update-story":
@@ -210,14 +209,14 @@ class ScrumMaster:
             self._process_story_submission(payload_values)
         elif callback_id == "delete-story-modal":
             self._process_delete_story(payload_values)
-        elif callback_id == "example-modal":
-            # Here's where you call the function to process your modal's submission
-            # e.g. self._process_example_submission(payload_values)
-            pass
         elif callback_id == "update-story-modal":
             self._process_update_submission(payload_values)
         elif callback_id == "search-story-modal":
             self._process_search_story(payload_values)
+        elif callback_id == "example-modal":
+            # Here's where you call the function to process your modal's submission
+            # e.g. self._process_example_submission(payload_values)
+            pass
         else:
             pass
 

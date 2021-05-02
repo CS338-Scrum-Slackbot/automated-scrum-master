@@ -23,8 +23,8 @@ slack_event_adapter = SlackEventAdapter(
 
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
-# CHANNEL = "#app_mention"
-CHANNEL = "#neha-test"
+# TODO: Change CHANNEL when developing locally"
+CHANNEL = "#app_mention"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -98,18 +98,6 @@ def get_app_mention(payload):
         # Potentially more scrum bot logic to follow here
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
-
-
-# For local development and debugging - testing the scrum_board logic
-# @slack_event_adapter.on('message')
-# def get_dm_mention(payload):
-#     print('\n', payload, '\n')
-#     event = payload.get('event', {})
-#     user_id = event['user']
-#     text = event['text']
-
-#     if BOT_ID != user_id:
-#         scrum_master.process_text(text)
 
 
 if __name__ == '__main__':
