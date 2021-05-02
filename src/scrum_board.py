@@ -61,7 +61,7 @@ class ScrumBoard:
         story_id = int(story_id)
         story_obj, source_log = self.reader.read(
             id=story_id)
-        if story_obj is None or source_log is None or source_log == "archived":
+        if story_obj is None or source_log is None:
             return "Story with \"ID " + str(story_id) + "\" does not exist."
 
         if source_log == "archived":
