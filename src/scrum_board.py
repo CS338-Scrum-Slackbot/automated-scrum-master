@@ -44,12 +44,7 @@ class ScrumBoard:
         obj, log_str = self.reader.read_all(log=log)
         if obj is None or log_str is None:
             return f"Could not find any stories in log {log}"
-        
-        return_text = "\n"
-        for story in obj:
-            return_text += str(story) + '\n'
-
-        return f"Reading stories from {log_str}: {return_text}"
+        return obj
 
     def update_story(self, story, log):
         print(f'UPDATING STORY: {story}')

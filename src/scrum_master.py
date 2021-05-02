@@ -8,7 +8,9 @@ from modal_editor import ModalEditor
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
+from block_ui.read_story_ui import READ_STORY_BLOCK
 import json
+import copy
 
 class ScrumMaster:
     # Interface with JSON data
@@ -128,7 +130,11 @@ class ScrumMaster:
             if id_text:
                 self.text = self.scrum_board.read(id=id_text, log=log)
             else:
-                sekf.text = self.scrum_board.read_all(log=log)
+                stories = self.scrum_board.read_all(log=log)
+                self.blocks = []
+                for i in range(len(stories)):
+                    self.blocks += self._story_to_msg(stories[i])
+                self.text = "Story:"
         elif "search story" in text:
             self._create_modal_btn(text="Search story", action_id="search-story")
         else:
@@ -158,7 +164,6 @@ class ScrumMaster:
         ] if text != "" else None
         self.text = ""
 
-    # @staticmethod
     def create_modal(self, action_id):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
@@ -237,6 +242,19 @@ class ScrumMaster:
             }, self.update_log)
         self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
         self.blocks = None
+
+    def _story_to_msg(self, story):
+        block = copy.deepcopy(READ_STORY_BLOCK)
+        story_content = block[0]['fields']
+        for k, v in story.items():
+            if k == "id":
+                story_content[0]['text'] = f"*ID: * {v}"
+            else:
+                story_content.append({
+                    "type": "mrkdwn",
+                    "text": f"*{k[0].upper() + k[1:]}:* {v}"
+                })
+        return block
 
 
     # Parses the payload of the create-story modal submission
