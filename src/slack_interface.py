@@ -6,8 +6,8 @@ from scrum_master import ScrumMaster
 from slackeventsapi import SlackEventAdapter
 from flask import Flask, request
 import json
-from flask import Flask
 from dotenv import load_dotenv
+import json_reader
 from pathlib import Path
 import slack
 import os
@@ -76,6 +76,8 @@ def handle_interaction():
             scrum_master.process_modal_submission(
                 data, callback_id)
             text_msg, interactive_msg = scrum_master.get_response()
+            print(f'text_msg: {text_msg}')
+            send_message(text_msg, interactive_msg)
 
             if text_msg == "updated_modal":
                 client.views_update(
