@@ -102,15 +102,6 @@ class ScrumMaster:
         elif "delete story" in text:
             self._create_modal_btn(text="Delete a Story",
                                    action_id="delete-story")
-        # elif "delete story" in text:
-        #     processed_text = text[14:]
-
-        #     if "," in processed_text:
-        #         ids_list = processed_text.split(", ")
-        #         for story_id in ids_list:
-        #             response = self.scrum_board.delete_story(story_id=story_id)
-        #     print("deleted")
-        #     self.text = response
         # Example
         elif "example modal" in text:
             self._create_modal_btn(text="Example Modal", action_id="example")
