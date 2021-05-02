@@ -4,6 +4,7 @@ Class to wrap the logic of the scrum master bot
 
 from scrum_board import ScrumBoard
 import json_reader as jr
+from modal_editor import ModalEditor
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
@@ -54,6 +55,8 @@ class ScrumMaster:
         self.story_update = {}
          # Interface with JSON data
         self.scrum_board = ScrumBoard()
+        # Modal editor
+        self.editor = ModalEditor()
         
     def process_user_msg(self, text: str):
         """ 
@@ -121,32 +124,13 @@ class ScrumMaster:
             if from_idx != -1:
                 log_idx = from_idx + 5
                 log = read_text[log_idx:]
-
+            
             if id_text:
                 self.text = self.scrum_board.read(id=id_text, log=log)
             else:
-                self.text = self.scrum_board.read_all(log=log)
-        elif "search" in text:
-            # Sample message: @Miyagi search x field in log: want to update
-            colon_idx = text.find(":")
-            lookup_text = text[colon_idx+2:] # everything after ": "
-            
-            parameter_text = text[:colon_idx] # everything before the colon
-            parameter_text = " ".join(parameter_text.split()[1:]) # everything between "search " and the colon
-            
-            field_idx = parameter_text.find("field")
-            field = None
-            if field_idx != -1:
-                field = parameter_text[:field_idx-1] # field is param_text before " field"
-
-            in_idx = parameter_text.find("in")
-            log = None
-            if in_idx != -1:
-                log = parameter_text[in_idx+3:colon_idx] # log is param_text between "in " and the colon (end)
-
-            self.text = "field="+str(field)+"    log="+str(log)
-            #self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
-            # TODO: replace self.text with the call to search once json search is merged to main
+                sekf.text = self.scrum_board.read_all(log=log)
+        elif "search story" in text:
+            self._create_modal_btn(text="Search story", action_id="search-story")
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -183,6 +167,8 @@ class ScrumMaster:
             return EXAMPLE_MODAL
         elif action_id == "update-story":
             return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
+        elif action_id == "search-story":
+            return self.editor.edit_search_story_modal()
         else:
             return ""
 
@@ -223,6 +209,8 @@ class ScrumMaster:
             pass
         elif callback_id == "update-story-modal":
             self._process_update_submission(payload_values)
+        elif callback_id == "search-story-modal":
+            self._process_search_story(payload_values)
         else:
             pass
 
@@ -275,6 +263,13 @@ class ScrumMaster:
 
         self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
         self.blocks = None
+
+    def _process_search_story(self, payload_values):
+        lookup_text = self._get_plaintext_input_item(payload_values, 0)
+        fields = self._get_static_multi_select_item(payload_values, 1)
+        swimlanes = self._get_static_multi_select_item(payload_values, 2)
+        self.text = self.scrum_board.search(lookup_text=lookup_text, logs=swimlanes, fields=fields )
+        self.blocks = None
     
     # Methods to help parse modal submission payload fields
     @staticmethod
@@ -292,6 +287,14 @@ class ScrumMaster:
     @staticmethod
     def _get_radio_group_item(payload_values, index):
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
+
+    @staticmethod
+    def _get_static_multi_select_item(payload_values, index):
+        selected_text = []
+        selected_options = payload_values[index]['multi_static_select-action']['selected_options']
+        for x in selected_options:
+            selected_text.append(x['text']['text'])
+        return selected_text
 
     def get_response(self):
         # self.text is the textual message to be displayed by bot
