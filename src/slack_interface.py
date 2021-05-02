@@ -24,7 +24,7 @@ slack_event_adapter = SlackEventAdapter(
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#app_mention"
+CHANNEL = "#test"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -101,4 +101,4 @@ def get_app_mention(payload):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

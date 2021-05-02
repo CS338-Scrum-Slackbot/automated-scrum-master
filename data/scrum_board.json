@@ -1,16 +1,6 @@
 {
     "product_backlog": [
         {
-            "id": 2,
-            "priority": -1,
-            "estimate": -1,
-            "sprint": 2,
-            "status": "",
-            "assigned_to": "Jane Doe",
-            "user_type": "customer",
-            "story": "I want to update a story."
-        },
-        {
             "id": 6,
             "priority": -1,
             "estimate": -1,
@@ -29,16 +19,6 @@
             "assigned_to": "",
             "user_type": "customer",
             "story": "create story test"
-        },
-        {
-            "id": 1,
-            "priority": 1,
-            "estimate": 6,
-            "sprint": 2,
-            "status": "none",
-            "assigned_to": "U01TRPZL02W",
-            "user_type": "Nathan",
-            "story": "I want my code to work."
         }
     ],
     "sprint_backlog": [
@@ -80,6 +60,26 @@
     "archived": [
         {
             "id": 7,
+            "priority": -1,
+            "estimate": -1,
+            "sprint": 2,
+            "status": "",
+            "assigned_to": "Jane Doe",
+            "user_type": "customer",
+            "story": "I want to update a story."
+        },
+        {
+            "id": 1,
+            "priority": 1,
+            "estimate": 6,
+            "sprint": 2,
+            "status": "none",
+            "assigned_to": "U01TRPZL02W",
+            "user_type": "Nathan",
+            "story": "I want my code to work."
+        },
+        {
+            "id": 2,
             "priority": -1,
             "estimate": -1,
             "sprint": 2,

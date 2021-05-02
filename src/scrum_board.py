@@ -64,6 +64,9 @@ class ScrumBoard:
         if story_obj is None or source_log is None or source_log == "archived":
             return "Story with \"ID " + str(story_id) + "\" does not exist."
 
+        if source_log == "archived":
+            return "Story with \"ID " + str(story_id) + "\" has already been deleted."
+
         moved_story, new_log = self.reader.move(
             story_id, 'archived', source_log)
 

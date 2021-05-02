@@ -66,33 +66,6 @@ class ScrumMaster:
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         Command: "create a story" will make a button that opens a create story modal
         """
-        # words = text.lower().split(' ')
-
-        # command = ""
-        # for word in words:
-        #     if word in self.commands.keys():
-        #         command = word
-
-        # action = self.commands[command]
-        # if command == "create":
-        #     action(self.sid, 2, "customer", "create story test")
-        #     self.text = "Successfully added story."
-        # if command == "update":
-        #     id, field, value = words[1], words[2], ' '.join(words[3:])
-        #     # rudimentary input checks
-        #     if field not in self.fields:
-        #         self.text = f"Invalid field \'{field}\'. Must be one of [{', '.join(self.fields)}]"
-        #         return
-        #     if field == 'priority': value = self.priorities[value]
-        #     elif field in ['estimate','sprint']:
-        #         try: value = int(value)
-        #         except:
-        #             self.text = f"Invalid input type for {field}. Given {type(value)}; expected int."
-        #             return
-        #     success = action(id, field, value)
-        #     self.text = "Successfully updated story." if success else f"Could not find story with id {id}."
-        # else:
-        #     self.text = "Sorry, I don't recognize that command."
 
         self.text = text
 
@@ -100,7 +73,7 @@ class ScrumMaster:
             self._create_modal_btn(text="Create a Story",
                                    action_id="create-story")
         elif "delete story" in text:
-            self._create_modal_btn(text="Delete a Story",
+            self._create_modal_btn(text="Delete Story",
                                    action_id="delete-story")
         # End example
         elif "update story" in text:
