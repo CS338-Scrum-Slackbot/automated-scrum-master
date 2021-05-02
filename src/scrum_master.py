@@ -10,6 +10,7 @@ from block_ui.delete_story_ui import DELETE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 import json
+import re
 
 
 class ScrumMaster:
@@ -101,10 +102,15 @@ class ScrumMaster:
         elif "delete story" in text:
             self._create_modal_btn(text="Delete a Story",
                                    action_id="delete-story")
-            # processed_text = text[14:]
-            # response = self.scrum_board.delete_story()
-            # print("deleted")
-            # self.text = response
+        # elif "delete story" in text:
+        #     processed_text = text[14:]
+
+        #     if "," in processed_text:
+        #         ids_list = processed_text.split(", ")
+        #         for story_id in ids_list:
+        #             response = self.scrum_board.delete_story(story_id=story_id)
+        #     print("deleted")
+        #     self.text = response
         # Example
         elif "example modal" in text:
             self._create_modal_btn(text="Example Modal", action_id="example")
@@ -167,12 +173,12 @@ class ScrumMaster:
         # TODO: Figure out flow for delete story
         elif action_id == "delete-story":
             return DELETE_STORY_MODAL
-        elif action_id == "example":
-            return EXAMPLE_MODAL
         elif action_id == "update-story":
             return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
+        elif action_id == "example":
+            return EXAMPLE_MODAL
         else:
             return ""
 
@@ -212,7 +218,7 @@ class ScrumMaster:
         if callback_id == "create-story-modal":
             self._process_story_submission(payload_values)
         elif callback_id == "delete-story-modal":
-            self._return_swimlane_stories(payload_values)
+            self._process_delete_story(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -275,28 +281,15 @@ class ScrumMaster:
         self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
         self.blocks = None
 
-    def _return_swimlane_stories(self, payload_values):
-        swimlane = self._get_dropdown_select_item(payload_values, 0)
-        print(swimlane)
-        self.text = "updated_modal"
-        self.blocks = {
-            "view": {
-                "type": "modal",
-                "title": {
-                    "type": "plain_text",
-                    "text": "Updated view"
-                },
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "I've changed and I'll never be the same. You must believe me."
-                        }
-                    }
-                ]
-            }
-        }
+    def _process_delete_story(self, payload_values):
+        story_id_string = self._get_plaintext_input_item(payload_values, 0)
+        story_id_list = re.findall(r'[0-9]+', story_id_string)
+
+        for story_id in story_id_list:
+            response = self.scrum_board.delete_story(story_id)
+            self.text = self.text + "\n" + response
+
+        self.blocks = None
 
     def _process_search_story(self, payload_values):
         lookup_text = self._get_plaintext_input_item(payload_values, 0)

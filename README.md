@@ -35,7 +35,7 @@ For the bot to respond to events in a slack channel (e.g. @bot), you must set up
 
 https://www.youtube.com/watch?v=6gHvqXrfjuo
 
-# Enable Events Subscription and Interactivity
+## Enable Events Subscription and Interactivity
 
 To make sure your app is capturing all events, go to Events Subscriptions tab. Take the forwarding address from ngrok and paste
 

@@ -57,16 +57,20 @@ class ScrumBoard:
             result = result + str(t[0]) + "\n"
         return result
 
-    def delete_story(self, story_id=3, source_log='product_backlog'):
-        story_obj, log = self.reader.read(
-            id=id, log=source_log)  # Read from json
-        if story_obj is None or log is None:
-            return "Story does not exist in this swimlane."
+    def delete_story(self, story_id):
+        story_id = int(story_id)
+        story_obj, source_log = self.reader.read(
+            id=story_id)
+        if story_obj is None or source_log is None or source_log == "archived":
+            return "Story with \"ID " + str(story_id) + "\" does not exist."
+
         moved_story, new_log = self.reader.move(
             story_id, 'archived', source_log)
+
         if moved_story == None or new_log == None:
-            return "Could not delete this story."
+            return "Could not delete \"ID " + str(story_id) + "\" story."
         else:
-            logs = self.reader.read_log()
-            print(logs, '\n', moved_story, '\n', new_log)
-            return "Successfully deleted " + moved_story.story + "from " + source_log
+            return "Successfully deleted " + "\"ID " + str(story_id) + ": " + moved_story["story"] + "\"" + " from " + source_log
+
+    def list_all_stories(self):
+        return self.reader.read_log()

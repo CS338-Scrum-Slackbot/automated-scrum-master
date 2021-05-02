@@ -79,11 +79,6 @@ def handle_interaction():
             print(f'text_msg: {text_msg}')
             send_message(text_msg, interactive_msg)
 
-            if text_msg == "updated_modal":
-                client.views_update(
-                    trigger_id=data['trigger_id'], view_id=data['view']['id'], view=interactive_msg)
-            else:
-                send_message(text_msg, interactive_msg)
         except KeyError:
             print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")
     else:

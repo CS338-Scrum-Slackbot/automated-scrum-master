@@ -1,7 +1,7 @@
 DELETE_STORY_MODAL = {
     "title": {
         "type": "plain_text",
-        "text": "Delete a Story"
+        "text": "Delete Story"
     },
     "submit": {
         "type": "plain_text",
@@ -15,53 +15,17 @@ DELETE_STORY_MODAL = {
     },
     "blocks": [
         {
+            "type": "divider"
+        },
+        {
             "type": "input",
             "element": {
-                    "type": "static_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select an item",
-                        "emoji": True
-                    },
-                "options": [
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Product Backlog",
-                                "emoji": True
-                            },
-                            "value": "board-1"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Sprint Backlog",
-                                "emoji": True
-                            },
-                            "value": "board-2"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Current Sprint",
-                                "emoji": True
-                            },
-                            "value": "board-3"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Previous Sprints",
-                                "emoji": True
-                            },
-                            "value": "board-4"
-                        }
-                        ],
-                "action_id": "static_select-action"
+                "type": "plain_text_input",
+                "action_id": "plain_text_input-action"
             },
             "label": {
                 "type": "plain_text",
-                "text": "Pick a swimlane to delete stories from",
+                "text": "Enter comma-seperated list of ids for the stories you want to delete",
                 "emoji": True
             }
         }
