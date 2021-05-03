@@ -9,7 +9,9 @@ from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.delete_story_ui import DELETE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
+from block_ui.read_story_ui import READ_STORY_BLOCK
 import json
+import copy
 import re
 
 
@@ -50,7 +52,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 6
+        self.sid = 7
 
         # log of story being updated:
         self.update_log = ''
@@ -69,6 +71,11 @@ class ScrumMaster:
 
         self.text = text
 
+        if "create story" in text:
+            self._create_modal_btn(text="Create a Story", action_id="create-story")
+        # Example
+        elif "example modal" in text:
+            self._create_modal_btn(text="Example Modal", action_id="example")
         if "create a story" in text:
             self._create_modal_btn(text="Create a Story",
                                    action_id="create-story")
@@ -89,6 +96,17 @@ class ScrumMaster:
         elif "read" in text:
             # Sample message: @Miyagi read 1 from product_backlog
             # @Miyagi read 1
+            try:
+                read_text = " ".join(text.split()[1:])
+            except ValueError:
+                self.text = "Could not understand read command."
+                return
+
+            try:
+                id_text  = int(text.split()[1])
+            except (ValueError, IndexError):
+                id_text = None
+                
             read_text = " ".join(text.split()[1:])
             id_text = int(text.split()[1])
             log = None
@@ -96,7 +114,15 @@ class ScrumMaster:
             if from_idx != -1:
                 log_idx = from_idx + 5
                 log = read_text[log_idx:]
-            self.text = self.scrum_board.read(id=id_text, log=log)
+            
+            if id_text:
+                self.text = self.scrum_board.read(id=id_text, log=log)
+            else:
+                stories = self.scrum_board.read_all(log=log)
+                self.blocks = []
+                for story in stories:
+                    self.blocks += self._story_to_msg(story)
+                self.text = "Story:"
         elif "search story" in text:
             self._create_modal_btn(text="Search story",
                                    action_id="search-story")
@@ -129,7 +155,6 @@ class ScrumMaster:
         ] if text != "" else None
         self.text = ""
 
-    # @staticmethod
     def create_modal(self, action_id):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
@@ -219,30 +244,55 @@ class ScrumMaster:
         self.text = f"Story {self.story_update['id']} updated successfully!" if update else "Failed to update story."
         self.blocks = None
 
+    def _story_to_msg(self, story):
+        block = copy.deepcopy(READ_STORY_BLOCK)
+        story_content = block[0]['fields']
+        actions = block[1]['elements']
+
+        for k, v in story.items():
+            if v:
+                story_content.append({
+                    "type": "mrkdwn",
+                    "text": f"*{k[0].upper() + k[1:]}:* {v}",
+                })
+
+        for action in actions:
+            if action['value'] == 'update-story':
+                action['action_id'] = f"update-story-{story['id']}"
+            elif action['value'] == 'move-story':
+                action['action_id'] = f"move-story-{story['id']}"
+            else:
+                action['action_id'] = f"delete-story-{story['id']}"
+        return block
+
+
     # Parses the payload of the create-story modal submission
     # To parse different modals, you need to create a new function that handles your modal
-    def _process_story_submission(self, payload_values):
-        board = self._get_dropdown_select_item(payload_values, 0)
-        priority = int(self._get_dropdown_select_item(payload_values, 1))
+    def _process_story_submission(self, payload_values):        
+        log = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
+        priority = self.priorities[self._get_dropdown_select_item(payload_values, 1)]
         estimate = int(self._get_dropdown_select_item(payload_values, 2))
         sprint = self._get_plaintext_input_item(payload_values, 3)
         assigned_to = self._get_userselect_item(payload_values, 4)
         user_type = self._get_plaintext_input_item(payload_values, 5)
         story_desc = self._get_plaintext_input_item(payload_values, 6)
 
+        print(type(log), log)
+
         create_story = self.scrum_board.create_story({
-            "id": self.story_update["id"],
+            "id": self.sid,
             "priority": priority,
             "estimate": estimate,
             "sprint": sprint,
-            "status": status,
+            "status": "None",
             "assigned_to": assigned_to,
             "user_type": user_type,
             "story": story_desc
-        }, board)
+        }, log)
 
-        self.text = f"Story {self.story_update['id']} created successfully!" if update else "Failed to create story."
+        self.text = f"Story {self.sid} created successfully!"
         self.blocks = None
+        self.sid += 1
 
     def _process_delete_story(self, payload_values):
         story_id_string = self._get_plaintext_input_item(payload_values, 0)
@@ -291,3 +341,6 @@ class ScrumMaster:
         # self.text is the textual message to be displayed by bot
         # self.blocks is the interactive message (e.g. modal) to be displayed in JSON
         return (self.text, self.blocks)
+
+    def reset(self):
+        self.text, self.blocks = "\0", None

@@ -18,6 +18,11 @@ class ScrumBoard:
             self.pb = json.load(pb)
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
+
+    def create_story(self, story,log):
+        print(f'Creating story: {story} in log {log}')
+        return self.reader.create(story, log)
+
     def create_story(self, id, sprint, assigned_to, user_type, story_desc, priority=-1, estimate=-1):
         story = {
             "id": id,
@@ -40,6 +45,12 @@ class ScrumBoard:
         if obj is None or log_str is None:
             return "Story not found."
         return "Reading story from "+log_str+": "+json.dumps(obj)
+
+    def read_all(self, log):
+        obj, log_str = self.reader.read_all(log=log)
+        if obj is None or log_str is None:
+            return f"Could not find any stories in log {log}"
+        return obj
 
     def update_story(self, story, log):
         print(f'UPDATING STORY: {story}')

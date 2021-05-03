@@ -20,6 +20,11 @@ CREATE_STORY_MODAL = {
                 },
                 {
                     "type": "input",
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Swim Lane",
+                        "emoji": True
+                    },
                     "element": {
                         "type": "static_select",
                         "placeholder": {
@@ -70,15 +75,15 @@ CREATE_STORY_MODAL = {
                             }
                         ],
                         "action_id": "static_select-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Board",
-                        "emoji": True
                     }
                 },
                 {
                     "type": "input",
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Priority",
+                        "emoji": True
+                    },
                     "element": {
                         "type": "static_select",
                         "placeholder": {
@@ -90,7 +95,7 @@ CREATE_STORY_MODAL = {
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "1",
+                                    "text": "Low",
                                     "emoji": True
                                 },
                                 "value": "priority-1"
@@ -98,7 +103,7 @@ CREATE_STORY_MODAL = {
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "2",
+                                    "text": "Medium",
                                     "emoji": True
                                 },
                                 "value": "priority-2"
@@ -106,18 +111,13 @@ CREATE_STORY_MODAL = {
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "3",
+                                    "text": "High",
                                     "emoji": True
                                 },
                                 "value": "priority-3"
                             }
                         ],
                         "action_id": "static_select-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Priority",
-                        "emoji": True
                     }
                 },
                 {

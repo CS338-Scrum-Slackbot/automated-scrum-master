@@ -66,11 +66,11 @@ def handle_interaction():
             return ''
         # Send a modal with our obtained trigger_id
         # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'],
-                   modal=scrum_master.create_modal(action_id))
+        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
+        print(data)
         try:
             callback_id = data['view']['callback_id']
             scrum_master.process_modal_submission(
@@ -98,6 +98,7 @@ def get_app_mention(payload):
         # Potentially more scrum bot logic to follow here
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
+        scrum_master.reset()
 
 
 if __name__ == '__main__':
