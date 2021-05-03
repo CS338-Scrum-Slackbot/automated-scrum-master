@@ -84,7 +84,7 @@ class ScrumMaster:
         jsr = jr.json_reader("data/scrum_board.json")
         sb = jsr.read_log('sprint_backlog')
         for s in sb: 
-            if s['status'] != "": s['status'] = 'to-do'
+            if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
             jsr.update(id=s['id'], new_entry=s, log='sprint_backlog')
             jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
@@ -98,7 +98,6 @@ class ScrumMaster:
 
         if "create story" in text:
             self._create_modal_btn(text="Create a Story", action_id="create-story")
-        # Example
         elif "example modal" in text:
             self._create_modal_btn(text="Example Modal", action_id="example")
         if "create a story" in text:
@@ -107,7 +106,6 @@ class ScrumMaster:
         elif "delete story" in text:
             self._create_modal_btn(text="Delete Story",
                                    action_id="delete-story")
-        # End example
         elif "update story" in text:
             self.update_story(text)
         elif "read" in text:
@@ -155,9 +153,6 @@ class ScrumMaster:
         elif "search story" in text:
             self._create_modal_btn(text="Search story",
                                    action_id="search-story")
-        # Example
-        elif "example modal" in text:
-            self._create_modal_btn(text="Example Modal", action_id="example")
         elif "start sprint" in text.lower():
             self.start_sprint(text)
         else:
@@ -235,7 +230,7 @@ class ScrumMaster:
 
         # Add an if-clause here with your callback_id used in the modal
         if callback_id == "create-story-modal":
-            self._process_modal_submission(payload_values)
+            self._process_create_update_submission(payload_values)
             # self._process_story_submission(payload_values)
         elif callback_id == "delete-story-modal":
             self._process_delete_story(payload_values)
@@ -246,12 +241,12 @@ class ScrumMaster:
             # e.g. self._process_example_submission(payload_values)
             pass
         elif callback_id == "update-story-modal":
-            self._process_modal_submission(
+            self._process_create_update_submission(
                 payload_values, payload['view']['private_metadata'].split(','))
         else:
             pass
 
-    def _process_modal_submission(self, payload_values, metadata=[]):
+    def _process_create_update_submission(self, payload_values, metadata=[]):
         i = 0 if metadata else 1
         estimate = int(self._get_dropdown_select_item(payload_values, i+6))
         priority = self.priorities[self._get_radio_group_item(payload_values, i+5).capitalize()]
@@ -264,7 +259,7 @@ class ScrumMaster:
             return
         user_type = self._get_plaintext_input_item(payload_values, i+1)
         story_title = self._get_plaintext_input_item(payload_values, i)
-        swimlane = metadata[1] if metadata else self._get_dropdown_select_item(payload_values, 0)
+        swimlane = metadata[1] if metadata else self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
 
         story = {
                 "id": int(metadata[0]) if metadata else self.sid,
