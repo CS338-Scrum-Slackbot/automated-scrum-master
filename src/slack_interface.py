@@ -66,7 +66,7 @@ def handle_interaction():
             return ''
         # Send a modal with our obtained trigger_id
         # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id))
+        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=data['view']['private_metadata']))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':

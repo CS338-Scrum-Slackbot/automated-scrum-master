@@ -60,6 +60,8 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
+        self.story_update, self.update_log = {}, None
+
     
     def create_story(self, text):
         self._create_modal_btn(text="Create a Story", action_id="create-story")
@@ -71,13 +73,14 @@ class ScrumMaster:
             self.text = "Story ID must be an int."
             return
         self.story_update, self.update_log = jr.json_reader("data/scrum_board.json").read(id)
-        self._create_modal_btn(text=f"Update Story {id}", action_id="update-story")
+        self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=f'{story_update["id"]},{update_log}')
 
     def read(self, text):
         pass
 
     def search(self, text):
-        pass
+        self._create_modal_btn(text="Search story",
+                                   action_id="search-story")
 
     def start_sprint(self, text):
         self.current_sprint += 1
@@ -158,7 +161,7 @@ class ScrumMaster:
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
-    def _create_modal_btn(self, text="", action_id=""):
+    def _create_modal_btn(self, text="", action_id="", metadata=""):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
 
         IMPORTANT!!! Remember what action_id you used because you will need to use it in create_modal
@@ -176,19 +179,20 @@ class ScrumMaster:
                         "value": "click_me_123",
                         "action_id": action_id
                     },
-                ]
+                ],
+                "private_metadata": metadata
             }
         ] if text != "" else None
         self.text = ""
 
-    def create_modal(self, action_id):
+    def create_modal(self, action_id, metadata=""):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
             return CREATE_STORY_MODAL
         elif action_id == "delete-story":
             return DELETE_STORY_MODAL
         elif action_id == "update-story":
-            return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
+            return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
         elif action_id == "example":
@@ -196,10 +200,10 @@ class ScrumMaster:
         else:
             return ""
 
-    def fill_update_modal(self, modal, id):
-        story_update, update_log = jr.json_reader("data/scrum_board.json").read(id)
+    def fill_update_modal(self, modal, metadata):
+        # story_update, update_log = jr.json_reader("data/scrum_board.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
-        modal['private_metadata'] = f'{story_update["id"]},{update_log}'
+        modal['private_metadata'] = metadata
         for b in modal['blocks']:
             if b['label']['text'] == 'Estimate':
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
