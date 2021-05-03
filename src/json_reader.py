@@ -16,7 +16,7 @@ def my_func:
     reader = jr.json_reader(file_path="data/scrum_board.json")
     ...
     my_obj = ...
-    my_log = ... 
+    my_log = ...
     reader.create(entry=my_obj, log=my_log)
     ...
     my_id = ...
@@ -26,21 +26,21 @@ def my_func:
     my_id = ...
     my_log = ... optional
     my_obj, my_log = reader.delete(id=my_id, log=my_log)
-    ...    
+    ...
     my_id = ...
     my_log = ... optional
     new_obj = ... # update() returns the old object
     old_obj, my_log = reader.update(id=my_id, new_entry=new_obj, log=my_log)
-    ...    
+    ...
     my_id = ...
     my_log = ... optional
     move_to_log = ...
     my_obj, my_log = reader.move(id=my_id, dest_log=move_to_log, src_log=my_log)
     ...
     my_lookup_term = ...
-    my_log = ... optional
-    my_field = ... optional
-    found_tuples = reader.search(lookup=my_lookup_term, log=my_log, field=my_field):
+    my_logs = []
+    my_fields = []
+    found_tuples = reader.search(lookup=my_lookup_term, logs=my_logs, fields=my_fields):
     num_entries_found = len(found_tuples)
     ith_obj_found = found_tuples[i][0]
     log_of_ith_obj = found_tuples[i][1]
@@ -51,7 +51,7 @@ def my_func:
     my_log = ... optional
     result = read_log(log=my_log) -> list:
     # Returns all entries in the log, or all entries in the file if my_log=None
-    
+
 
 """
 
@@ -72,8 +72,8 @@ class json_interface():
         pass # Updates id# with new_entry. Log is optional. Returns the old object, log if update was successful.
     def move(self, id: int, dest_log: str, src_log: str = None): # Return Tuple[object, str]
         pass # Moves id# to the destination log. Source log of entry is optional. Returns the object, src_log if move was successful.
-    def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
-        pass # Lookup any contents: the field and log are optional.
+    def search(self, lookup: any, logs: list, fields: list): #- Return listof Tuple[object, str]
+        pass # Lookup any contents: the field and log are optional (as [])
 
     # Log-based ops
     def list_logs(self) -> list:
@@ -87,12 +87,12 @@ class json_interface():
 class json_reader(json_interface):
     def __init__(self, file_path: str):
         self._file_path = file_path
-        # Hard coded logs, field because it's hard to read them in (in case file is empty)
-        self._list_logs = ["product_backlog","sprint_backlog","current_sprint","previous_sprints","archived"]
-        self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
-        self._j = None # Load file into memory   
         with open(file=self._file_path, mode="r+") as f:
-            self._j = json.load(f)
+            self._j = json.load(f) # Load file into memory
+        self._list_logs = list(self._j.keys())
+        # Hard coded fields because it's hard to read them in (in case file is empty)
+        self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
+
 
     # Entry-based ops
 
@@ -102,7 +102,7 @@ class json_reader(json_interface):
             f.seek(0)
             f.write(json.dumps(self._j, indent=4)) # Write python obj to file
             f.truncate()
-    
+
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log
         def read_log(r_log: str) -> object:
@@ -121,9 +121,13 @@ class json_reader(json_interface):
                 return result, l
         return None, None
 
-    def delete(self, id: int, log: str = None): # Returns Tuple[object, str]
+    def read_all(self, log: str = None):
+        return ([e for e in self._j[log]], log) if log in self._j.keys() else (None, log)
+
+    def delete(self, id: int, log: str = None):  # Returns Tuple[object, str]
         with open(file=self._file_path, mode="r+") as f:
             # Helper function for deleting from specific log
+
             def delete_from_log(l: str):
                 entries = self._j[l] # Array of objs
                 for idx in range(0, len(entries)):
@@ -144,44 +148,42 @@ class json_reader(json_interface):
                     return result, l
             return None, None
 
-    def update(self, id: int, new_entry: object, log: str = None): # Return Tuple[object, str]
+    # Return Tuple[object, str]
+    def update(self, id: int, new_entry: object, log: str = None):
         o, this_log = self.delete(id, log)
         if o is None or this_log is None:
-            return None # Deletion failed
+            return None  # Deletion failed
         self.create(new_entry, this_log)
         return new_entry, this_log
 
-    def move(self, id: int, dest_log: str, src_log: str = None): # Return Tuple[object, str]
+    # Return Tuple[object, str]
+    def move(self, id: int, dest_log: str, src_log: str = None):
         entry, src_log = self.delete(id, src_log)
         if entry is None or src_log is None:
-            return None # Deletion failed
+            return None  # Deletion failed
         self.create(entry, dest_log)
         return entry, src_log
-        
-    def search(self, lookup: any, log:str = None, field:str = None): #- Return listof Tuple[object, str]
-        if field is not None and field not in self._list_fields or log is not None and log not in self.list_logs():
-            return None # Invalid field or log
-        lookup = str(lookup)    # Cast to string
-        found = []              # Will hold the found entries
+
+    def search(self, lookup: any, logs: list, fields: list): #- Return listof Tuple[object, str]
+        lookup = str(lookup).lower()    # Cast to string and convert to lowercase
+        found = []                      # Will hold the found entries
         # Helper function for reading specific log
         def read_log(r_log: str):
             entries = self._j[r_log]
             for e in entries:
                 def compare_field(field_):
-                    if lookup in str(e[field_]): # Cast the value to a string as well
+                    if lookup in str(e[field_]).lower(): # Cast field's value to string and convert to lowercase
                         found.append([e, r_log])
                         return True
                     return False
-                if field is not None:
-                    compare_field(field)
-                else: # scan over all fields
-                    for f in self._list_fields:
-                        if compare_field(f): break # If any field matches, stop comparing fields
-        if log is not None and log in self._list_logs: # Read specified log
-            read_log(log)
-        else:  # Scan over logs
-            for l in self.list_logs():
-                read_log(l)
+                for f in fields:
+                    if compare_field(f): break # If any field matches, stop comparing fields
+        if logs == []:
+            logs = self.list_logs()
+        if fields == []:
+            fields = self.list_fields()
+        for l in logs:
+            read_log(l)
         return found
 
     # Log-based ops
