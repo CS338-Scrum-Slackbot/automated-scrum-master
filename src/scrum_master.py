@@ -308,10 +308,16 @@ class ScrumMaster:
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
-        self.text = self.scrum_board.search(
-            lookup_text=lookup_text, logs=swimlanes, fields=fields)
-        self.blocks = None
-
+        stories = self.scrum_board.search_story(lookup_text=lookup_text, logs=swimlanes, fields=fields )
+        if isinstance(stories, str):
+            self.text = stories # Handles error case of string from scrum_board
+            return
+        # Otherwise, stories is a list of objs that are pretty-printed.
+        self.blocks = []
+        for story in stories:
+            self.blocks += self._story_to_msg(story)
+        self.text = "Story:"
+    
     # Methods to help parse modal submission payload fields
     @staticmethod
     def _get_userselect_item(payload_values, index):

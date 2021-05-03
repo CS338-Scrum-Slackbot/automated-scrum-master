@@ -3,8 +3,11 @@ call .lower() on the user input string for matching
 #Example usage of create (must include story keyword):
 create story
 
-#Example usage of read, read x many. the FROM keyword is optional, supports single ID:
+#Example usage of read, read x many. TODO: the last usage case is broken and requires refactoring
 read story 1 from product_backlog
+read story 1
+read story from product_backlog
+read story 
 
 #Example usage of read swimlane (log) / FUTURE:
 #read swimlane product_backlog
