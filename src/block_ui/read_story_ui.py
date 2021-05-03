@@ -1,12 +1,7 @@
 READ_STORY_BLOCK = [
 		{
 			"type": "section",
-			"fields": [
-				{
-					"type": "mrkdwn",
-					"text": ""
-				}
-			]
+			"fields": []
 		},
 		{
 			"type": "actions",
@@ -15,9 +10,9 @@ READ_STORY_BLOCK = [
 					"type": "button",
 					"text": {
 						"type": "plain_text",
-						"text": "Edit"
+						"text": "Update"
 					},
-					"value": "edit-story"
+					"value": "update-story"
 				},
 				{
 					"type": "button",

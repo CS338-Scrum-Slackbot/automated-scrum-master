@@ -93,7 +93,7 @@ class ScrumMaster:
         # else:
         #     self.text = "Sorry, I don't recognize that command."
 
-        if "create a story" in text:
+        if "create story" in text:
             self._create_modal_btn(text="Create a Story", action_id="create-story")
         # Example
         elif "example modal" in text:
@@ -250,18 +250,15 @@ class ScrumMaster:
         actions = block[1]['elements']
 
         for k, v in story.items():
-            if k == "id":
-                story_content[0]['text'] = f"*ID: * {v}"
-            else:
-                if v:
-                    story_content.append({
-                        "type": "mrkdwn",
-                        "text": f"*{k[0].upper() + k[1:]}:* {v}",
-                    })
+            if v:
+                story_content.append({
+                    "type": "mrkdwn",
+                    "text": f"*{k[0].upper() + k[1:]}:* {v}",
+                })
 
         for action in actions:
-            if action['value'] == 'edit-story':
-                action['action_id'] = f"edit-story-{story['id']}"
+            if action['value'] == 'update-story':
+                action['action_id'] = f"update-story-{story['id']}"
             elif action['value'] == 'move-story':
                 action['action_id'] = f"move-story-{story['id']}"
             else:
@@ -272,7 +269,7 @@ class ScrumMaster:
     # Parses the payload of the create-story modal submission
     # To parse different modals, you need to create a new function that handles your modal
     def _process_story_submission(self, payload_values):        
-        log = self._get_dropdown_select_item(payload_values, 0).lower().join("_")
+        log = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
         priority = self.priorities[self._get_dropdown_select_item(payload_values, 1)]
         estimate = int(self._get_dropdown_select_item(payload_values, 2))
         sprint = self._get_plaintext_input_item(payload_values, 3)
@@ -280,21 +277,23 @@ class ScrumMaster:
         user_type = self._get_plaintext_input_item(payload_values, 5)
         story_desc = self._get_plaintext_input_item(payload_values, 6)
 
+        print(type(log), log)
+
         create_story = self.scrum_board.create_story({
             "id": self.sid,
             "priority": priority,
             "estimate": estimate,
             "sprint": sprint,
-            "status": "",
+            "status": "None",
             "assigned_to": assigned_to,
             "user_type": user_type,
             "story": story_desc
         }, log)
 
-        self.sid += 1
         self.text = f"Story {self.sid} created successfully!"
         self.blocks = None
-
+        self.sid += 1
+        
     def _process_search_story(self, payload_values):
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
@@ -331,5 +330,8 @@ class ScrumMaster:
         # self.text is the textual message to be displayed by bot
         # self.blocks is the interactive message (e.g. modal) to be displayed in JSON
         return (self.text, self.blocks)
+
+    def reset(self):
+        self.text, self.blocks = "\0", None
 
 

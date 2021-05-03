@@ -53,7 +53,6 @@ def handle_interaction():
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
-        print(data)
         try:
             action_id = data['message']['blocks'][0]['elements'][0]['action_id']
         except KeyError:
@@ -66,6 +65,7 @@ def handle_interaction():
         
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
+        print(data)
         try:
             callback_id = data['view']['callback_id']
             scrum_master.process_modal_submission(data, callback_id)
@@ -90,6 +90,7 @@ def get_app_mention(payload):
         # Potentially more scrum bot logic to follow here
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
+        scrum_master.reset()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
