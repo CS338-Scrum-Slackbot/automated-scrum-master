@@ -22,17 +22,21 @@ class ScrumBoard:
         print(f'Creating story: {story} in log {log}')
         return self.reader.create(story, log)
 
-    def read(self, id, log):  # [id: int, log: str = None]
+    def read_story(self, id, log):  # [id: int, log: str = None]
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
-        if obj is None or log_str is None:
-            return "Story not found."
-        return "Reading story from "+log_str+": "+json.dumps(obj)
+        if obj is None and log is None:
+            return "Story not found in your board."
+        elif obj is None and log is not None:
+            return f"Story not found in {log}, try a different swimlane?\nYou can also read the whole board using `read story {id}`"
+        return [obj, log_str]
 
-    def read_all(self, log):
-        obj, log_str = self.reader.read_all(log=log)
-        if obj is None or log_str is None:
-            return f"Could not find any stories in log {log}"
-        return obj
+    def read_log(self, log):
+        story_list = self.reader.read_log(log=log)
+        if story_list is None and log is None:
+            return "No stories in your board."
+        elif story_list is None and log is not None:
+            return f"Could not find any stories in {log}"
+        return story_list
 
     def update_story(self, story, log):
         print(f'UPDATING STORY: {story}')

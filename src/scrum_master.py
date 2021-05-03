@@ -111,45 +111,43 @@ class ScrumMaster:
                                    action_id="delete-story")
         elif "update story" in text:
             self.update_story(text)
-        elif "read" in text:
-            # Sample message: @Miyagi read 1 from product_backlog
-            # @Miyagi read 1
+        elif "read story" in text:
             try:
-                read_text = " ".join(text.split()[1:])
+                read_text = " ".join(text.split()[2:])
             except ValueError:
-                self.text = "Could not understand read command."
+                self.text = "Could not understand read story command."
                 return
 
             try:
-                id_text  = int(text.split()[1])
+                id_text  = int(text.split()[2])
             except (ValueError, IndexError):
                 id_text = None
                 
-            read_text = " ".join(text.split()[1:])
-            id_text = int(text.split()[1])
+            read_text = " ".join(text.split()[2:])
             log = None
             from_idx = read_text.find("from")
             if from_idx != -1:
                 log_idx = from_idx + 5
                 log = read_text[log_idx:]
-            field_idx = parameter_text.find("field")
-            field = None
-            if field_idx != -1:
-                field = parameter_text[:field_idx-1] # field is param_text before " field"
-
-            in_idx = parameter_text.find("in")
-            log = None
-            if in_idx != -1:
-                log = parameter_text[in_idx+3:colon_idx] # log is param_text between "in " and the colon (end)
-
-            self.text = "field="+str(field)+"    log="+str(log)
-            #self.scrum_board.search(lookup_text=lookup_text, log=log, field=field)
-            # TODO: replace self.text with the call to search once json search is merged to main
+            self.blocks = []
             if id_text:
-                self.text = self.scrum_board.read(id=id_text, log=log)
+                # If ID is specified, read specific story.
+                result = self.scrum_board.read_story(id=id_text, log=log)
+                if isinstance(result, str):
+                    self.text = result # Handles error case of string from scrum_board
+                    return
+                # Otherwise, stories is one obj that is pretty-printed.
+                story = result[0]
+                log = result[1]
+                self.blocks += self._story_to_msg(story)
+                self.text = f"Story {id_text} from {log}:"
             else:
-                stories = self.scrum_board.read_all(log=log)
+                # If there is no ID, return the swimlane/log/entire board.
+                stories = self.scrum_board.read_log(log=log)
                 self.blocks = []
+                if isinstance(stories, str):
+                    self.text = stories # Handles error case of string from scrum_board
+                    return
                 for story in stories:
                     self.blocks += self._story_to_msg(story)
                 self.text = "Story:"

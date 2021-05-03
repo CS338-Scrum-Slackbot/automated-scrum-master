@@ -81,7 +81,7 @@ class json_interface():
     def list_fields(self) -> list:
         pass # Returns the list of fields for each story: ["id","priority","estimate",...]
     def read_log(self, log: str = None) -> list:
-        pass # Returns all entries in the log, or all entries in the file if log=None
+        pass # Returns all entries in the log, or list of all entries in the file if log=None
 
 
 class json_reader(json_interface):
@@ -120,9 +120,6 @@ class json_reader(json_interface):
             if (result != None):
                 return result, l
         return None, None
-
-    def read_all(self, log: str = None):
-        return ([e for e in self._j[log]], log) if log in self._j.keys() else (None, log)
 
     def delete(self, id: int, log: str = None):  # Returns Tuple[object, str]
         with open(file=self._file_path, mode="r+") as f:
@@ -198,6 +195,9 @@ class json_reader(json_interface):
         if log is not None and log not in self.list_logs():
             return None # error
         if log is None:
-            return self._j
+            all_entries = []
+            for l in self.list_logs():
+                all_entries += self._j[l]
+            return all_entries
         else:
             return self._j[log]
