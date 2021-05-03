@@ -79,26 +79,16 @@ CREATE_STORY_MODAL = {
                 },
                 {
                     "type": "input",
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Priority",
-                        "emoji": True
-                    },
                     "element": {
-                        "type": "static_select",
-                        "placeholder": {
-                            "type": "plain_text",
-                            "text": "Select an number",
-                            "emoji": True
-                        },
+                        "type": "radio_buttons",
                         "options": [
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "Low",
+                                    "text": "High",
                                     "emoji": True
                                 },
-                                "value": "priority-1"
+                                "value": "high"
                             },
                             {
                                 "text": {
@@ -106,18 +96,31 @@ CREATE_STORY_MODAL = {
                                     "text": "Medium",
                                     "emoji": True
                                 },
-                                "value": "priority-2"
+                                "value": "medium"
                             },
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "High",
+                                    "text": "Low",
                                     "emoji": True
                                 },
-                                "value": "priority-3"
+                                "value": "low"
                             }
                         ],
-                        "action_id": "static_select-action"
+                        "initial_option": {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Low",
+                                "emoji": True
+                            },
+                            "value": "low"
+                        },
+                        "action_id": "radio_buttons-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Priority",
+                        "emoji": True
                     }
                 },
                 {
@@ -176,19 +179,24 @@ CREATE_STORY_MODAL = {
                     }
                 },
                 {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "Assigned to"
-                    },
-                    "accessory": {
+                    "type": "input",
+                    "element": {
                         "type": "users_select",
                         "placeholder": {
                             "type": "plain_text",
-                            "text": "Select a user",
+                            "text": "Select users",
                             "emoji": True
                         },
                         "action_id": "users_select-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Assigned To",
+                        "emoji": True
+                    },
+                    "hint": {
+                        "type": "plain_text",
+                        "text": "Select a user to assign this story to."
                     }
                 },
                 {

@@ -73,7 +73,7 @@ class ScrumMaster:
             self.text = "Story ID must be an int."
             return
         self.story_update, self.update_log = jr.json_reader("data/scrum_board.json").read(id)
-        self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=f'{story_update["id"]},{update_log}')
+        self._create_modal_btn(text=f"Update Story {id}", action_id="update-story")
 
     def read(self, text):
         pass
@@ -159,7 +159,7 @@ class ScrumMaster:
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
-    def _create_modal_btn(self, text="", action_id="", metadata=""):
+    def _create_modal_btn(self, text="", action_id=""):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
 
         IMPORTANT!!! Remember what action_id you used because you will need to use it in create_modal
@@ -178,19 +178,18 @@ class ScrumMaster:
                         "action_id": action_id
                     },
                 ],
-                "private_metadata": metadata
             }
         ] if text != "" else None
         self.text = ""
 
-    def create_modal(self, action_id, metadata=""):
+    def create_modal(self, action_id):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
             return CREATE_STORY_MODAL
         elif action_id == "delete-story":
             return DELETE_STORY_MODAL
         elif action_id == "update-story":
-            return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
+            return self.fill_update_modal(UPDATE_STORY_MODAL, self.story_update['id'])
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
         elif action_id == "example":
@@ -198,16 +197,17 @@ class ScrumMaster:
         else:
             return ""
 
-    def fill_update_modal(self, modal, metadata):
-        # story_update, update_log = jr.json_reader("data/scrum_board.json").read(id)
+    def fill_update_modal(self, modal, id):
+        story_update, update_log = jr.json_reader("data/scrum_board.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
-        modal['private_metadata'] = metadata
+        print(f'\n\nSTORY: {story_update}\n\n{update_log}\n')
+        modal['private_metadata'] = f'{story_update["id"]},{update_log}'
         for b in modal['blocks']:
             if b['label']['text'] == 'Estimate':
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
                 b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
-                b['element']['initial_value'] = story_update['sprint'] if story_update['sprint'] else self.current_sprint 
+                b['element']['initial_value'] = str(story_update['sprint']) if story_update['sprint'] else str(self.current_sprint)
             elif b['label']['text'] == 'Priority':
                 if self.story_update['priority'] != -1: 
                     p = list(self.priorities.keys())[list(self.priorities.values()).index(story_update['priority'])]
@@ -218,12 +218,13 @@ class ScrumMaster:
                     b['element']['initial_option']['value'] = 'low'
             elif b['label']['text'] == 'Status':
                 b['element']['initial_option']['text']['text'] = story_update['status'].capitalize() if story_update['status'] else 'None'
-                b['element']['initial_option']['value'] = story_update['status'] if story_update['status'] else 'none'
+                b['element']['initial_option']['value'] = story_update['status'].lower() if story_update['status'] else 'none'
             elif b['label']['text'] == 'User Type':
                 b['element']['initial_value'] = story_update['user_type'].capitalize()
             elif b['label']['text'] == 'Story Title':
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
+                print(f'\n\nASSIGNED TO: {story_update["assigned_to"]}\n\n')
                 b['element']['initial_user'] = story_update['assigned_to']
         return modal
 
@@ -232,7 +233,7 @@ class ScrumMaster:
 
         # Add an if-clause here with your callback_id used in the modal
         if callback_id == "create-story-modal":
-            self._process_create_update_submission(payload_values)
+            self._process_story_submission(payload_values)
             # self._process_story_submission(payload_values)
         elif callback_id == "delete-story-modal":
             self._process_delete_story(payload_values)
@@ -284,7 +285,7 @@ class ScrumMaster:
             self.blocks = None
             self.sid += 1
     
-    def _process_update_submission(self, payload_values):
+    def _process_update_submission(self, payload_values, metadata=[]):
         try:
             estimate = int(self._get_plaintext_input_item(payload_values, 0))
         except:
@@ -336,7 +337,8 @@ class ScrumMaster:
     # To parse different modals, you need to create a new function that handles your modal
     def _process_story_submission(self, payload_values):        
         log = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
-        priority = self.priorities[self._get_dropdown_select_item(payload_values, 1)]
+        priority = self.priorities[self._get_radio_group_item(
+            payload_values, 1).capitalize()]
         estimate = int(self._get_dropdown_select_item(payload_values, 2))
         sprint = self._get_plaintext_input_item(payload_values, 3)
         assigned_to = self._get_userselect_item(payload_values, 4)

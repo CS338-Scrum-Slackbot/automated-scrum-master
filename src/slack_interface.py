@@ -24,7 +24,7 @@ slack_event_adapter = SlackEventAdapter(
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -66,7 +66,7 @@ def handle_interaction():
             return ''
         # Send a modal with our obtained trigger_id
         # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=data['view']['private_metadata']))
+        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
