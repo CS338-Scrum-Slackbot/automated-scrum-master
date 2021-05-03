@@ -56,7 +56,7 @@ class ScrumBoard:
         print(f'UPDATING STORY: {story}')
         return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
 
-    def search(self, lookup_text: str, logs: list, fields: list):
+    def search_story(self, lookup_text: str, logs: list, fields: list):
         tuples = self.reader.search(
             lookup=lookup_text, logs=logs, fields=fields)
         if tuples is None:
