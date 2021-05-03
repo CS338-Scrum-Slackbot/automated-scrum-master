@@ -32,10 +32,10 @@
         },
         {
             "id": 1,
-            "priority": 1,
-            "estimate": 6,
+            "priority": 2,
+            "estimate": 21,
             "sprint": 2,
-            "status": "none",
+            "status": "completed",
             "assigned_to": "U01TRPZL02W",
             "user_type": "Nathan",
             "story": "I want my code to work."

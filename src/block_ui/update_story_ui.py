@@ -15,63 +15,71 @@ UPDATE_STORY_MODAL = {
 				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "Hours"
+					"text": "I want to..."
 				},
                 "initial_value": "0"
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "Estimate"
-			},
-			"hint": {
-				"type": "plain_text",
-				"text": "Number of hours the task will take."
+				"text": "Story Title"
 			}
 		},
 		{
 			"type": "input",
 			"element": {
-				"type": "radio_buttons",
-				"options": [
-					{
-						"text": {
-							"type": "plain_text",
-							"text": "High",
-							"emoji": True
-						},
-						"value": "high"
-					},
-					{
-						"text": {
-							"type": "plain_text",
-							"text": "Medium",
-							"emoji": True
-						},
-						"value": "medium"
-					},
-					{
-						"text": {
-							"type": "plain_text",
-							"text": "Low",
-							"emoji": True
-						},
-						"value": "low"
-					}
-				],
-                "initial_option": {
-					"text": {
-						"type": "plain_text",
-						"text": "Low",
-						"emoji": True
-					},
-					"value": "low"
+				"type": "plain_text_input",
+				"action_id": "plain_text_input-action",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "End user, administrator, etc."
 				},
-				"action_id": "radio_buttons-action"
+                "initial_value": "0"
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "Priority",
+				"text": "User Type"
+			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "plain_text_input-action",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Sprint number"
+				},
+                "initial_value": "1"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Sprint"
+			},
+			"hint": {
+				"type": "plain_text",
+				"text": "Must be an integer."
+			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "users_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select users",
+					"emoji": True
+				},
+                "initial_user": "0",
+				"action_id": "users_select-action"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Assigned To",
 				"emoji": True
+			},
+			"hint": {
+				"type": "plain_text",
+				"text": "Select a user to assign this story to."
 			}
 		},
 		{
@@ -131,58 +139,134 @@ UPDATE_STORY_MODAL = {
 		{
 			"type": "input",
 			"element": {
-				"type": "plain_text_input",
-				"action_id": "plain_text_input-action",
-				"placeholder": {
-					"type": "plain_text",
-					"text": "End user, administrator, etc."
+				"type": "radio_buttons",
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "High",
+							"emoji": True
+						},
+						"value": "high"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Medium",
+							"emoji": True
+						},
+						"value": "medium"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Low",
+							"emoji": True
+						},
+						"value": "low"
+					}
+				],
+                "initial_option": {
+					"text": {
+						"type": "plain_text",
+						"text": "Low",
+						"emoji": True
+					},
+					"value": "low"
 				},
-                "initial_value": "0"
+				"action_id": "radio_buttons-action"
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "User Type"
+				"text": "Priority",
+				"emoji": True
 			}
 		},
 		{
 			"type": "input",
 			"element": {
-				"type": "plain_text_input",
+				"type": "static_select",
 				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "I want to..."
+					"text": "Select an estimate"
 				},
-                "initial_value": "0"
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "1",
+							"emoji": True
+						},
+						"value": "1"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "2",
+							"emoji": True
+						},
+						"value": "2"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "3",
+							"emoji": True
+						},
+						"value": "3"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "5",
+							"emoji": True
+						},
+						"value": "5"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "8",
+							"emoji": True
+						},
+						"value": "8"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "13",
+							"emoji": True
+						},
+						"value": "13"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "21",
+							"emoji": True
+						},
+						"value": "21"
+					}
+				],
+				"initial_option": {
+					"text": {
+						"type": "plain_text",
+						"text": "1",
+						"emoji": True
+					},
+					"value": "1"
+				},
+				"action_id": "static_select-action"
 			},
 			"label": {
 				"type": "plain_text",
-				"text": "User Story"
-			}
-		},
-		{
-			"type": "input",
-			"element": {
-				"type": "users_select",
-				"placeholder": {
-					"type": "plain_text",
-					"text": "Select users",
-					"emoji": True
-				},
-                "initial_user": "0",
-				"action_id": "users_select-action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Assigned To",
+				"text": "Estimate",
 				"emoji": True
 			},
-			"hint": {
-				"type": "plain_text",
-				"text": "Select a user to assign this story to."
-			}
-		}
+		},
 	],
 	"type": "modal",
     "callback_id": "update-story-modal",
+	"private_metadata": "0",
 }

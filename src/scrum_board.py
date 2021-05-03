@@ -17,22 +17,8 @@ class ScrumBoard:
             self.pb = json.load(pb)
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
-    def create_story(self, id, sprint, assigned_to, user_type, story_desc):
-        story = {
-            "id": id,
-            "priority": priority,
-            "estimate":estimate,
-            "sprint": sprint,
-            "status": "",
-            "assigned_to": assigned_to,
-            "user_type": user_type,
-            "story": story_desc
-        }
-
-        self.sb['product_backlog'].append(story)
-        print(self.sb['product_backlog'])
-        with open(SCRUM_BOARD, 'w') as f:
-            json.dump(self.sb, f, indent=4)
+    def create_story(self, story, board):
+        return jr.json_reader(SCRUM_BOARD).create(story, board)
 
     def read(self, id, log): # [id: int, log: str = None]
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
