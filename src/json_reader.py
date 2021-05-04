@@ -97,11 +97,14 @@ class json_reader(json_interface):
     # Entry-based ops
 
     def create(self, entry: object, log: str):
-        with open(file=self._file_path, mode="r+") as f:
-            self._j[log].append(entry)             # Add to python obj
-            f.seek(0)
-            f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-            f.truncate()
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._j[log].append(entry)             # Add to python obj
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except: return 0
 
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log

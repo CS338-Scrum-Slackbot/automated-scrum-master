@@ -12,10 +12,11 @@ UPDATE_STORY_MODAL = {
 			"type": "input",
 			"element": {
 				"type": "plain_text_input",
+				"multiline": True,
 				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "I want to..."
+					"text": "As a ___, I want to..."
 				},
                 "initial_value": "0"
 			},
@@ -69,7 +70,7 @@ UPDATE_STORY_MODAL = {
 					"text": "Select users",
 					"emoji": True
 				},
-                "initial_user": "0",
+                "initial_user": "None",
 				"action_id": "users_select-action"
 			},
 			"label": {
@@ -79,7 +80,7 @@ UPDATE_STORY_MODAL = {
 			},
 			"hint": {
 				"type": "plain_text",
-				"text": "Select a user to assign this story to."
+				"text": "Select a user to assign this story to or leave blank if unassigned."
 			}
 		},
 		{

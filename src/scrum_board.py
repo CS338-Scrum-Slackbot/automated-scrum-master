@@ -18,7 +18,7 @@ class ScrumBoard:
             self.pb = json.load(pb)
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
-    def create_story(self, story,log):
+    def create_story(self, story, log):
         print(f'Creating story: {story} in log {log}')
         return self.reader.create(story, log)
 
