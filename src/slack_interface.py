@@ -28,7 +28,7 @@ BOT_ID = client.api_call("auth.test")["user_id"]
 #     f.write(json.dumps(MEMBERS, indent=4))
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#demo"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()

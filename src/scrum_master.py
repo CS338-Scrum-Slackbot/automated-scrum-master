@@ -52,7 +52,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 8
+        self.sid = 1
 
         # Interface with JSON data
         self.scrum_board = ScrumBoard()
@@ -75,7 +75,7 @@ class ScrumMaster:
         except: 
             self.text = "Story ID must be an int."
             return
-        story, log = jr.json_reader("data/scrum_board.json").read(id)
+        story, log = jr.json_reader("data/demo.json").read(id)
         metadata = {"story":story, "log":log}
         self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=json.dumps(metadata))
 
@@ -126,7 +126,7 @@ class ScrumMaster:
 
     def start_sprint(self):
         self.current_sprint += 1
-        jsr = jr.json_reader("data/scrum_board.json")
+        jsr = jr.json_reader("data/demo.json")
         sb = jsr.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
@@ -199,7 +199,7 @@ class ScrumMaster:
     def fill_update_modal(self, modal, metadata):
         data = json.loads(metadata)
         story_update = data['story']
-        # story_update, update_log = jr.json_reader("data/scrum_board.json").read(id)
+        # story_update, update_log = jr.json_reader("data/demo.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
         modal['private_metadata'] = f'{story_update["id"]},{data["log"]}'
         for b in modal['blocks']:

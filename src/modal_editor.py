@@ -3,7 +3,7 @@ import copy
 import json_reader as jr
 from block_ui.search_story_ui import SEARCH_STORY_MODAL
 
-SCRUM_BOARD = 'data/scrum_board.json'
+SCRUM_BOARD = 'data/demo.json'
 
 class ModalEditor:
     def __init__(self) -> None:
