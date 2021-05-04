@@ -97,11 +97,14 @@ class json_reader(json_interface):
     # Entry-based ops
 
     def create(self, entry: object, log: str):
-        with open(file=self._file_path, mode="r+") as f:
-            self._j[log].append(entry)             # Add to python obj
-            f.seek(0)
-            f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-            f.truncate()
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._j[log].append(entry)             # Add to python obj
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except: return 0
 
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log
@@ -169,7 +172,13 @@ class json_reader(json_interface):
             entries = self._j[r_log]
             for e in entries:
                 def compare_field(field_):
-                    if lookup in str(e[field_]).lower(): # Cast field's value to string and convert to lowercase
+                    # from scrum_master import ScrumMaster
+                    get_name = __import__('scrum_master').ScrumMaster._get_member_name
+                    if field_ == 'assigned_to':
+                        s = get_name(e[field_]).lower()
+                    else: 
+                        s = str(e[field_]).lower() # Cast field's value to string and convert to lowercase
+                    if lookup in s: 
                         found.append([e, r_log])
                         return True
                     return False

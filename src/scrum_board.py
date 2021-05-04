@@ -18,30 +18,12 @@ class ScrumBoard:
             self.pb = json.load(pb)
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
-
-    def create_story(self, story,log):
+    def create_story(self, story, log):
         print(f'Creating story: {story} in log {log}')
-        return self.reader.create(story, log)
-
-    def create_story(self, id, sprint, assigned_to, user_type, story_desc, priority=-1, estimate=-1):
-        story = {
-            "id": id,
-            "priority": priority,
-            "estimate": estimate,
-            "sprint": sprint,
-            "status": "",
-            "assigned_to": assigned_to,
-            "user_type": user_type,
-            "story": story_desc
-        }
-
-        self.pb['product_backlog'].append(story)
-        print(self.pb['product_backlog'])
-        with open(SCRUM_BOARD, 'w') as f:
-            json.dump(self.pb, f, indent=4)
+        return jr.json_reader(file_path=SCRUM_BOARD).create(story, log)
 
     def read_story(self, id, log):  # [id: int, log: str = None]
-        obj, log_str = self.reader.read(id=id, log=log)  # Read from json
+        obj, log_str = jr.json_reader(file_path=SCRUM_BOARD).read(id=id, log=log)  # Read from json
         if obj is None and log is None:
             return "Story not found in your board."
         elif obj is None and log is not None:
@@ -49,7 +31,7 @@ class ScrumBoard:
         return [obj, log_str]
 
     def read_log(self, log):
-        story_list = self.reader.read_log(log=log)
+        story_list = jr.json_reader(file_path=SCRUM_BOARD).read_log(log=log)
         if story_list is None and log is None:
             return "No stories in your board."
         elif story_list is None and log is not None:
@@ -61,7 +43,13 @@ class ScrumBoard:
         return jr.json_reader(SCRUM_BOARD).update(story['id'], story, log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list):
-        tuples = self.reader.search(
+        # from slack_interface import get_all_members
+        # members = get_all_members()
+        # possible_members = []
+        # for m in members:
+        #     possible_members.append(m['profile']['real_name'])
+        #     possible_members.append(m['profile']['display_name'])
+        tuples = jr.json_reader(file_path=SCRUM_BOARD).search(
             lookup=lookup_text, logs=logs, fields=fields)
         if tuples is None:
             return "Internal error: Fields or swimlanes did not match JSON."
@@ -75,7 +63,7 @@ class ScrumBoard:
 
     def delete_story(self, story_id):
         story_id = int(story_id)
-        story_obj, source_log = self.reader.read(
+        story_obj, source_log = jr.json_reader(file_path=SCRUM_BOARD).read(
             id=story_id)
         if story_obj is None or source_log is None:
             return "Story with \"ID " + str(story_id) + "\" does not exist."
@@ -83,7 +71,7 @@ class ScrumBoard:
         if source_log == "archived":
             return "Story with \"ID " + str(story_id) + "\" has already been deleted."
 
-        moved_story, new_log = self.reader.move(
+        moved_story, new_log = jr.json_reader(file_path=SCRUM_BOARD).move(
             story_id, 'archived', source_log)
 
         if moved_story == None or new_log == None:
@@ -92,4 +80,4 @@ class ScrumBoard:
             return "Successfully deleted " + "\"ID " + str(story_id) + ": " + moved_story["story"] + "\"" + " from " + source_log
 
     def list_all_stories(self):
-        return self.reader.read_log()
+        return jr.json_reader(file_path=SCRUM_BOARD).read_log()

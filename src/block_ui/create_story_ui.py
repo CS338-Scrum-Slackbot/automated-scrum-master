@@ -22,7 +22,7 @@ CREATE_STORY_MODAL = {
                     "type": "input",
                     "label": {
                         "type": "plain_text",
-                        "text": "Swim Lane",
+                        "text": "Swimlane",
                         "emoji": True
                     },
                     "element": {
@@ -79,26 +79,137 @@ CREATE_STORY_MODAL = {
                 },
                 {
                     "type": "input",
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Priority",
-                        "emoji": True
-                    },
                     "element": {
-                        "type": "static_select",
+                        "type": "plain_text_input",
+                        "multiline": True,
+                        "action_id": "plain_text_input-action",
                         "placeholder": {
                             "type": "plain_text",
-                            "text": "Select an number",
+                            "text": "As a ___, I want to..."
+                        },
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Story Title",
+                        "emoji": True
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "End user, administrator, etc."
+                        },
+                        "action_id": "plain_text_input-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "User Type",
+                        "emoji": True
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Sprint number"
+                        },
+                        "action_id": "plain_text_input-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Sprint",
+                        "emoji": True
+                    },
+                    "hint": {
+                        "type": "plain_text",
+                        "text": "Must be an integer."
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "users_select",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select users",
                             "emoji": True
                         },
+                        "initial_user": "None",
+                        "action_id": "users_select-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Assigned To",
+                        "emoji": True
+                    },
+                    "hint": {
+                        "type": "plain_text",
+                        "text": "Select a user to assign this story to or leave blank if unassigned."
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "radio_buttons",
                         "options": [
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "Low",
+                                    "text": "None",
                                     "emoji": True
                                 },
-                                "value": "priority-1"
+                                "value": "none"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "To-do",
+                                    "emoji": True
+                                },
+                                "value": "to-do"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "In-progress",
+                                    "emoji": True
+                                },
+                                "value": "in-progress"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Completed",
+                                    "emoji": True
+                                },
+                                "value": "completed"
+                            }
+                        ],
+                        "action_id": "radio_buttons-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Status",
+                        "emoji": True
+                    }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "radio_buttons",
+                        "options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "High",
+                                    "emoji": True
+                                },
+                                "value": "high"
                             },
                             {
                                 "text": {
@@ -106,28 +217,33 @@ CREATE_STORY_MODAL = {
                                     "text": "Medium",
                                     "emoji": True
                                 },
-                                "value": "priority-2"
+                                "value": "medium"
                             },
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "High",
+                                    "text": "Low",
                                     "emoji": True
                                 },
-                                "value": "priority-3"
+                                "value": "low"
                             }
                         ],
-                        "action_id": "static_select-action"
+                        "action_id": "radio_buttons-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Priority",
+                        "emoji": True
                     }
                 },
                 {
                     "type": "input",
                     "element": {
                         "type": "static_select",
+                        "action_id": "plain_text_input-action",
                         "placeholder": {
                             "type": "plain_text",
-                            "text": "Select an item",
-                            "emoji": True
+                            "text": "Select an estimate"
                         },
                         "options": [
                             {
@@ -136,7 +252,7 @@ CREATE_STORY_MODAL = {
                                     "text": "1",
                                     "emoji": True
                                 },
-                                "value": "estimate-1"
+                                "value": "1"
                             },
                             {
                                 "text": {
@@ -144,7 +260,7 @@ CREATE_STORY_MODAL = {
                                     "text": "2",
                                     "emoji": True
                                 },
-                                "value": "estimate-2"
+                                "value": "2"
                             },
                             {
                                 "text": {
@@ -152,69 +268,56 @@ CREATE_STORY_MODAL = {
                                     "text": "3",
                                     "emoji": True
                                 },
-                                "value": "estimate-3"
+                                "value": "3"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "5",
+                                    "emoji": True
+                                },
+                                "value": "5"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "8",
+                                    "emoji": True
+                                },
+                                "value": "8"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "13",
+                                    "emoji": True
+                                },
+                                "value": "13"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "21",
+                                    "emoji": True
+                                },
+                                "value": "21"
                             }
                         ],
+                        "initial_option": {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "1",
+                                "emoji": True
+                            },
+                            "value": "1"
+                        },
                         "action_id": "static_select-action"
                     },
                     "label": {
                         "type": "plain_text",
                         "text": "Estimate",
                         "emoji": True
-                    }
-                },
-                {
-                    "type": "input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "plain_text_input-action"
                     },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Sprint",
-                        "emoji": True
-                    }
                 },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "Assigned to"
-                    },
-                    "accessory": {
-                        "type": "users_select",
-                        "placeholder": {
-                            "type": "plain_text",
-                            "text": "Select a user",
-                            "emoji": True
-                        },
-                        "action_id": "users_select-action"
-                    }
-                },
-                {
-                    "type": "input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "plain_text_input-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "User type",
-                        "emoji": True
-                    }
-                },
-                {
-                    "type": "input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "multiline": True,
-                        "action_id": "plain_text_input-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Story description",
-                        "emoji": True
-                    }
-                }
             ],
 }
