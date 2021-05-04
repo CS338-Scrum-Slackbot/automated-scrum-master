@@ -59,6 +59,7 @@ class ScrumMaster:
 
         # Modal editor
         self.editor = ModalEditor()
+
     
     def create_story(self):
         self._create_modal_btn(text="Create a Story",
@@ -289,10 +290,12 @@ class ScrumMaster:
         actions = block[1]['elements']
 
         for k, v in story.items():
+            # if k == 'assigned_to' and v != "" and v != "None":
+            #     print(ScrumMaster._get_member_name(v))
             if v:
                 story_content.append({
                     "type": "mrkdwn",
-                    "text": f"*{k[0].upper() + k[1:]}:* {v}",
+                    "text": f"*{k[0].upper() + k[1:]}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
                 })
 
         for action in actions:
@@ -328,6 +331,15 @@ class ScrumMaster:
         for story in stories:
             self.blocks += self._story_to_msg(story)
         self.text = "Story:"
+    
+    @staticmethod
+    def _get_member_name(id):
+        from slack_interface import get_member
+        ret = get_member(id)
+        if ret:
+            return ret['real_name'] if ret['real_name'] else ret['display_name']
+        else:
+            return id
     
     # Methods to help parse modal submission payload fields
     @staticmethod
