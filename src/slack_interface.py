@@ -28,7 +28,7 @@ BOT_ID = client.api_call("auth.test")["user_id"]
 #     f.write(json.dumps(MEMBERS, indent=4))
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -39,6 +39,9 @@ def get_member(id):
     except:
         ret = None
     return ret
+
+def get_all_members():
+    return client.api_call(api_method="users.list")['members']
 
 def send_message(text_msg, interactive_msg=None):
     """ Sends a message to the slack channel

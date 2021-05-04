@@ -172,7 +172,13 @@ class json_reader(json_interface):
             entries = self._j[r_log]
             for e in entries:
                 def compare_field(field_):
-                    if lookup in str(e[field_]).lower(): # Cast field's value to string and convert to lowercase
+                    # from scrum_master import ScrumMaster
+                    get_name = __import__('scrum_master').ScrumMaster._get_member_name
+                    if field_ == 'assigned_to':
+                        s = get_name(e[field_]).lower()
+                    else: 
+                        s = str(e[field_]).lower() # Cast field's value to string and convert to lowercase
+                    if lookup in s: 
                         found.append([e, r_log])
                         return True
                     return False

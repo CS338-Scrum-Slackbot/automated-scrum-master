@@ -77,5 +77,16 @@
             "story": "I want to update a story."
         }
     ],
-    "archived": []
+    "archived": [
+        {
+            "id": 8,
+            "priority": 3,
+            "estimate": 13,
+            "sprint": 2,
+            "status": "none",
+            "assigned_to": "U01TB0ZH5F1",
+            "user_type": "Test",
+            "story": "Test"
+        }
+    ]
 }

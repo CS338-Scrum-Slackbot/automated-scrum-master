@@ -290,8 +290,6 @@ class ScrumMaster:
         actions = block[1]['elements']
 
         for k, v in story.items():
-            # if k == 'assigned_to' and v != "" and v != "None":
-            #     print(ScrumMaster._get_member_name(v))
             if v:
                 story_content.append({
                     "type": "mrkdwn",
