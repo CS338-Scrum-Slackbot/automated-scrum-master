@@ -23,12 +23,9 @@ slack_event_adapter = SlackEventAdapter(
 
 client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
-# MEMBERS = client.api_call(api_method="users.list")['members']
-# with open(file='data/workspace_members.json', mode="r+") as f:
-#     f.write(json.dumps(MEMBERS, indent=4))
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
