@@ -21,16 +21,6 @@
             "assigned_to": "None",
             "user_type": "student",
             "story": "As a student, I want to view my transcript."
-        },
-        {
-            "id": 5,
-            "priority": 2,
-            "estimate": 13,
-            "sprint": 4,
-            "status": "none",
-            "assigned_to": "U01TK108J86",
-            "user_type": "Admin",
-            "story": "As an administrator, i want to control data access."
         }
     ],
     "current_sprint": [
@@ -73,6 +63,16 @@
             "assigned_to": "U01TB0ZH5F1",
             "user_type": "admin",
             "story": "As an administrator, I want to stop other people from accessing my database."
+        },
+        {
+            "id": 11,
+            "priority": 3,
+            "estimate": 3,
+            "sprint": 3,
+            "status": "none",
+            "assigned_to": "U01TK108J86",
+            "user_type": "Student",
+            "story": "As a student, we want to present our demo!"
         }
     ],
     "previous_sprints": [
@@ -107,6 +107,16 @@
             "assigned_to": "None",
             "user_type": "user",
             "story": "Delete me"
+        },
+        {
+            "id": 5,
+            "priority": 2,
+            "estimate": 13,
+            "sprint": 4,
+            "status": "none",
+            "assigned_to": "U01TK108J86",
+            "user_type": "Admin",
+            "story": "As an administrator, i want to control data access."
         }
     ]
 }
