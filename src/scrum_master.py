@@ -59,9 +59,6 @@ class ScrumMaster:
 
         # Modal editor
         self.editor = ModalEditor()
-
-        self.story_update, self.update_log = {}, None
-
     
     def create_story(self):
         self._create_modal_btn(text="Create a Story",
