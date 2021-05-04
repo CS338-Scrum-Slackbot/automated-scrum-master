@@ -52,7 +52,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 8
+        self.sid = 9
 
         # Interface with JSON data
         self.scrum_board = ScrumBoard()
