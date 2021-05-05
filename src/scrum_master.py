@@ -62,7 +62,7 @@ class ScrumMaster:
 
     
     def create_story(self):
-        self._create_modal_btn(text="Create a Story",
+        self._create_modal_btn(text="Create Story",
                                    action_id="create-story")
 
     def delete_story(self):
@@ -142,8 +142,6 @@ class ScrumMaster:
         self.text = text
 
         if "create story" in text.lower():
-            self.create_story()
-        elif "create a story" in text.lower():
             self.create_story()
         elif "delete story" in text.lower():
             self.delete_story()

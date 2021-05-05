@@ -56,22 +56,6 @@ CREATE_STORY_MODAL = {
                                     "emoji": True
                                 },
                                 "value": "board-3"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Previous Sprints",
-                                    "emoji": True
-                                },
-                                "value": "board-4"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Archived",
-                                    "emoji": True
-                                },
-                                "value": "board-5"
                             }
                         ],
                         "action_id": "static_select-action"
