@@ -95,7 +95,7 @@ class json_reader(json_interface):
         self._list_logs = list(self._j.keys())
 
         # quick fix for removing metadata key from swimlanes
-        # self._list_logs.remove('metadata')
+        self._list_logs.remove('metadata')
 
         # Hard coded fields because it's hard to read them in (in case file is empty)
         self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
