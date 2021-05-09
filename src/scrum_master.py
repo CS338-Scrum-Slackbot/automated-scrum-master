@@ -10,9 +10,11 @@ from block_ui.delete_story_ui import DELETE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
+from block_ui.set_sprint_ui import SET_SPRINT_MODAL
 import json
 import copy
 import re
+from datetime import datetime
 
 
 class ScrumMaster:
@@ -201,6 +203,8 @@ class ScrumMaster:
             return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
+        elif action_id == 'start-sprint':
+            return self.init_sprint_modal(SET_SPRINT_MODAL)
         elif action_id == "create-swimlane":
             return self.editor.edit_create_swimlane_modal()
         elif action_id == "update-swimlane":
@@ -209,6 +213,13 @@ class ScrumMaster:
             return EXAMPLE_MODAL
         else:
             return ""
+
+    def init_sprint_modal(self, modal):
+        today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
+        modal['blocks'][0]['element']['initial_date'] = today[0]
+        modal['blocks'][1]['element']['initial_time'] = today[1]
+        return modal
+
 
     def fill_update_modal(self, modal, metadata):
         data = json.loads(metadata)
@@ -361,11 +372,11 @@ class ScrumMaster:
         
     @staticmethod
     def _get_member_name(id):
-        from slack_interface import get_member
-        ret = get_member(id)
-        if ret:
-            return ret['real_name'] if ret['real_name'] else ret['display_name']
-        else:
+        with open('data/scrum_board.json') as f:
+            id_to_name = json.load(f)['metadata']['id_to_name']
+        try:
+            return id_to_name[id]
+        except KeyError:
             return id
     
     # Methods to help parse modal submission payload fields

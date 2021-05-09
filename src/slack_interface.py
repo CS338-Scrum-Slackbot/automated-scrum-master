@@ -25,10 +25,11 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
+SCRUM_BOARD = 'data/scrum_board.json'
 
 def get_member(id):
     try: 
@@ -39,6 +40,19 @@ def get_member(id):
 
 def get_all_members():
     return client.api_call(api_method="users.list")['members']
+
+def populate_members():
+    members = get_all_members()
+    # print(json.dumps(members, indent=4))
+    id_to_name = {x['id']:x['real_name'] for x in members if not x['is_bot'] and x['real_name'] != 'Slackbot'}
+    with open(file=SCRUM_BOARD, mode="r+") as f:
+        js = json.load(f)
+        js['metadata']['id_to_name'] =  id_to_name
+        f.seek(0)
+        f.write(json.dumps(js, indent=4))
+        f.truncate()
+
+populate_members()
 
 def send_message(text_msg, interactive_msg=None):
     """ Sends a message to the slack channel
@@ -61,6 +75,16 @@ def send_modal(trigger_id, modal):
     """
     client.views_open(trigger_id=trigger_id, view=modal)
 
+def register_or_update_member(payload):
+    event = payload.get("event", {})
+    user_id = event.get("user", {}).get("id")
+    real_name = event.get("user", {}).get("real_name")
+    with open(file=SCRUM_BOARD, mode="r+") as f:
+        js = json.load(f)
+        js['metadata']['id_to_name'][user_id] = real_name
+        f.seek(0)
+        f.write(json.dumps(js, indent=4))
+        f.truncate()
 
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
@@ -94,6 +118,17 @@ def handle_interaction():
         print("Unknown interactive request.")
     return ''
 
+@slack_event_adapter.on('team_join')
+def team_join_event(payload):
+    print('TEAM JOIN DETECTED!!')
+    register_or_update_member(payload)
+    return ''
+
+@slack_event_adapter.on('user_change')
+def user_change_event(payload):
+    print('USER CHANGE DETECTED!!')
+    register_or_update_member(payload)
+    return ''
 
 @slack_event_adapter.on('app_mention')
 def get_app_mention(payload):
