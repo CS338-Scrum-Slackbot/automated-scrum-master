@@ -8,7 +8,7 @@ Scrum board API for simple interfacing with data
 import json
 import json_reader as jr
 
-SCRUM_BOARD = 'data/demo.json'
+SCRUM_BOARD = 'data/scrum_board.json'
 
 
 class ScrumBoard:

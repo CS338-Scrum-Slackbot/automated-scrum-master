@@ -75,7 +75,7 @@ class ScrumMaster:
         except: 
             self.text = "Story ID must be an int."
             return
-        story, log = jr.json_reader("data/demo.json").read(id)
+        story, log = jr.json_reader("data/scrum_board.json").read(id)
         metadata = {"story":story, "log":log}
         self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=json.dumps(metadata))
 
@@ -222,7 +222,7 @@ class ScrumMaster:
             elif b['label']['text'] == 'Story Title':
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
-                b['element']['initial_user'] = story_update['assigned_to']
+                b['element']['initial_user'] = story_update['assigned_to'] if story_update['assigned_to'] else "None"
         return modal
 
     def process_modal_submission(self, payload, callback_id):
@@ -295,10 +295,11 @@ class ScrumMaster:
                 })
 
         for action in actions:
-            if action['value'] == 'update-story':
-                action['action_id'] = f"update-story-{story['id']}"
-            elif action['value'] == 'move-story':
-                action['action_id'] = f"move-story-{story['id']}"
+            if action['text']['text'] == 'Update':
+                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                metadata = {"story":story, "log":log}
+                action['action_id'] = f"update-story"
+                action['value'] = json.dumps(metadata)
             else:
                 action['action_id'] = f"delete-story-{story['id']}"
         return block

@@ -25,7 +25,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#demo"
+CHANNEL = "#app_mention"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -61,7 +61,6 @@ def send_modal(trigger_id, modal):
     """
     client.views_open(trigger_id=trigger_id, view=modal)
 
-
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
@@ -69,23 +68,29 @@ def handle_interaction():
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
         try:
-            action_id = data['message']['blocks'][0]['elements'][0]['action_id']
-            metadata = data['message']['blocks'][0]['elements'][0]['value']
-        except KeyError:
+            # Get the action_id and value fields from the event payload
+            action_id = data['actions'][0]['action_id']
+            value = data['actions'][0]['value']
+        except KeyError as e:
             print("Unexpected payload. Doing nothing...")
             return ''
         # Send a modal with our obtained trigger_id
         # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata))
+        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
+
+            # Extract relevant data from modal
             scrum_master.process_modal_submission(
                 data, callback_id)
+            
+            # Get text and block response from backend
             text_msg, interactive_msg = scrum_master.get_response()
-            # print(f'text_msg: {text_msg}')
+
+            # Send message to slack channel
             send_message(text_msg, interactive_msg)
 
         except KeyError:
