@@ -8,7 +8,7 @@ Scrum board API for simple interfacing with data
 import json
 import json_reader as jr
 
-SCRUM_BOARD = 'data/demo.json'
+SCRUM_BOARD = 'data/scrum_board.json'
 
 
 class ScrumBoard:
@@ -35,7 +35,7 @@ class ScrumBoard:
         if story_list is None and log is None:
             return "No stories in your board."
         elif story_list is None and log is not None:
-            return f"Could not find any stories in {log}"
+            return f"Could not find any stories in {log}."
         return story_list
 
     def update_story(self, story, log):
@@ -83,8 +83,8 @@ class ScrumBoard:
         return self.reader.read_log()
 
     def create_swimlane(self, log_name: str):
-        if self.reader.create(log_name):
-            return f"Successfully created new swimlane {log_name}"
+        if self.reader.create_swimlane(log_name):
+            return f"Successfully created new swimlane {log_name}."
         else: return f"Swimlane {log_name} already exists: try creating a different name, or update this one using `update swimlane`."
 
     def update_swimlane(self, old_name:str, new_name:str):
