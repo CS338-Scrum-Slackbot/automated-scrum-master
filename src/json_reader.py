@@ -219,6 +219,7 @@ class json_reader(json_interface):
             return 0 # Log already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
+                self._list_logs.append(log_name)
                 self._j[log_name] = []
                 f.seek(0)
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file
@@ -233,6 +234,7 @@ class json_reader(json_interface):
             return -2  # new_name already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
+                self._list_logs = [log if log != old_name else new_name for log in self._list_logs]
                 self._j[new_name] = self._j.pop(old_name) # Transfers entries to new key while deleting the old
                 f.seek(0)
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file

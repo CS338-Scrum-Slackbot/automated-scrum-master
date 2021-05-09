@@ -89,7 +89,7 @@ class ScrumBoard:
 
     def update_swimlane(self, old_name:str, new_name:str):
         result =  self.reader.update_swimlane(old_name, new_name)
-        if result == 1: return f"Successfully updated {old_name} to {new_name}"
+        if result == 1: return f"Successfully updated {old_name} to {new_name}."
         elif result == -1: return f"Swimlane {old_name} does not exist." # This should not happen bc of the modal
-        elif result == -2: return f"Swimlane {new_name} already exists: try updating with a different name."
-        else: return "Internal error"
+        elif result == -2: return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
+        else: return "Internal error."

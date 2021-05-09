@@ -138,6 +138,10 @@ class ScrumMaster:
         self._create_modal_btn(text="Create swimlane",
                                    action_id="create-swimlane")
 
+    def update_swimlane(self):
+        self._create_modal_btn(text="Update swimlane",
+                                   action_id="update-swimlane")
+
     def process_user_msg(self, text: str):
         """
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
@@ -159,6 +163,8 @@ class ScrumMaster:
             self.start_sprint()
         elif "create swimlane" in text.lower():
             self.create_swimlane()
+        elif "update swimlane" in text.lower():
+            self.update_swimlane()
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -197,6 +203,8 @@ class ScrumMaster:
             return self.editor.edit_search_story_modal()
         elif action_id == "create-swimlane":
             return self.editor.edit_create_swimlane_modal()
+        elif action_id == "update-swimlane":
+            return self.editor.edit_update_swimlane_modal()
         elif action_id == "example":
             return EXAMPLE_MODAL
         else:
@@ -245,6 +253,8 @@ class ScrumMaster:
             self._process_search_story(payload_values)
         elif callback_id == "create-swimlane-modal":
             self._process_create_swimlane(payload_values)
+        elif callback_id == "update-swimlane-modal":
+            self._process_update_swimlane(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -341,6 +351,12 @@ class ScrumMaster:
     def _process_create_swimlane(self, payload_values):
         log_name = self._get_plaintext_input_item(payload_values, 0)
         self.text = self.scrum_board.create_swimlane(log_name=log_name)
+        self.blocks = []
+
+    def _process_update_swimlane(self, payload_values):
+        old_name = self._get_dropdown_select_item(payload_values, 0)
+        new_name = self._get_plaintext_input_item(payload_values, 1)
+        self.text = self.scrum_board.update_swimlane(old_name, new_name)
         self.blocks = []
         
     @staticmethod
