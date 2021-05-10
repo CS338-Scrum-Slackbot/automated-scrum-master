@@ -38,9 +38,9 @@ class ScrumBoard:
             return f"Could not find any stories in {log}."
         return story_list
 
-    def update_story(self, story, log):
+    def update_story(self, story, log, new_log):
         print(f'UPDATING STORY: {story}')
-        return self.reader.update(story['id'], story, log)
+        return self.reader.update(story['id'], story, log, new_log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list):
         # from slack_interface import get_all_members
