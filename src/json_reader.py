@@ -156,12 +156,12 @@ class json_reader(json_interface):
             return None, None
 
     # Return Tuple[object, str]
-    def update(self, id: int, new_entry: object, log: str = None):
-        o, this_log = self.delete(id, log)
+    def update(self, id: int, new_entry: object, old_log: str = None, new_log: str = None):
+        o, this_log = self.delete(id, old_log)
         if o is None or this_log is None:
             return None  # Deletion failed
-        self.create(new_entry, this_log)
-        return new_entry, this_log
+        self.create(new_entry, new_log)
+        return new_entry, new_log
 
     # Return Tuple[object, str]
     def move(self, id: int, dest_log: str, src_log: str = None):

@@ -222,13 +222,29 @@ class ScrumMaster:
 
 
     def fill_update_modal(self, modal, metadata):
+        logs = jr.json_reader("data/scrum_board.json")._list_logs
+        swimlane_options = [
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": x.replace(" ", "_").title(),
+                    "emoji": True
+                },
+                "value": x
+            }
+            for x in logs
+        ]
         data = json.loads(metadata)
         story_update = data['story']
         # story_update, update_log = jr.json_reader("data/demo.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
         modal['private_metadata'] = f'{story_update["id"]},{data["log"]}'
         for b in modal['blocks']:
-            if b['label']['text'] == 'Estimate':
+            if b['label']['text'] == 'Swimlane':
+                b['element']['options'] = swimlane_options
+                b['element']['initial_option']['text']['text'] = data['log'].replace(" ", "_").title()
+                b['element']['initial_option']['value'] = data['log']
+            elif b['label']['text'] == 'Estimate':
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
                 b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
@@ -277,19 +293,19 @@ class ScrumMaster:
             pass
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
-        i = 0 if metadata else 1
-        estimate = int(self._get_dropdown_select_item(payload_values, i+6))
-        priority = self.priorities[self._get_radio_group_item(payload_values, i+5).capitalize()]
-        status = self._get_radio_group_item(payload_values, i+4)
-        assigned_to = self._get_userselect_item(payload_values, i+3)
-        try: sprint = int(self._get_plaintext_input_item(payload_values, i+2))
+        # i = 0 if metadata else 1
+        estimate = int(self._get_dropdown_select_item(payload_values, 7))
+        priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
+        status = self._get_radio_group_item(payload_values, 5)
+        assigned_to = self._get_userselect_item(payload_values, 4)
+        try: sprint = int(self._get_plaintext_input_item(payload_values, 3))
         except:
             self.text = "Sprint must be an integer."
             self.blocks = None
             return
-        user_type = self._get_plaintext_input_item(payload_values, i+1)
-        story_title = self._get_plaintext_input_item(payload_values, i)
-        swimlane = metadata[1] if metadata else self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
+        user_type = self._get_plaintext_input_item(payload_values, 2)
+        story_title = self._get_plaintext_input_item(payload_values, 1)
+        swimlane = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
 
         story = {
                 "id": int(metadata[0]) if metadata else self.sid,
@@ -303,7 +319,7 @@ class ScrumMaster:
                 }
 
         if metadata:
-            update = self.scrum_board.update_story(story, swimlane)
+            update = self.scrum_board.update_story(story, metadata[1], swimlane)
             self.text = f"Story {int(metadata[0])} updated successfully!" if update else f"Failed to update story {int(metadata[0])}."
             self.blocks = None
         else: 

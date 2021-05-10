@@ -3,6 +3,7 @@
         "sid": 11,
         "story_count": 7,
         "current_sprint": 2,
+        "current_sprint_starts": "2021-05-23 09:00",
         "current_sprint_ends": "2021-05-30 09:00",
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
