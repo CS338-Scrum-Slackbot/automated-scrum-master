@@ -11,6 +11,7 @@ from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
 from block_ui.set_sprint_ui import SET_SPRINT_MODAL
+from block_ui.home_page_ui import HOME_PAGE_BLOCK
 import json
 import copy
 import re
@@ -62,6 +63,16 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
+    def update_home(self):
+        view = {
+            "type": 'home',
+            "title": {
+                "type": "plain_text",
+                "text": "Test home tab!"
+            },
+            "blocks": HOME_PAGE_BLOCK
+        }
+        return view
     
     def create_story(self):
         self._create_modal_btn(text="Create Story",
