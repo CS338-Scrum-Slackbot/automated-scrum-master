@@ -160,7 +160,7 @@ class json_reader(json_interface):
         o, this_log = self.delete(id, old_log)
         if o is None or this_log is None:
             return None  # Deletion failed
-        self.create(new_entry, new_log)
+        self.create(new_entry, new_log if new_log else old_log)
         return new_entry, new_log
 
     # Return Tuple[object, str]

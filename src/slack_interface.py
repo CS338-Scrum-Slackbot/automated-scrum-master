@@ -31,28 +31,6 @@ CHANNEL = "#nathan"
 scrum_master = ScrumMaster()
 SCRUM_BOARD = 'data/scrum_board.json'
 
-reminder_block = {
-	"blocks": [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": "This is a reminder about a sprint ending."
-			},
-			"accessory": {
-				"type": "button",
-				"text": {
-					"type": "plain_text",
-					"text": "Click Me",
-					"emoji": True
-				},
-				"value": "click_me_123",
-				"action_id": "button-action"
-			}
-		}
-	]
-}
-
 def get_member(id):
     try: 
         ret = client.users_info(user=id)['user']['profile']
@@ -165,6 +143,18 @@ def get_app_mention(payload):
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
         scrum_master.reset()
+
+@slack_event_adapter.on('app_home_opened')
+def displayHome(payload):
+    print('\n\nAPP HOME OPENED\n\n')
+    print(json.dumps(payload, indent=4))
+    user_id = payload.get("event", {}).get("user")
+    print(f'\n\nUSER ID: {user_id}')
+    view = scrum_master.update_home()
+    client.views_publish(user_id=user_id, view=view)
+
+def updateHome(user):
+    pass
 
 
 if __name__ == '__main__':
