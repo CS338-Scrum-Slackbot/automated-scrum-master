@@ -152,7 +152,11 @@ class ScrumMaster:
                                    action_id="create-swimlane")
 
     def update_swimlane(self):
-        self._create_modal_btn(text="Update swimlane",
+        if len(self.scrum_board.list_user_swimlanes()) == 0:
+            # if there are no user-generated swimlanes ..
+            self.text = "You have no swimlanes to update. You cannot update default swimlanes, but you may create new ones using `create swimlane`."
+            return
+        else: self._create_modal_btn(text="Update swimlane",
                                    action_id="update-swimlane")
 
     def process_user_msg(self, text: str):
