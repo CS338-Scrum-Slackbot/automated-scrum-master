@@ -59,8 +59,7 @@ class ModalEditor:
     def edit_update_swimlane_modal(self, modal=UPDATE_SWIMLANE_MODAL):
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
         # Get lists from reader
-        logs = self.reader.list_logs()
-        # TODO: get list of user-generated logs only !!
+        logs = self.reader.list_user_gen_logs()
 
         # Get option list for log list
         log_block = self._generate_select_options(logs, "log")

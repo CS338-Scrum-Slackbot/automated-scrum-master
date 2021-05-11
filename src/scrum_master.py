@@ -55,7 +55,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 11
+        #self.sid = 11
 
         # Interface with JSON data
         self.scrum_board = ScrumBoard()
@@ -154,7 +154,11 @@ class ScrumMaster:
                                    action_id="create-swimlane")
 
     def update_swimlane(self):
-        self._create_modal_btn(text="Update swimlane",
+        if len(self.scrum_board.list_user_swimlanes()) == 0:
+            # if there are no user-generated swimlanes ..
+            self.text = "You have no swimlanes to update. You cannot update default swimlanes, but you may create new ones using `create swimlane`."
+            return
+        else: self._create_modal_btn(text="Update swimlane",
                                    action_id="update-swimlane")
 
     def process_user_msg(self, text: str):
@@ -211,9 +215,9 @@ class ScrumMaster:
         if action_id == "create-story":
             return CREATE_STORY_MODAL
         elif action_id == "delete-story":
-            return DELETE_STORY_MODAL
+            return self._fill_delete_modal(DELETE_STORY_MODAL, metadata)
         elif action_id == "update-story":
-            return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
+            return self._fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
         elif action_id == 'set-sprint':
@@ -227,14 +231,18 @@ class ScrumMaster:
         else:
             return ""
 
+    def _fill_delete_modal(self, modal, metadata=None):
+        modal['blocks'][1]['element']['initial_value'] = metadata
+        return modal
+
+
     def init_sprint_modal(self, modal):
         today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
         modal['blocks'][1]['elements'][0]['initial_date'] = today[0]
         modal['blocks'][1]['elements'][1]['initial_time'] = today[1]
         return modal
 
-
-    def fill_update_modal(self, modal, metadata):
+    def _fill_update_modal(self, modal, metadata):
         logs = scrum_board.get_logs()
         swimlane_options = [
             {
@@ -278,7 +286,7 @@ class ScrumMaster:
             elif b['label']['text'] == 'Story Title':
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
-                b['element']['initial_user'] = story_update['assigned_to']
+                b['element']['initial_user'] = story_update['assigned_to'] if story_update['assigned_to'] else "None"
         return modal
 
     def process_modal_submission(self, payload, callback_id):
@@ -338,6 +346,8 @@ class ScrumMaster:
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1
+        for i in payload_values:
+            print(i)
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
         status = self._get_radio_group_item(payload_values, 5)
@@ -352,7 +362,7 @@ class ScrumMaster:
         swimlane = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
 
         story = {
-                "id": int(metadata[0]) if metadata else self.sid,
+                "id": int(metadata[0]) if metadata else None,   #self.sid,
                 "priority": priority,
                 "estimate": estimate,
                 "sprint": sprint,
@@ -367,10 +377,10 @@ class ScrumMaster:
             self.text = f"Story {int(metadata[0])} updated successfully!" if update else f"Failed to update story {int(metadata[0])}."
             self.blocks = None
         else: 
-            create_story = self.scrum_board.create_story(story, swimlane)
-            self.text = f"Story {self.sid} created successfully!" if create_story else "Failed to create story."
+            created_sid = self.scrum_board.create_story(story, swimlane)
+            self.text = f"Story {created_sid} created successfully!" if created_sid else "Failed to create story."
             self.blocks = None
-            self.sid += 1
+            #self.sid += 1
 
 
     def _story_to_msg(self, story):
@@ -380,18 +390,21 @@ class ScrumMaster:
 
         for k, v in story.items():
             if v:
+                label = [tag[0].upper() + tag[1:] for tag in k.split('_')]
                 story_content.append({
                     "type": "mrkdwn",
-                    "text": f"*{k[0].upper() + k[1:]}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
+                    "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
                 })
 
         for action in actions:
-            if action['value'] == 'update-story':
-                action['action_id'] = f"update-story-{story['id']}"
-            elif action['value'] == 'move-story':
-                action['action_id'] = f"move-story-{story['id']}"
+            if action['text']['text'] == 'Update':
+                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                metadata = {"story":story, "log":log}
+                action['action_id'] = "update-story"
+                action['value'] = json.dumps(metadata)
             else:
-                action['action_id'] = f"delete-story-{story['id']}"
+                action['action_id'] = "delete-story"
+                action['value'] = f"story {str(story['id'])}"
         return block
 
 
@@ -454,6 +467,7 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
+        print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod
