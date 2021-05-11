@@ -229,7 +229,7 @@ class json_reader(json_interface):
             return self._j[log]["stories"]
 
     def create_swimlane(self, log_name: str):
-        if log_name in self.list_logs():
+        if log_name in self.list_logs() or log_name == "metadata":
             return 0 # Log already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
@@ -245,7 +245,7 @@ class json_reader(json_interface):
     def update_swimlane(self, old_name:str, new_name:str):
         if not old_name in self.list_logs():
             return -1 # old_name does not exist
-        elif new_name in self.list_logs():
+        elif new_name in self.list_logs() or new_name == "metadata":
             return -2  # new_name already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
