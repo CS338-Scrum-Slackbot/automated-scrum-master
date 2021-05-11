@@ -97,3 +97,6 @@ class ScrumBoard:
         elif result == -1: return f"Swimlane {old_name} does not exist." # This should not happen bc of the modal
         elif result == -2: return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
         else: return "Internal error."
+
+    def list_user_swimlanes(self):
+        return self.reader.list_user_gen_logs()
