@@ -10,9 +10,12 @@ from block_ui.delete_story_ui import DELETE_STORY_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
+from block_ui.set_sprint_ui import SET_SPRINT_MODAL
+from block_ui.home_page_ui import HOME_PAGE_BLOCK
 import json
 import copy
 import re
+from datetime import datetime
 
 
 class ScrumMaster:
@@ -60,6 +63,16 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
+    def update_home(self):
+        view = {
+            "type": 'home',
+            "title": {
+                "type": "plain_text",
+                "text": "Test home tab!"
+            },
+            "blocks": HOME_PAGE_BLOCK
+        }
+        return view
     
     def create_story(self):
         self._create_modal_btn(text="Create Story",
@@ -126,13 +139,21 @@ class ScrumMaster:
 
     def start_sprint(self):
         self.current_sprint += 1
-        jsr = jr.json_reader("data/demo.json")
+        jsr = jr.json_reader("data/scrum_board.json")
         sb = jsr.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
             jsr.update(id=s['id'], new_entry=s, log='sprint_backlog')
             jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
+
+    def create_swimlane(self):
+        self._create_modal_btn(text="Create swimlane",
+                                   action_id="create-swimlane")
+
+    def update_swimlane(self):
+        self._create_modal_btn(text="Update swimlane",
+                                   action_id="update-swimlane")
 
     def process_user_msg(self, text: str):
         """
@@ -153,6 +174,10 @@ class ScrumMaster:
             self.search_story()
         elif "start sprint" in text.lower():
             self.start_sprint()
+        elif "create swimlane" in text.lower():
+            self.create_swimlane()
+        elif "update swimlane" in text.lower():
+            self.update_swimlane()
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -189,6 +214,12 @@ class ScrumMaster:
             return self._fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
+        elif action_id == 'start-sprint':
+            return self.init_sprint_modal(SET_SPRINT_MODAL)
+        elif action_id == "create-swimlane":
+            return self.editor.edit_create_swimlane_modal()
+        elif action_id == "update-swimlane":
+            return self.editor.edit_update_swimlane_modal()
         elif action_id == "example":
             return EXAMPLE_MODAL
         else:
@@ -199,14 +230,37 @@ class ScrumMaster:
         return modal
 
 
+    def init_sprint_modal(self, modal):
+        today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
+        modal['blocks'][0]['element']['initial_date'] = today[0]
+        modal['blocks'][1]['element']['initial_time'] = today[1]
+        return modal
+
+
     def _fill_update_modal(self, modal, metadata):
+        logs = jr.json_reader("data/scrum_board.json")._list_logs
+        swimlane_options = [
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": x.replace(" ", "_").title(),
+                    "emoji": True
+                },
+                "value": x
+            }
+            for x in logs
+        ]
         data = json.loads(metadata)
         story_update = data['story']
         # story_update, update_log = jr.json_reader("data/demo.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
         modal['private_metadata'] = f'{story_update["id"]},{data["log"]}'
         for b in modal['blocks']:
-            if b['label']['text'] == 'Estimate':
+            if b['label']['text'] == 'Swimlane':
+                b['element']['options'] = swimlane_options
+                b['element']['initial_option']['text']['text'] = data['log'].replace(" ", "_").title()
+                b['element']['initial_option']['value'] = data['log']
+            elif b['label']['text'] == 'Estimate':
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
                 b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
@@ -240,6 +294,10 @@ class ScrumMaster:
             self._process_delete_story(payload_values)
         elif callback_id == "search-story-modal":
             self._process_search_story(payload_values)
+        elif callback_id == "create-swimlane-modal":
+            self._process_create_swimlane(payload_values)
+        elif callback_id == "update-swimlane-modal":
+            self._process_update_swimlane(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -251,19 +309,21 @@ class ScrumMaster:
             pass
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
-        i = 0 if metadata else 1
-        estimate = int(self._get_dropdown_select_item(payload_values, i+6))
-        priority = self.priorities[self._get_radio_group_item(payload_values, i+5).capitalize()]
-        status = self._get_radio_group_item(payload_values, i+4)
-        assigned_to = self._get_userselect_item(payload_values, i+3)
-        try: sprint = int(self._get_plaintext_input_item(payload_values, i+2))
+        # i = 0 if metadata else 1
+        for i in payload_values:
+            print(i)
+        estimate = int(self._get_dropdown_select_item(payload_values, 7))
+        priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
+        status = self._get_radio_group_item(payload_values, 5)
+        assigned_to = self._get_userselect_item(payload_values, 4)
+        try: sprint = int(self._get_plaintext_input_item(payload_values, 3))
         except:
             self.text = "Sprint must be an integer."
             self.blocks = None
             return
-        user_type = self._get_plaintext_input_item(payload_values, i+1)
-        story_title = self._get_plaintext_input_item(payload_values, i)
-        swimlane = metadata[1] if metadata else self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
+        user_type = self._get_plaintext_input_item(payload_values, 2)
+        story_title = self._get_plaintext_input_item(payload_values, 1)
+        swimlane = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
 
         story = {
                 "id": int(metadata[0]) if metadata else self.sid,
@@ -277,7 +337,7 @@ class ScrumMaster:
                 }
 
         if metadata:
-            update = self.scrum_board.update_story(story, swimlane)
+            update = self.scrum_board.update_story(story, metadata[1], swimlane)
             self.text = f"Story {int(metadata[0])} updated successfully!" if update else f"Failed to update story {int(metadata[0])}."
             self.blocks = None
         else: 
@@ -335,14 +395,25 @@ class ScrumMaster:
         for story in stories:
             self.blocks += self._story_to_msg(story)
         self.text = "Story:"
-    
+
+    def _process_create_swimlane(self, payload_values):
+        log_name = self._get_plaintext_input_item(payload_values, 0)
+        self.text = self.scrum_board.create_swimlane(log_name=log_name)
+        self.blocks = []
+
+    def _process_update_swimlane(self, payload_values):
+        old_name = self._get_dropdown_select_item(payload_values, 0)
+        new_name = self._get_plaintext_input_item(payload_values, 1)
+        self.text = self.scrum_board.update_swimlane(old_name, new_name)
+        self.blocks = []
+        
     @staticmethod
     def _get_member_name(id):
-        from slack_interface import get_member
-        ret = get_member(id)
-        if ret:
-            return ret['real_name'] if ret['real_name'] else ret['display_name']
-        else:
+        with open('data/scrum_board.json') as f:
+            id_to_name = json.load(f)['metadata']['id_to_name']
+        try:
+            return id_to_name[id]
+        except KeyError:
             return id
     
     # Methods to help parse modal submission payload fields
@@ -360,6 +431,7 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
+        print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod

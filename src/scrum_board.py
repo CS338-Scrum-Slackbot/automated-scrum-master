@@ -35,12 +35,12 @@ class ScrumBoard:
         if story_list is None and log is None:
             return "No stories in your board."
         elif story_list is None and log is not None:
-            return f"Could not find any stories in {log}"
+            return f"Could not find any stories in {log}."
         return story_list
 
-    def update_story(self, story, log):
+    def update_story(self, story, log, new_log):
         print(f'UPDATING STORY: {story}')
-        return self.reader.update(story['id'], story, log)
+        return self.reader.update(story['id'], story, log, new_log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list):
         # from slack_interface import get_all_members
@@ -81,3 +81,15 @@ class ScrumBoard:
 
     def list_all_stories(self):
         return self.reader.read_log()
+
+    def create_swimlane(self, log_name: str):
+        if self.reader.create_swimlane(log_name):
+            return f"Successfully created new swimlane {log_name}."
+        else: return f"Swimlane {log_name} already exists: try creating a different name, or update this one using `update swimlane`."
+
+    def update_swimlane(self, old_name:str, new_name:str):
+        result =  self.reader.update_swimlane(old_name, new_name)
+        if result == 1: return f"Successfully updated {old_name} to {new_name}."
+        elif result == -1: return f"Swimlane {old_name} does not exist." # This should not happen bc of the modal
+        elif result == -2: return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
+        else: return "Internal error."

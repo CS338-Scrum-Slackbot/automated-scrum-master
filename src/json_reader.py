@@ -1,5 +1,4 @@
 import json
-from os import read
 
 """
 #### README
@@ -82,6 +81,10 @@ class json_interface():
         pass # Returns the list of fields for each story: ["id","priority","estimate",...]
     def read_log(self, log: str = None) -> list:
         pass # Returns all entries in the log, or list of all entries in the file if log=None
+    def create_swimlane(self, log_name: str):
+        pass
+    def update_swimlane(self, old_name:str, new_name:str):
+        pass
 
 
 class json_reader(json_interface):
@@ -90,6 +93,10 @@ class json_reader(json_interface):
         with open(file=self._file_path, mode="r+") as f:
             self._j = json.load(f) # Load file into memory
         self._list_logs = list(self._j.keys())
+
+        # quick fix for removing metadata key from swimlanes
+        self._list_logs.remove('metadata')
+
         # Hard coded fields because it's hard to read them in (in case file is empty)
         self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
 
@@ -149,12 +156,12 @@ class json_reader(json_interface):
             return None, None
 
     # Return Tuple[object, str]
-    def update(self, id: int, new_entry: object, log: str = None):
-        o, this_log = self.delete(id, log)
+    def update(self, id: int, new_entry: object, old_log: str = None, new_log: str = None):
+        o, this_log = self.delete(id, old_log)
         if o is None or this_log is None:
             return None  # Deletion failed
-        self.create(new_entry, this_log)
-        return new_entry, this_log
+        self.create(new_entry, new_log if new_log else old_log)
+        return new_entry, new_log
 
     # Return Tuple[object, str]
     def move(self, id: int, dest_log: str, src_log: str = None):
@@ -210,3 +217,31 @@ class json_reader(json_interface):
             return all_entries
         else:
             return self._j[log]
+
+    def create_swimlane(self, log_name: str):
+        if log_name in self.list_logs():
+            return 0 # Log already exists
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._list_logs.append(log_name)
+                self._j[log_name] = []
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except: return 0
+
+    def update_swimlane(self, old_name:str, new_name:str):
+        if not old_name in self.list_logs():
+            return -1 # old_name does not exist
+        elif new_name in self.list_logs():
+            return -2  # new_name already exists
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._list_logs = [log if log != old_name else new_name for log in self._list_logs]
+                self._j[new_name] = self._j.pop(old_name) # Transfers entries to new key while deleting the old
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except: return 0

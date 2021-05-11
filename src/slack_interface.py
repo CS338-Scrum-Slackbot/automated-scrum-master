@@ -29,6 +29,7 @@ CHANNEL = "#app_mention"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
+SCRUM_BOARD = 'data/scrum_board.json'
 
 def get_member(id):
     try: 
@@ -39,6 +40,19 @@ def get_member(id):
 
 def get_all_members():
     return client.api_call(api_method="users.list")['members']
+
+def populate_members():
+    members = get_all_members()
+    # print(json.dumps(members, indent=4))
+    id_to_name = {x['id']:x['real_name'] for x in members if not x['is_bot'] and x['real_name'] != 'Slackbot'}
+    with open(file=SCRUM_BOARD, mode="r+") as f:
+        js = json.load(f)
+        js['metadata']['id_to_name'] =  id_to_name
+        f.seek(0)
+        f.write(json.dumps(js, indent=4))
+        f.truncate()
+
+populate_members()
 
 def send_message(text_msg, interactive_msg=None):
     """ Sends a message to the slack channel
@@ -60,6 +74,17 @@ def send_modal(trigger_id, modal):
         modal -- The JSON object of the modal we want sent to the channel
     """
     client.views_open(trigger_id=trigger_id, view=modal)
+
+def register_or_update_member(payload):
+    event = payload.get("event", {})
+    user_id = event.get("user", {}).get("id")
+    real_name = event.get("user", {}).get("real_name")
+    with open(file=SCRUM_BOARD, mode="r+") as f:
+        js = json.load(f)
+        js['metadata']['id_to_name'][user_id] = real_name
+        f.seek(0)
+        f.write(json.dumps(js, indent=4))
+        f.truncate()
 
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
@@ -93,12 +118,24 @@ def handle_interaction():
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
 
-        except KeyError:
-            print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")
+        except KeyError as e:
+            if e=='callback_id':
+                print("YOU MUST INCLUDE A callback_id FIELD IN YOUR MODAL!!")
     else:
         print("Unknown interactive request.")
     return ''
 
+@slack_event_adapter.on('team_join')
+def team_join_event(payload):
+    print('TEAM JOIN DETECTED!!')
+    register_or_update_member(payload)
+    return ''
+
+@slack_event_adapter.on('user_change')
+def user_change_event(payload):
+    print('USER CHANGE DETECTED!!')
+    register_or_update_member(payload)
+    return ''
 
 @slack_event_adapter.on('app_mention')
 def get_app_mention(payload):
@@ -113,6 +150,18 @@ def get_app_mention(payload):
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
         scrum_master.reset()
+
+@slack_event_adapter.on('app_home_opened')
+def displayHome(payload):
+    print('\n\nAPP HOME OPENED\n\n')
+    print(json.dumps(payload, indent=4))
+    user_id = payload.get("event", {}).get("user")
+    print(f'\n\nUSER ID: {user_id}')
+    view = scrum_master.update_home()
+    client.views_publish(user_id=user_id, view=view)
+
+def updateHome(user):
+    pass
 
 
 if __name__ == '__main__':

@@ -10,6 +10,41 @@ UPDATE_STORY_MODAL = {
 	"blocks": [
 		{
 			"type": "input",
+			"label": {
+				"type": "plain_text",
+				"text": "Swimlane",
+				"emoji": True
+			},
+			"element": {
+				"type": "static_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select an item",
+					"emoji": True
+				},
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Product Backlog",
+							"emoji": True
+						},
+						"value": "product_backlog"
+					}
+				],
+				"initial_option": {
+					"text": {
+						"type": "plain_text",
+						"text": "Product Backlog",
+						"emoji": True
+					},
+					"value": "product_backlog"
+				},
+				"action_id": "static_select-action"
+			}
+		},
+		{
+			"type": "input",
 			"element": {
 				"type": "plain_text_input",
 				"multiline": True,
