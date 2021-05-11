@@ -209,9 +209,9 @@ class ScrumMaster:
         if action_id == "create-story":
             return CREATE_STORY_MODAL
         elif action_id == "delete-story":
-            return DELETE_STORY_MODAL
+            return self._fill_delete_modal(DELETE_STORY_MODAL, metadata)
         elif action_id == "update-story":
-            return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
+            return self._fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
         elif action_id == 'start-sprint':
@@ -225,6 +225,11 @@ class ScrumMaster:
         else:
             return ""
 
+    def _fill_delete_modal(self, modal, metadata=None):
+        modal['blocks'][1]['element']['initial_value'] = metadata
+        return modal
+
+
     def init_sprint_modal(self, modal):
         today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
         modal['blocks'][0]['element']['initial_date'] = today[0]
@@ -232,7 +237,7 @@ class ScrumMaster:
         return modal
 
 
-    def fill_update_modal(self, modal, metadata):
+    def _fill_update_modal(self, modal, metadata):
         logs = jr.json_reader("data/scrum_board.json")._list_logs
         swimlane_options = [
             {
@@ -276,7 +281,7 @@ class ScrumMaster:
             elif b['label']['text'] == 'Story Title':
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
-                b['element']['initial_user'] = story_update['assigned_to']
+                b['element']['initial_user'] = story_update['assigned_to'] if story_update['assigned_to'] else "None"
         return modal
 
     def process_modal_submission(self, payload, callback_id):
@@ -305,6 +310,8 @@ class ScrumMaster:
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1
+        for i in payload_values:
+            print(i)
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
         status = self._get_radio_group_item(payload_values, 5)
@@ -347,18 +354,21 @@ class ScrumMaster:
 
         for k, v in story.items():
             if v:
+                label = [tag[0].upper() + tag[1:] for tag in k.split('_')]
                 story_content.append({
                     "type": "mrkdwn",
-                    "text": f"*{k[0].upper() + k[1:]}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
+                    "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
                 })
 
         for action in actions:
-            if action['value'] == 'update-story':
-                action['action_id'] = f"update-story-{story['id']}"
-            elif action['value'] == 'move-story':
-                action['action_id'] = f"move-story-{story['id']}"
+            if action['text']['text'] == 'Update':
+                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                metadata = {"story":story, "log":log}
+                action['action_id'] = "update-story"
+                action['value'] = json.dumps(metadata)
             else:
-                action['action_id'] = f"delete-story-{story['id']}"
+                action['action_id'] = "delete-story"
+                action['value'] = f"story {str(story['id'])}"
         return block
 
 
@@ -421,6 +431,7 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
+        print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod

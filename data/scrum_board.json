@@ -58,7 +58,7 @@
         {
             "id": 3,
             "priority": 1,
-            "estimate": 20,
+            "estimate": 21,
             "sprint": 2,
             "status": "to-do",
             "assigned_to": "nathan timmerman",
