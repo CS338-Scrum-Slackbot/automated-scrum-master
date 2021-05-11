@@ -55,7 +55,7 @@ class ScrumMaster:
         self.current_sprint = 0
 
         # Next story id
-        self.sid = 11
+        #self.sid = 11
 
         # Interface with JSON data
         self.scrum_board = ScrumBoard()
@@ -319,7 +319,7 @@ class ScrumMaster:
         swimlane = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
 
         story = {
-                "id": int(metadata[0]) if metadata else self.sid,
+                "id": int(metadata[0]) if metadata else None,   #self.sid,
                 "priority": priority,
                 "estimate": estimate,
                 "sprint": sprint,
@@ -334,10 +334,10 @@ class ScrumMaster:
             self.text = f"Story {int(metadata[0])} updated successfully!" if update else f"Failed to update story {int(metadata[0])}."
             self.blocks = None
         else: 
-            create_story = self.scrum_board.create_story(story, swimlane)
-            self.text = f"Story {self.sid} created successfully!" if create_story else "Failed to create story."
+            created_sid = self.scrum_board.create_story(story, swimlane)
+            self.text = f"Story {created_sid} created successfully!" if created_sid else "Failed to create story."
             self.blocks = None
-            self.sid += 1
+            #self.sid += 1
 
 
     def _story_to_msg(self, story):
