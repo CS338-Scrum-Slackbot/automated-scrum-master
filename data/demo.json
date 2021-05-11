@@ -1,5 +1,20 @@
 {
-    "product_backlog": [
+    "metadata": {
+        "sid": 11,
+        "story_count": 7,
+        "current_sprint": 2,
+        "current_sprint_starts": "2021-05-23 09:00",
+        "current_sprint_ends": "2021-05-30 09:00",
+        "id_to_name": {
+            "U01TB0ZH5F1": "Brendan Lamishaw",
+            "U01TK108J86": "Neha Sharma",
+            "U01TRPZL02W": "Nathan Timmerman",
+            "U01U4CJED7T": "Caspar Popova"
+        }
+    },
+    "product_backlog": {
+        "user_generated": false,
+        "stories": [
         {
             "id": 6,
             "priority": 2,
@@ -10,8 +25,10 @@
             "user_type": "developer",
             "story": "As a developer, I want to connect with my coworkers."
         }
-    ],
-    "sprint_backlog": [
+    ]},
+    "sprint_backlog": {
+        "user_generated": false,
+        "stories": [
         {
             "id": 7,
             "priority": 2,
@@ -22,8 +39,10 @@
             "user_type": "student",
             "story": "As a student, I want to view my transcript."
         }
-    ],
-    "current_sprint": [
+    ]},
+    "current_sprint": {
+        "user_generated": false,
+        "stories": [
         {
             "id": 1,
             "priority": 2,
@@ -74,8 +93,10 @@
             "user_type": "Student",
             "story": "As a student, we want to present our demo!"
         }
-    ],
-    "previous_sprints": [
+    ]},
+    "previous_sprints": {
+        "user_generated": false,
+        "stories": [
         {
             "id": 2,
             "priority": 2,
@@ -86,8 +107,10 @@
             "user_type": "tester",
             "story": "As a tester, I want to run unit tests on out code."
         }
-    ],
-    "archived": [
+    ]},
+    "archived": {
+        "user_generated": false,
+        "stories": [
         {
             "id": 3,
             "priority": 1,
@@ -118,5 +141,5 @@
             "user_type": "Admin",
             "story": "As an administrator, i want to control data access."
         }
-    ]
+    ]}
 }

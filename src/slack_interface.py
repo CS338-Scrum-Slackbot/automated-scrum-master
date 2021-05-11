@@ -25,7 +25,8 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#app_mention"
+
+CHANNEL = "#test"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()

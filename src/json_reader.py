@@ -51,7 +51,7 @@ def my_func:
     result = read_log(log=my_log) -> list:
     # Returns all entries in the log, or all entries in the file if my_log=None
 
-
+    Swimlane operators not shown.
 """
 
 
@@ -105,8 +105,10 @@ class json_reader(json_interface):
 
     def create(self, entry: object, log: str):
         try:
+            if log not in self._list_logs:
+                return 0
             with open(file=self._file_path, mode="r+") as f:
-                self._j[log].append(entry)             # Add to python obj
+                self._j[log]["stories"].append(entry)             # Add to python obj
                 f.seek(0)
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                 f.truncate()
@@ -116,7 +118,7 @@ class json_reader(json_interface):
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log
         def read_log(r_log: str) -> object:
-            entries = self._j[r_log]
+            entries = self._j[r_log]["stories"]
             for e in entries:
                 if e["id"] == id:
                     return e
@@ -136,10 +138,10 @@ class json_reader(json_interface):
             # Helper function for deleting from specific log
 
             def delete_from_log(l: str):
-                entries = self._j[l] # Array of objs
+                entries = self._j[l]["stories"] # Array of objs
                 for idx in range(0, len(entries)):
                     if entries[idx]["id"] == id:
-                        e = self._j[l].pop(idx) # Remove from python obj
+                        e = self._j[l]["stories"].pop(idx) # Remove from python obj
                         f.seek(0)
                         f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                         f.truncate()
@@ -176,7 +178,7 @@ class json_reader(json_interface):
         found = []                      # Will hold the found entries
         # Helper function for reading specific log
         def read_log(r_log: str):
-            entries = self._j[r_log]
+            entries = self._j[r_log]["stories"]
             for e in entries:
                 def compare_field(field_):
                     # from scrum_master import ScrumMaster
@@ -204,6 +206,13 @@ class json_reader(json_interface):
     def list_logs(self) -> list:
         return self._list_logs
 
+    def list_user_gen_logs(self) -> list:
+        result = []
+        for l in self.list_logs():
+            if self._j[l]["user_generated"]:
+                result.append(l)
+        return result
+
     def list_fields(self) -> list:
         return self._list_fields
 
@@ -213,18 +222,19 @@ class json_reader(json_interface):
         if log is None:
             all_entries = []
             for l in self.list_logs():
-                all_entries += self._j[l]
+                all_entries += self._j[l]["stories"]
             return all_entries
         else:
-            return self._j[log]
+            return self._j[log]["stories"]
 
     def create_swimlane(self, log_name: str):
-        if log_name in self.list_logs():
+        if log_name in self.list_logs() or log_name == "metadata":
             return 0 # Log already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
                 self._list_logs.append(log_name)
-                self._j[log_name] = []
+                self._j[log_name] = {"user_generated": True,
+                                        "stories": [] }
                 f.seek(0)
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                 f.truncate()
@@ -234,7 +244,7 @@ class json_reader(json_interface):
     def update_swimlane(self, old_name:str, new_name:str):
         if not old_name in self.list_logs():
             return -1 # old_name does not exist
-        elif new_name in self.list_logs():
+        elif new_name in self.list_logs() or new_name == "metadata":
             return -2  # new_name already exists
         try:
             with open(file=self._file_path, mode="r+") as f:
@@ -244,4 +254,21 @@ class json_reader(json_interface):
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                 f.truncate()
             return 1
+        except: return 0
+
+    # ===========
+    #   METADATA
+    # ===========
+
+    def get_sid(self):
+        return self._j["metadata"]["sid"]
+
+    def increment_sid(self):
+        try: 
+            with open(file=self._file_path, mode="r+") as f:
+                    self._j["metadata"]["sid"] = self._j["metadata"]["sid"] + 1
+                    f.seek(0)
+                    f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                    f.truncate()
+                    return 1
         except: return 0
