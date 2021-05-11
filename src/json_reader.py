@@ -109,6 +109,7 @@ class json_reader(json_interface):
                 return 0
             with open(file=self._file_path, mode="r+") as f:
                 self._j[log]["stories"].append(entry)             # Add to python obj
+                self._j["metadata"]["sid"] = entry["id"] + 1
                 f.seek(0)
                 f.write(json.dumps(self._j, indent=4)) # Write python obj to file
                 f.truncate()
