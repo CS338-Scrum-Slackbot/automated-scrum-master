@@ -144,8 +144,10 @@ class ScrumMaster:
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
-            jsr.update(id=s['id'], new_entry=s, log='sprint_backlog')
+            jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
             jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
+        self._create_modal_btn(text="Set Sprint",
+                                    action_id="set-sprint")
 
     def create_swimlane(self):
         self._create_modal_btn(text="Create swimlane",
@@ -214,7 +216,7 @@ class ScrumMaster:
             return self.fill_update_modal(UPDATE_STORY_MODAL, metadata)
         elif action_id == "search-story":
             return self.editor.edit_search_story_modal()
-        elif action_id == 'start-sprint':
+        elif action_id == 'set-sprint':
             return self.init_sprint_modal(SET_SPRINT_MODAL)
         elif action_id == "create-swimlane":
             return self.editor.edit_create_swimlane_modal()
@@ -227,13 +229,13 @@ class ScrumMaster:
 
     def init_sprint_modal(self, modal):
         today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
-        modal['blocks'][0]['element']['initial_date'] = today[0]
-        modal['blocks'][1]['element']['initial_time'] = today[1]
+        modal['blocks'][1]['elements'][0]['initial_date'] = today[0]
+        modal['blocks'][1]['elements'][1]['initial_time'] = today[1]
         return modal
 
 
     def fill_update_modal(self, modal, metadata):
-        logs = jr.json_reader("data/scrum_board.json")._list_logs
+        logs = scrum_board.get_logs()
         swimlane_options = [
             {
                 "text": {
@@ -300,8 +302,39 @@ class ScrumMaster:
         elif callback_id == "update-story-modal":
             self._process_create_update_submission(
                 payload_values, payload['view']['private_metadata'].split(','))
+        elif callback_id == "start-sprint-modal":
+            self._process_start_sprint_submission(payload_values)
         else:
             pass
+
+    def  _process_start_sprint_submission(self, payload_values):
+        print(json.dumps(payload_values, indent=4))
+        start_date = payload_values[0]['sprint-date']['selected_date']
+        start_time = payload_values[0]['sprint-time']['selected_time']
+        duration = int(payload_values[1]['duration']['selected_option']['text']['text'])
+        unit = payload_values[1]['unit']['selected_option']['text']['text']
+        seconds_table = {
+            'days': 86400,
+            'weeks': 604800,
+            'months': 2419200,
+        }
+        duration_in_seconds = duration * seconds_table[unit]
+        unix_start = int(datetime.strptime(f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
+        unix_end = unix_start + duration_in_seconds
+        with open('data/scrum_board.json', mode="r+") as f:
+            js = json.load(f)
+            js['metadata']['current_sprint_starts'] = unix_start
+            js['metadata']['current_sprint_ends'] = unix_end
+            f.seek(0)
+            f.write(json.dumps(js, indent=4))
+            f.truncate()
+
+        # TODO:
+        # schedule a message for when the sprint ends (unix_end)
+        
+        self.text = f"Sprint has been set!\nIt begins on {start_date} at {start_time} " + \
+                    f"and ends on {datetime.fromtimestamp(unix_end).strftime('%Y-%m-%d at %H:%M')}."
+        self.blocks = None
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1

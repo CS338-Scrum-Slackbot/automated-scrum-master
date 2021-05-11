@@ -30,6 +30,9 @@ class ScrumBoard:
             return f"Story not found in {log}, try a different swimlane?\nYou can also read the whole board using `read story {id}`"
         return [obj, log_str]
 
+    def get_logs(self):
+        return self.reader._list_logs
+
     def read_log(self, log):
         story_list = self.reader.read_log(log=log)
         if story_list is None and log is None:

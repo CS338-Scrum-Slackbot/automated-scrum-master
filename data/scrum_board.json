@@ -3,8 +3,8 @@
         "sid": 11,
         "story_count": 7,
         "current_sprint": 2,
-        "current_sprint_starts": "2021-05-23 09:00",
-        "current_sprint_ends": "2021-05-30 09:00",
+        "current_sprint_starts": 1620684000,
+        "current_sprint_ends": 1621288800,
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
             "U01TK108J86": "Neha Sharma",
@@ -54,18 +54,7 @@
             "story": "I want my code to work."
         }
     ],
-    "sprint_backlog": [
-        {
-            "id": 3,
-            "priority": 1,
-            "estimate": 20,
-            "sprint": 2,
-            "status": "to-do",
-            "assigned_to": "nathan timmerman",
-            "user_type": "customer",
-            "story": "I want to update a story."
-        }
-    ],
+    "sprint_backlog": [],
     "current_sprint": [
         {
             "id": 4,
@@ -74,6 +63,16 @@
             "sprint": 2,
             "status": "in-progress",
             "assigned_to": "Hannah Montana",
+            "user_type": "customer",
+            "story": "I want to update a story."
+        },
+        {
+            "id": 3,
+            "priority": 1,
+            "estimate": 20,
+            "sprint": 3,
+            "status": "to-do",
+            "assigned_to": "nathan timmerman",
             "user_type": "customer",
             "story": "I want to update a story."
         }
