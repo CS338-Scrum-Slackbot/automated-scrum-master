@@ -1,36 +1,40 @@
 HOME_PAGE_BLOCK = [
 		{
 			"type": "section",
+			"block_id": "swimlane_select",
 			"text": {
 				"type": "mrkdwn",
 				"text": "Select the swimlanes you'd like to see."
 			},
 			"accessory": {
-				"type": "checkboxes",
+				"type": "radio_buttons",
 				"options": [
 					{
 						"text": {
-							"type": "mrkdwn",
-							"text": "Product Backlog"
+							"type": "plain_text",
+							"text": "Product Backlog",
+							"emoji": True
 						},
 						"value": "value-0"
 					},
 					{
 						"text": {
-							"type": "mrkdwn",
-							"text": "Sprint Backlog"
+							"type": "plain_text",
+							"text": "Sprint Backlog",
+							"emoji": True
 						},
 						"value": "value-1"
 					},
 					{
 						"text": {
-							"type": "mrkdwn",
-							"text": "Current Sprint"
+							"type": "plain_text",
+							"text": "Current Sprint",
+							"emoji": True
 						},
 						"value": "value-2"
 					}
 				],
-				"action_id": "checkboxes-action"
+				"action_id": "swimlane_select"
 			}
 		},
 		{
@@ -41,6 +45,7 @@ HOME_PAGE_BLOCK = [
 		},
 		{
 			"type": "actions",
+			"block_id": "create-story-button",
 			"elements": [
 				{
 					"type": "button",
@@ -50,7 +55,7 @@ HOME_PAGE_BLOCK = [
 						"emoji": True
 					},
 					"value": "click_me_123",
-					"action_id": "actionId-0"
+					"action_id": "create-story"
 				}
 			]
 		},

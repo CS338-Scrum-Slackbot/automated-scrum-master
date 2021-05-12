@@ -64,6 +64,8 @@ class ScrumMaster:
         self.editor = ModalEditor()
 
     def update_home(self):
+        # TODO:
+        # dynamically put viewable swimlanes
         view = {
             "type": 'home',
             "title": {
@@ -242,8 +244,14 @@ class ScrumMaster:
         modal['blocks'][1]['elements'][1]['initial_time'] = today[1]
         return modal
 
+    def _get_valid_logs(self, create=0):
+        # can create a story in any swimlane EXCEPT previous_sprint and archived
+        if create: return [x for x in self.scrum_board.get_logs() if x not in ['previous_sprint','archived']]
+        # can move a story to any swimlane EXCEPT previous_sprint
+        else: return [x for x in self.scrum_board.get_logs() if x != 'previous_sprint']
+
     def _fill_update_modal(self, modal, metadata):
-        logs = scrum_board.get_logs()
+        logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
                 "text": {

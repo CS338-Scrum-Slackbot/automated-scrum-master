@@ -25,8 +25,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -90,19 +89,26 @@ def register_or_update_member(payload):
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
+    print('\n\nINTERACT POST\n\n')
+    print(json.dumps(data, indent=4))
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
-        try:
-            # Get the action_id and value fields from the event payload
-            action_id = data['actions'][0]['action_id']
-            value = data['actions'][0]['value']
-        except KeyError as e:
-            print("Unexpected payload. Doing nothing...")
-            return ''
-        # Send a modal with our obtained trigger_id
-        # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
+        if 'view' in data:
+            print('\n\nVIEW CHANGED\n\n')
+            if data['view']['type'] == 'home':
+                updateHome(data, init=0)
+        else: 
+            try:
+                # Get the action_id and value fields from the event payload
+                action_id = data['actions'][0]['action_id']
+                value = data['actions'][0]['value']
+            except KeyError as e:
+                print("Unexpected payload. Doing nothing...")
+                return ''
+            # Send a modal with our obtained trigger_id
+            # Which modal to send is evaluated in scrum_master based on the provided action_id
+            send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
@@ -154,15 +160,22 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
-    print('\n\nAPP HOME OPENED\n\n')
-    print(json.dumps(payload, indent=4))
-    user_id = payload.get("event", {}).get("user")
-    print(f'\n\nUSER ID: {user_id}')
-    view = scrum_master.update_home()
-    client.views_publish(user_id=user_id, view=view)
+    updateHome(payload, init=1)
 
-def updateHome(user):
-    pass
+def updateHome(payload, init):
+    if init:
+        print('\n\nAPP HOME OPENED\n\n')
+        print(json.dumps(payload, indent=4))
+        user_id = payload.get("event", {}).get("user")
+        print(f'\n\nUSER ID: {user_id}')
+        view = scrum_master.update_home()
+        print('\n\nPUBLISHING DEFAULT HOME\n\n')
+        client.views_publish(user_id=user_id, view=view)
+    else:
+        user_id = payload['user']['id']
+        print(f'\n\nUPDATING HOME for {user_id}\n\n')
+
+        
 
 
 if __name__ == '__main__':
