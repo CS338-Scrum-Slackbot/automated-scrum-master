@@ -98,5 +98,19 @@ class ScrumBoard:
         elif result == -2: return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
         else: return "Internal error."
 
+    def delete_swimlane(self, log_name: str):
+        # Iterate over stories in log_name and move them to archived
+        stories = self.reader.read_log(log=log_name)
+        for s in stories:
+            story_id = s["id"]
+            self.reader.move(story_id, dest_log="archived", src_log=log_name)
+        # Delete swimlane
+        result = self.reader.delete_swimlane(log_name)
+        if result == -3: return "Internal error."
+        elif result == -2: return f"{log_name} does not exist."
+        elif result == -1: return f"{log_name} is a default log and may not be deleted."
+        elif result == 0: return f"Failed to move stories from {log_name} before deletion."
+        return f"{log_name} successfully deleted; {len(stories)} moved to `archived`."
+
     def list_user_swimlanes(self):
         return self.reader.list_user_gen_logs()

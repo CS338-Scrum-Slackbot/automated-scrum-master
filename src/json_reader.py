@@ -85,6 +85,8 @@ class json_interface():
         pass
     def update_swimlane(self, old_name:str, new_name:str):
         pass
+    def delete_swimlane(self, log_name:str):
+        pass
 
 
 class json_reader(json_interface):
@@ -255,6 +257,23 @@ class json_reader(json_interface):
                 f.truncate()
             return 1
         except: return 0
+
+    def delete_swimlane(self, log_name:str):
+        if log_name not in self.list_logs():
+            return -2
+        if log_name not in self.list_user_gen_logs():
+            return -1
+        if self._j[log_name]["stories"] != []:
+            return 0
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._j.pop(log_name)
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except:
+            return -3
 
     # ===========
     #   METADATA

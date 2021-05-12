@@ -26,7 +26,7 @@ BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
 
-CHANNEL = "#test"
+CHANNEL = "#caspar-private-test"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
