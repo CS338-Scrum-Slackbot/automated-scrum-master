@@ -53,6 +53,8 @@ class ScrumBoard:
 
     def update_story(self, story, log, new_log):
         print(f'UPDATING STORY: {story}')
+        if log in ['previous_sprint', 'archived']:
+            return 0
         return self.reader.update(story['id'], story, log, new_log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list):
