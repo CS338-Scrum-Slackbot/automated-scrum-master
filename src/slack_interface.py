@@ -90,13 +90,14 @@ def register_or_update_member(payload):
 def handle_interaction():
     data = json.loads(request.form["payload"])
     print('\n\nINTERACT POST\n\n')
-    print(json.dumps(data, indent=4))
+    # print(json.dumps(data, indent=4))
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
         if 'view' in data:
             print('\n\nVIEW CHANGED\n\n')
             if data['view']['type'] == 'home':
+                print('UPDATE HOME IN INTERACTIVE (INIT=0)')
                 updateHome(data, init=0)
         else: 
             try:
@@ -160,20 +161,26 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
-    updateHome(payload, init=1)
+    print('UPDATE HOME IN EVENT (INIT=1)')
+
+    updateHome(payload, init=not 'view' in payload)
 
 def updateHome(payload, init):
+    print(f'\n\nSLACK INTERFACE UPDATE HOME INIT: {init}\n\n')
     if init:
         print('\n\nAPP HOME OPENED\n\n')
-        print(json.dumps(payload, indent=4))
+        # print(json.dumps(payload, indent=4))
         user_id = payload.get("event", {}).get("user")
         print(f'\n\nUSER ID: {user_id}')
-        view = scrum_master.update_home()
+        view = scrum_master.update_home(payload['event'], init=init)
         print('\n\nPUBLISHING DEFAULT HOME\n\n')
         client.views_publish(user_id=user_id, view=view)
     else:
         user_id = payload['user']['id']
         print(f'\n\nUPDATING HOME for {user_id}\n\n')
+        view = scrum_master.update_home(payload, init=init)
+        print('\n\nPUBLISHING UPDATED HOME\n\n')
+        client.views_publish(user_id=user_id, view=view)
 
         
 

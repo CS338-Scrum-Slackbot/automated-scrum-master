@@ -11,11 +11,12 @@ from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
 from block_ui.set_sprint_ui import SET_SPRINT_MODAL
-from block_ui.home_page_ui import HOME_PAGE_BLOCK
+from block_ui.home_page_ui import * #INIT_HOME_PAGE, SWIMLANE_HEADER, SWIMLANE_FOOTER, SORT_DROPDOWN, STORY_BLOCK, RADIO_INIT_OPTION, SWIMLANE_OPTION
 import json
 import copy
 import re
 from datetime import datetime
+import itertools
 
 
 class ScrumMaster:
@@ -63,19 +64,129 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
-    def update_home(self):
+    def update_home(self, payload, init=0):
+        print(f'\n\nSCRUM MASTER UPDATE_HOME INIT: {init}\n\n')
+        print(json.dumps(payload, indent=4))
         # TODO:
         # dynamically put viewable swimlanes
+        # if init:
+        #     ui = self.populate_swimlanes(INIT_HOME_PAGE, init_option=None)
+        #     # INIT_HOME_PAGE.append(SORT_DROPDOWN[0])
+        #     view = {
+        #         "type": 'home',
+        #         "title": {
+        #             "type": "plain_text",
+        #             "text": "Test home tab!"
+        #         },
+        #         "blocks": ui
+        #     }
+        #     return view
+        # else:
+        swimlane_select = []
+        story_blocks = []
+        swimlane_header = []
+        swimlane_footer = []
+        sort_by_block = []
+        if 'swimlane_select' in payload['view']['state']['values']:
+            init_option = payload['view']['state']['values']['swimlane_select']['swimlane_select']['selected_option']['value']
+            sort_by_block = SORT_DROPDOWN
+        else: init_option = None
+        if 'sort_by' in payload['view']['state']['values']:
+            if payload['view']['state']['values']['sort_by']['sort_by']['selected_option']:
+                sort_by = payload['view']['state']['values']['sort_by']['sort_by']['selected_option']['value']
+            else: sort_by = None
+        else: sort_by = None
+        print(f'\n\n\nSORTED BY: {sort_by}\n\n\n')
+
+
+        if init_option: 
+            swimlane_header = [
+                                    {
+                                        "type": "header",
+                                        "text": {
+                                            "type": "plain_text",
+                                            "text": init_option,
+                                            "emoji": True
+                                        }
+                                    }
+                                ]
+            swimlane_footer = [
+                                {
+                                        "type": "context",
+                                        "elements": [
+                                            {
+                                                "type": "plain_text",
+                                                "text": "/ "+init_option,
+                                                "emoji": True
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "divider"
+                                    },
+                                    {
+                                        "type": "divider"
+                                    }
+                            ]
+            stories = self.scrum_board.read_log(init_option)
+            if not isinstance(stories, str):
+                flatten = lambda *n: (e for a in n
+                    for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
+                print(f'\n\nSTORIES:\n\n{json.dumps(stories, indent=4)}\n\n')
+                if sort_by: stories = sorted(stories, key = lambda x: x[sort_by])
+                story_blocks = flatten([self._story_to_msg(story, add_divider=True) for story in stories])
+            else:
+                story_blocks = [{
+                                    "type": "section",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "There are no stories in this swimlane.",
+                                        "emoji": True
+                                    }
+                                }]
+
+        swimlane_select = self.populate_swimlanes(INIT_HOME_PAGE, init_option=init_option)
+
+        ui = list(itertools.chain(swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
         view = {
             "type": 'home',
             "title": {
                 "type": "plain_text",
                 "text": "Test home tab!"
             },
-            "blocks": HOME_PAGE_BLOCK
+            "blocks": ui
         }
+        print('\n\n VIEW BLOCKS: \n\n')
+        print(json.dumps(view, indent=4))
         return view
-    
+
+
+
+    def populate_swimlanes(self, blocks, init_option=None):
+        swimlanes = self.scrum_board.get_logs()
+        blocks[0]['accessory']['options'] = [
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": s,
+                    "emoji": True
+                },
+                "value": s
+            }
+            for s in swimlanes
+        ]
+        if init_option:
+            blocks[0]['accessory']['initial_option'] = {
+						"value": init_option,
+						"text": {
+							"type": "plain_text",
+							"text": init_option
+						}
+					}
+        return blocks
+
+
+
     def create_story(self):
         self._create_modal_btn(text="Create Story",
                                    action_id="create-story")
@@ -256,7 +367,7 @@ class ScrumMaster:
             {
                 "text": {
                     "type": "plain_text",
-                    "text": x.replace(" ", "_").title(),
+                    "text": x,
                     "emoji": True
                 },
                 "value": x
@@ -271,7 +382,7 @@ class ScrumMaster:
         for b in modal['blocks']:
             if b['label']['text'] == 'Swimlane':
                 b['element']['options'] = swimlane_options
-                b['element']['initial_option']['text']['text'] = data['log'].replace(" ", "_").title()
+                b['element']['initial_option']['text']['text'] = data['log']
                 b['element']['initial_option']['value'] = data['log']
             elif b['label']['text'] == 'Estimate':
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
@@ -367,7 +478,7 @@ class ScrumMaster:
             return
         user_type = self._get_plaintext_input_item(payload_values, 2)
         story_title = self._get_plaintext_input_item(payload_values, 1)
-        swimlane = self._get_dropdown_select_item(payload_values, 0).lower().replace(" ", "_")
+        swimlane = self._get_dropdown_select_item(payload_values, 0)
 
         story = {
                 "id": int(metadata[0]) if metadata else None,   #self.sid,
@@ -391,18 +502,18 @@ class ScrumMaster:
             #self.sid += 1
 
 
-    def _story_to_msg(self, story):
+    def _story_to_msg(self, story, add_divider = False):
         block = copy.deepcopy(READ_STORY_BLOCK)
         story_content = block[0]['fields']
         actions = block[1]['elements']
 
         for k, v in story.items():
-            if v:
-                label = [tag[0].upper() + tag[1:] for tag in k.split('_')]
-                story_content.append({
-                    "type": "mrkdwn",
-                    "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
-                })
+            # if v:
+            label = [tag[0].upper() + tag[1:] for tag in k.split('_')]
+            story_content.append({
+                "type": "mrkdwn",
+                "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
+            })
 
         for action in actions:
             if action['text']['text'] == 'Update':
@@ -413,6 +524,8 @@ class ScrumMaster:
             else:
                 action['action_id'] = "delete-story"
                 action['value'] = f"story {str(story['id'])}"
+
+        if add_divider: block.append({"type": "divider"})
         return block
 
 

@@ -12,13 +12,13 @@
             "U01U4CJED7T": "Caspar Popova"
         }
     },
-    "product_backlog": {
+    "Product Backlog": {
         "user_generated": false,
         "stories": [
             {
                 "id": 2,
                 "priority": -1,
-                "estimate": -1,
+                "estimate": 3,
                 "sprint": 2,
                 "status": "",
                 "assigned_to": "U01TK108J86",
@@ -28,7 +28,7 @@
             {
                 "id": 6,
                 "priority": -1,
-                "estimate": -1,
+                "estimate": 5,
                 "sprint": 2,
                 "status": "",
                 "assigned_to": "",
@@ -38,7 +38,7 @@
             {
                 "id": 7,
                 "priority": -1,
-                "estimate": -1,
+                "estimate": 21,
                 "sprint": 2,
                 "status": "",
                 "assigned_to": "",
@@ -48,7 +48,7 @@
             {
                 "id": 1,
                 "priority": 2,
-                "estimate": 21,
+                "estimate": 1,
                 "sprint": 2,
                 "status": "completed",
                 "assigned_to": "U01TRPZL02W",
@@ -57,7 +57,7 @@
             }
         ]
     },
-    "sprint_backlog": {
+    "Sprint Backlog": {
         "user_generated": false,
         "stories": [
             {
@@ -72,7 +72,7 @@
             }
         ]
     },
-    "current_sprint": {
+    "Current Sprint": {
         "user_generated": false,
         "stories": [
             {
@@ -87,7 +87,7 @@
             }
         ]
     },
-    "previous_sprints": {
+    "Previous Sprint": {
         "user_generated": false,
         "stories": [
             {
@@ -102,7 +102,7 @@
             }
         ]
     },
-    "archived": {
+    "Archived": {
         "user_generated": false,
         "stories": [
             {
