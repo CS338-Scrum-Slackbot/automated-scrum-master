@@ -64,24 +64,8 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
-    def update_home(self, payload, init=0):
-        print(f'\n\nSCRUM MASTER UPDATE_HOME INIT: {init}\n\n')
+    def update_home(self, payload):
         print(json.dumps(payload, indent=4))
-        # TODO:
-        # dynamically put viewable swimlanes
-        # if init:
-        #     ui = self.populate_swimlanes(INIT_HOME_PAGE, init_option=None)
-        #     # INIT_HOME_PAGE.append(SORT_DROPDOWN[0])
-        #     view = {
-        #         "type": 'home',
-        #         "title": {
-        #             "type": "plain_text",
-        #             "text": "Test home tab!"
-        #         },
-        #         "blocks": ui
-        #     }
-        #     return view
-        # else:
         swimlane_select = []
         story_blocks = []
         swimlane_header = []
@@ -96,8 +80,6 @@ class ScrumMaster:
                 sort_by = payload['view']['state']['values']['sort_by']['sort_by']['selected_option']['value']
             else: sort_by = None
         else: sort_by = None
-        print(f'\n\n\nSORTED BY: {sort_by}\n\n\n')
-
 
         if init_option: 
             swimlane_header = [
@@ -132,7 +114,6 @@ class ScrumMaster:
             if not isinstance(stories, str):
                 flatten = lambda *n: (e for a in n
                     for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
-                print(f'\n\nSTORIES:\n\n{json.dumps(stories, indent=4)}\n\n')
                 if sort_by: stories = sorted(stories, key = lambda x: x[sort_by])
                 story_blocks = flatten([self._story_to_msg(story, add_divider=True) for story in stories])
             else:
@@ -156,8 +137,6 @@ class ScrumMaster:
             },
             "blocks": ui
         }
-        print('\n\n VIEW BLOCKS: \n\n')
-        print(json.dumps(view, indent=4))
         return view
 
 

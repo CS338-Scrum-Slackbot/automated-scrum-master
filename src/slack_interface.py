@@ -30,6 +30,7 @@ CHANNEL = "#nathan"
 # Class to handle bot logic
 scrum_master = ScrumMaster()
 SCRUM_BOARD = 'data/scrum_board.json'
+view_actions = ['update-story', 'delete-story', 'create-story', 'update-swimlane','create-swimlane']
 
 def get_member(id):
     try: 
@@ -97,8 +98,12 @@ def handle_interaction():
         if 'view' in data:
             print('\n\nVIEW CHANGED\n\n')
             if data['view']['type'] == 'home':
-                print('UPDATE HOME IN INTERACTIVE (INIT=0)')
-                updateHome(data, init=0)
+                if data['actions'][0]['action_id'] in view_actions:
+                    action_id = data['actions'][0]['action_id']
+                    value = data['actions'][0]['value']
+                    send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
+                else:
+                    updateHome(data, init=0)
         else: 
             try:
                 # Get the action_id and value fields from the event payload
@@ -125,6 +130,7 @@ def handle_interaction():
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
+            updateHome(data, init=0)
 
         except KeyError as e:
             if e=='callback_id':
@@ -161,28 +167,31 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
-    print('UPDATE HOME IN EVENT (INIT=1)')
-
     updateHome(payload, init=not 'view' in payload)
 
 def updateHome(payload, init):
-    print(f'\n\nSLACK INTERFACE UPDATE HOME INIT: {init}\n\n')
     if init:
-        print('\n\nAPP HOME OPENED\n\n')
-        # print(json.dumps(payload, indent=4))
         user_id = payload.get("event", {}).get("user")
-        print(f'\n\nUSER ID: {user_id}')
-        view = scrum_master.update_home(payload['event'], init=init)
-        print('\n\nPUBLISHING DEFAULT HOME\n\n')
-        client.views_publish(user_id=user_id, view=view)
+        view = scrum_master.update_home(payload['event'])
     else:
         user_id = payload['user']['id']
-        print(f'\n\nUPDATING HOME for {user_id}\n\n')
-        view = scrum_master.update_home(payload, init=init)
-        print('\n\nPUBLISHING UPDATED HOME\n\n')
-        client.views_publish(user_id=user_id, view=view)
+        view = scrum_master.update_home(payload)
+    
+    if 'actions' in payload:
+        trigger_id = payload['trigger_id']
+        if payload['actions'][0]['action_id'] == 'update-story':
+            print('UPDATE STORY BUTTON PRESSED')
+        elif payload['actions'][0]['action_id'] == 'delete-story':
+            print('DELETE STORY BUTTON PRESSED')
+        elif payload['actions'][0]['action_id'] == 'create-story':
+            print('CREATE STORY BUTTON PRESSED')
+        elif payload['actions'][0]['action_id'] == 'update-swimlane':
+            print('UPDATE SWIMLANE STORY BUTTON PRESSED')
+        elif payload['actions'][0]['action_id'] == 'create-swimlane':
+            print('CREATE SWIMLANE STORY BUTTON PRESSED')
 
-        
+    client.views_publish(user_id=user_id, view=view)
+    
 
 
 if __name__ == '__main__':

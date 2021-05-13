@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "sid": 11,
+        "sid": 13,
         "story_count": 7,
         "current_sprint": 2,
         "current_sprint_starts": 1620684000,
@@ -15,16 +15,6 @@
     "Product Backlog": {
         "user_generated": false,
         "stories": [
-            {
-                "id": 2,
-                "priority": -1,
-                "estimate": 3,
-                "sprint": 2,
-                "status": "",
-                "assigned_to": "U01TK108J86",
-                "user_type": "customer",
-                "story": "I want to update a story."
-            },
             {
                 "id": 6,
                 "priority": -1,
@@ -54,6 +44,16 @@
                 "assigned_to": "U01TRPZL02W",
                 "user_type": "Nathan",
                 "story": "I want my code to work."
+            },
+            {
+                "id": 2,
+                "priority": 1,
+                "estimate": 3,
+                "sprint": 2,
+                "status": "completed",
+                "assigned_to": "U01TK108J86",
+                "user_type": "Customer",
+                "story": "I want to update a story."
             }
         ]
     },
