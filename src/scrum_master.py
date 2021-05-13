@@ -99,7 +99,7 @@ class ScrumMaster:
         metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option: 
-            print(f'INIT OPTION!!!!!! {init_option}')
+            # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
                                     {
                                         "type": "header",
@@ -150,7 +150,7 @@ class ScrumMaster:
         
 
         ui = list(itertools.chain(swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
-        print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
+        # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
 
         view = {
             "type": 'home',

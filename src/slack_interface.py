@@ -182,21 +182,6 @@ def updateHome(payload, init, after_button=False):
     else:
         user_id = payload['user']['id']
         view = scrum_master.update_home(payload, metadata=button_metadata)
-    
-    # print('\n\nUPDATE HOME PAYLOAD\n\n')
-    # print(json.dumps(payload, indent=4))
-    if 'actions' in payload:
-        trigger_id = payload['trigger_id']
-        if payload['actions'][0]['action_id'] == 'update-story':
-            print('UPDATE STORY BUTTON PRESSED')
-        elif payload['actions'][0]['action_id'] == 'delete-story':
-            print('DELETE STORY BUTTON PRESSED')
-        elif payload['actions'][0]['action_id'] == 'create-story':
-            print('CREATE STORY BUTTON PRESSED')
-        elif payload['actions'][0]['action_id'] == 'update-swimlane':
-            print('UPDATE SWIMLANE STORY BUTTON PRESSED')
-        elif payload['actions'][0]['action_id'] == 'create-swimlane':
-            print('CREATE SWIMLANE STORY BUTTON PRESSED')
 
     client.views_publish(user_id=user_id, view=view)
     
