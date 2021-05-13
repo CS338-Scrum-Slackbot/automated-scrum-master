@@ -120,6 +120,7 @@ def handle_interaction():
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
+            print(f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
 
             # Extract relevant data from modal
             scrum_master.process_modal_submission(
@@ -130,7 +131,7 @@ def handle_interaction():
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
-            updateHome(data, init=0)
+            updateHome(data, init=0, after_button=True)
 
         except KeyError as e:
             if e=='callback_id':
@@ -169,14 +170,21 @@ def get_app_mention(payload):
 def displayHome(payload):
     updateHome(payload, init=not 'view' in payload)
 
-def updateHome(payload, init):
+def updateHome(payload, init, after_button=False):
+    button_metadata = None
+    if after_button: 
+        print('\n\nAFTER BUTTON\n\n')
+        print(json.dumps(payload, indent=4))
+        button_metadata = payload['view']['private_metadata']
     if init:
         user_id = payload.get("event", {}).get("user")
-        view = scrum_master.update_home(payload['event'])
+        view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
     else:
         user_id = payload['user']['id']
-        view = scrum_master.update_home(payload)
+        view = scrum_master.update_home(payload, metadata=button_metadata)
     
+    # print('\n\nUPDATE HOME PAYLOAD\n\n')
+    # print(json.dumps(payload, indent=4))
     if 'actions' in payload:
         trigger_id = payload['trigger_id']
         if payload['actions'][0]['action_id'] == 'update-story':

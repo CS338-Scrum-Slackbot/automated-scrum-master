@@ -442,7 +442,7 @@ INIT_HOME_PAGE = [
 			"block_id": "swimlane_select",
 			"text": {
 				"type": "mrkdwn",
-				"text": "Select the swimlanes you'd like to view."
+				"text": "Select the swimlane you'd like to view."
 			},
 			"accessory": {
 				"type": "radio_buttons",
@@ -633,3 +633,6 @@ SWIMLANE_OPTION = {
 					},
 					"value": ""
 				}
+
+
+# {"story": {"id": 13, "priority": 2, "estimate": 1, "sprint": 1, "status": "in-progress", "assigned_to": "U01TK108J86", "user_type": "Test", "story": "Test test test"}, "log": "Product Backlog", "swimlane": "Product Backlog", "sort_by": "UNSORTED"}

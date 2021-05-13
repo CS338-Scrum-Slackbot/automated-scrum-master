@@ -64,24 +64,42 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
-    def update_home(self, payload):
-        print(json.dumps(payload, indent=4))
+    def update_home(self, payload, metadata=""):
+        # print(json.dumps(payload, indent=4))
+        # print(f'\n\nUPDATE HOME METADATA: {metadata}\n\n')
         swimlane_select = []
         story_blocks = []
         swimlane_header = []
         swimlane_footer = []
         sort_by_block = []
-        if 'swimlane_select' in payload['view']['state']['values']:
-            init_option = payload['view']['state']['values']['swimlane_select']['swimlane_select']['selected_option']['value']
-            sort_by_block = SORT_DROPDOWN
-        else: init_option = None
-        if 'sort_by' in payload['view']['state']['values']:
-            if payload['view']['state']['values']['sort_by']['sort_by']['selected_option']:
-                sort_by = payload['view']['state']['values']['sort_by']['sort_by']['selected_option']['value']
+
+        init_option, sort_by = None, None
+        if metadata and metadata != 'None':
+            print(f'UPDATE HOME METADATA: {metadata}, {type(metadata)}')
+            md = json.loads(metadata)
+            print('\n\nSTORY IN METADATA\n\n')
+            init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
+            if init_option: sort_by_block = SORT_DROPDOWN
+            sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
+            print(init_option, sort_by)
+        
+        if not init_option:
+            if 'swimlane_select' in payload['view']['state']['values']:
+                init_option = payload['view']['state']['values']['swimlane_select']['swimlane_select']['selected_option']['value']
+                sort_by_block = SORT_DROPDOWN
+            else: init_option = None
+
+        if not sort_by:
+            if 'sort_by' in payload['view']['state']['values']:
+                if payload['view']['state']['values']['sort_by']['sort_by']['selected_option']:
+                    sort_by = payload['view']['state']['values']['sort_by']['sort_by']['selected_option']['value']
+                else: sort_by = None
             else: sort_by = None
-        else: sort_by = None
+
+        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option: 
+            print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
                                     {
                                         "type": "header",
@@ -115,7 +133,7 @@ class ScrumMaster:
                 flatten = lambda *n: (e for a in n
                     for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
                 if sort_by: stories = sorted(stories, key = lambda x: x[sort_by])
-                story_blocks = flatten([self._story_to_msg(story, add_divider=True) for story in stories])
+                story_blocks = flatten([self._story_to_msg(story, add_divider=True, md=json.dumps(metadata2)) for story in stories])
             else:
                 story_blocks = [{
                                     "type": "section",
@@ -127,15 +145,21 @@ class ScrumMaster:
                                 }]
 
         swimlane_select = self.populate_swimlanes(INIT_HOME_PAGE, init_option=init_option)
+        for x in range(len(swimlane_select[3]['elements'])):
+            swimlane_select[3]['elements'][x]['value'] = json.dumps(metadata2)
+        
 
         ui = list(itertools.chain(swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
+        print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
+
         view = {
             "type": 'home',
             "title": {
                 "type": "plain_text",
                 "text": "Test home tab!"
             },
-            "blocks": ui
+            "blocks": ui,
+            "private_metadata":  json.dumps(metadata2)
         }
         return view
 
@@ -305,7 +329,7 @@ class ScrumMaster:
     def create_modal(self, action_id, metadata):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
         if action_id == "create-story":
-            return CREATE_STORY_MODAL
+            return self._fill_create_modal(CREATE_STORY_MODAL, metadata)
         elif action_id == "delete-story":
             return self._fill_delete_modal(DELETE_STORY_MODAL, metadata)
         elif action_id == "update-story":
@@ -315,16 +339,40 @@ class ScrumMaster:
         elif action_id == 'set-sprint':
             return self.init_sprint_modal(SET_SPRINT_MODAL)
         elif action_id == "create-swimlane":
-            return self.editor.edit_create_swimlane_modal()
+            modal =  self.editor.edit_create_swimlane_modal()
+            modal['private_metadata'] = metadata
+            return modal
         elif action_id == "update-swimlane":
-            return self.editor.edit_update_swimlane_modal()
+            modal = self.editor.edit_update_swimlane_modal()
+            modal['private_metadata'] = metadata
+            return modal
         elif action_id == "example":
             return EXAMPLE_MODAL
         else:
             return ""
 
+    def _fill_create_modal(self, modal, metadata):
+        logs = self._get_valid_logs(create=1)
+        swimlane_options = [
+            {
+                "text": {
+                    "type": "plain_text",
+                    "text": x,
+                    "emoji": True
+                },
+                "value": x
+            }
+            for x in logs
+        ]
+        modal['blocks'][1]['element']['options'] = swimlane_options
+        modal['private_metadata'] = metadata
+        return modal
+
     def _fill_delete_modal(self, modal, metadata=None):
-        modal['blocks'][1]['element']['initial_value'] = metadata
+        print(f'FILL DELETE MODAL METADATA: {metadata}')
+        md = json.loads(metadata)
+        modal['blocks'][1]['element']['initial_value'] = md['story']
+        modal['private_metadata'] = metadata
         return modal
 
 
@@ -341,6 +389,7 @@ class ScrumMaster:
         else: return [x for x in self.scrum_board.get_logs() if x != 'previous_sprint']
 
     def _fill_update_modal(self, modal, metadata):
+        print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
         logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
@@ -357,7 +406,11 @@ class ScrumMaster:
         story_update = data['story']
         # story_update, update_log = jr.json_reader("data/demo.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
-        modal['private_metadata'] = f'{story_update["id"]},{data["log"]}'
+        if 'swimlane' in data:
+            private_metadata = {"story":story_update, "log": data["log"], "swimlane": data["swimlane"], "sort_by": data["sort_by"]}
+        else:
+            private_metadata = {"story":story_update, "log": data["log"]}
+        modal['private_metadata'] = json.dumps(private_metadata) #f'{story_update["id"]},{data["log"]}'
         for b in modal['blocks']:
             if b['label']['text'] == 'Swimlane':
                 b['element']['options'] = swimlane_options
@@ -406,8 +459,11 @@ class ScrumMaster:
             # e.g. self._process_example_submission(payload_values)
             pass
         elif callback_id == "update-story-modal":
+            md = json.loads(payload['view']['private_metadata'])
+            print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
+            # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
-                payload_values, payload['view']['private_metadata'].split(','))
+                payload_values, [md["story"]["id"],md["log"]])#payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
             self._process_start_sprint_submission(payload_values)
         else:
@@ -444,8 +500,7 @@ class ScrumMaster:
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1
-        for i in payload_values:
-            print(i)
+        print(f'\n\nPROCESS UPDATE SUBMISSION MD: {metadata}\n\n')
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
         status = self._get_radio_group_item(payload_values, 5)
@@ -481,7 +536,7 @@ class ScrumMaster:
             #self.sid += 1
 
 
-    def _story_to_msg(self, story, add_divider = False):
+    def _story_to_msg(self, story, add_divider = False, md=""):
         block = copy.deepcopy(READ_STORY_BLOCK)
         story_content = block[0]['fields']
         actions = block[1]['elements']
@@ -494,15 +549,25 @@ class ScrumMaster:
                 "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
             })
 
+        # print(f'\n\nmd: {json.loads(md)}\n\n')
         for action in actions:
             if action['text']['text'] == 'Update':
                 story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
                 metadata = {"story":story, "log":log}
+                if md: 
+                    mdata = json.loads(md)
+                    metadata["swimlane"] = mdata["swimlane"]
+                    metadata["sort_by"] = mdata["sort_by"]
                 action['action_id'] = "update-story"
                 action['value'] = json.dumps(metadata)
             else:
                 action['action_id'] = "delete-story"
-                action['value'] = f"story {str(story['id'])}"
+                metadata = {"story": f"story {str(story['id'])}"}
+                if md: 
+                    mdata = json.loads(md)
+                    metadata["swimlane"] =  mdata["swimlane"]
+                    metadata["sort_by"] = mdata["sort_by"]
+                action['value'] = json.dumps(metadata)
 
         if add_divider: block.append({"type": "divider"})
         return block
