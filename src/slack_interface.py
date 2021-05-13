@@ -174,7 +174,7 @@ def updateHome(payload, init, after_button=False):
     button_metadata = None
     if after_button: 
         print('\n\nAFTER BUTTON\n\n')
-        print(json.dumps(payload, indent=4))
+        # print(json.dumps(payload, indent=4))
         button_metadata = payload['view']['private_metadata']
     if init:
         user_id = payload.get("event", {}).get("user")
