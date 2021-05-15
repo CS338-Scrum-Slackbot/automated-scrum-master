@@ -14,7 +14,7 @@ DELETE_SWIMLANE_MODAL = {
             "type": "section",
             "text": 
                 {
-                    "type": "plain_text",
+                    "type": "mrkdwn",
                     "text": "Any stories in a deleted swimlane will be moved to `archived `. You cannot delete default swimlanes.",
                 }
 		},

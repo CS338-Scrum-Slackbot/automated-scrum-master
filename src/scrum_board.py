@@ -110,7 +110,7 @@ class ScrumBoard:
         elif result == -2: return f"{log_name} does not exist."
         elif result == -1: return f"{log_name} is a default log and may not be deleted."
         elif result == 0: return f"Failed to move stories from {log_name} before deletion."
-        return f"{log_name} successfully deleted; {len(stories)} moved to `archived`."
+        return f"{log_name} successfully deleted; {len(stories)} stories moved to `archived`."
 
     def list_user_swimlanes(self):
         return self.reader.list_user_gen_logs()

@@ -151,13 +151,13 @@ class ScrumMaster:
         self._create_modal_btn(text="Create swimlane",
                                    action_id="create-swimlane")
 
-    def update_swimlane(self):
+    def update_or_delete_swimlane(self, action: str): # Where action="update" or "delete"
         if len(self.scrum_board.list_user_swimlanes()) == 0:
             # if there are no user-generated swimlanes ..
-            self.text = "You have no swimlanes to update. You cannot update default swimlanes, but you may create new ones using `create swimlane`."
+            self.text = f"You have no swimlanes to {action}. You cannot {action} default swimlanes, but you may create new ones using `create swimlane`."
             return
-        else: self._create_modal_btn(text="Update swimlane",
-                                   action_id="update-swimlane")
+        else: self._create_modal_btn(text=f"{action.title()} swimlane",
+                                   action_id=f"{action}-swimlane")
 
     def process_user_msg(self, text: str):
         """
@@ -181,7 +181,9 @@ class ScrumMaster:
         elif "create swimlane" in text.lower():
             self.create_swimlane()
         elif "update swimlane" in text.lower():
-            self.update_swimlane()
+            self.update_or_delete_swimlane("update")
+        elif "delete swimlane" in text.lower():
+            self.update_or_delete_swimlane("delete")
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -223,7 +225,9 @@ class ScrumMaster:
         elif action_id == "create-swimlane":
             return self.editor.edit_create_swimlane_modal()
         elif action_id == "update-swimlane":
-            return self.editor.edit_update_swimlane_modal()
+            return self.editor.edit_update_or_delete_swimlane_modal("update")
+        elif action_id == "delete-swimlane":
+            return self.editor.edit_update_or_delete_swimlane_modal("delete")
         elif action_id == "example":
             return EXAMPLE_MODAL
         else:
@@ -302,6 +306,8 @@ class ScrumMaster:
             self._process_create_swimlane(payload_values)
         elif callback_id == "update-swimlane-modal":
             self._process_update_swimlane(payload_values)
+        elif callback_id == "delete-swimlane-modal":
+            self._process_delete_swimlane(payload_values)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -409,6 +415,11 @@ class ScrumMaster:
         old_name = self._get_dropdown_select_item(payload_values, 0)
         new_name = self._get_plaintext_input_item(payload_values, 1)
         self.text = self.scrum_board.update_swimlane(old_name, new_name)
+        self.blocks = []
+
+    def _process_delete_swimlane(self, payload_values):
+        name = self._get_dropdown_select_item(payload_values, 0)
+        self.text = self.scrum_board.delete_swimlane(name)
         self.blocks = []
         
     @staticmethod
