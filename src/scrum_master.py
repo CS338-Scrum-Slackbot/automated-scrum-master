@@ -617,7 +617,9 @@ class ScrumMaster:
         self.blocks = []
 
     def _process_delete_swimlane(self, payload_values):
-        name = self._get_dropdown_select_item(payload_values, 0)
+        selected_option = self._get_dropdown_select_item(payload_values, 0)
+        idx = selected_option.find("(")
+        name = selected_option[:idx-1] # need to remove " (X)" notation
         self.text = self.scrum_board.delete_swimlane(name)
         self.blocks = []
         

@@ -172,7 +172,7 @@ class json_reader(json_interface):
         entry, src_log = self.delete(id, src_log)
         if entry is None or src_log is None:
             return None  # Deletion failed
-        self.create(entry, dest_log)
+        assert self.create(entry, dest_log)
         return entry, src_log
 
     def search(self, lookup: any, logs: list, fields: list): #- Return listof Tuple[object, str]
