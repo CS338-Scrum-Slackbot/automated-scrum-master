@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "sid": 22,
+        "sid": 23,
         "story_count": 7,
         "current_sprint": 2,
         "current_sprint_starts": 1620684000,
@@ -109,7 +109,18 @@
     },
     "My New Swimlane": {
         "user_generated": true,
-        "stories": []
+        "stories": [
+            {
+                "id": 22,
+                "priority": 3,
+                "estimate": 21,
+                "sprint": 4,
+                "status": "none",
+                "assigned_to": "U01TB0ZH5F1",
+                "user_type": "user",
+                "story": "refactor test"
+            }
+        ]
     },
     "My Second New Swimlane": {
         "user_generated": true,

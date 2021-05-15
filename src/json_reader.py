@@ -13,84 +13,12 @@ import json_reader as jr
 
 def my_func:
     reader = jr.json_reader(file_path="data/scrum_board.json")
-    ...
-    my_obj = ...
-    my_log = ...
-    reader.create(entry=my_obj, log=my_log)
-    ...
-    my_id = ...
-    my_log = ... optional if the user does not provide one. read() will return the log where it found the entry
-    my_obj, my_log = reader.read(id=my_id, log=my_log)
-    ...
-    my_id = ...
-    my_log = ... optional
-    my_obj, my_log = reader.delete(id=my_id, log=my_log)
-    ...
-    my_id = ...
-    my_log = ... optional
-    new_obj = ... # update() returns the old object
-    old_obj, my_log = reader.update(id=my_id, new_entry=new_obj, log=my_log)
-    ...
-    my_id = ...
-    my_log = ... optional
-    move_to_log = ...
-    my_obj, my_log = reader.move(id=my_id, dest_log=move_to_log, src_log=my_log)
-    ...
-    my_lookup_term = ...
-    my_logs = []
-    my_fields = []
-    found_tuples = reader.search(lookup=my_lookup_term, logs=my_logs, fields=my_fields):
-    num_entries_found = len(found_tuples)
-    ith_obj_found = found_tuples[i][0]
-    log_of_ith_obj = found_tuples[i][1]
-    ...
-    my_logs = reader.list_logs()
-    print(str(my_logs)) --> ["product_backlog",""sprint_backlog","current_sprint","archived"]
-    ...
-    my_log = ... optional
-    result = read_log(log=my_log) -> list:
-    # Returns all entries in the log, or all entries in the file if my_log=None
-
-    Swimlane operators not shown.
 """
 
-
-class json_interface():
-    def __init__(self, file_path):
-        pass
-
-    # Entry-based ops
-    def create(self, entry: object, log: str):
-        pass # Adds the entry to specified log
-    def read(self, id: int, log: str = None): # Return Tuple[object, str]
-        pass # If id# is found in the log or file (log=None), returns entry, log.
-             # Otherwise, returns None, None
-    def delete(self, id: int, log: str = None): # Return Tuple[obj, str]
-        pass # Removes id# from log or file (log=None). (!!HARD DELETE!!)
-    def update(self, id: int, new_entry: object, log: str = None): # Return Tuple[object, str]
-        pass # Updates id# with new_entry. Log is optional. Returns the old object, log if update was successful.
-    def move(self, id: int, dest_log: str, src_log: str = None): # Return Tuple[object, str]
-        pass # Moves id# to the destination log. Source log of entry is optional. Returns the object, src_log if move was successful.
-    def search(self, lookup: any, logs: list, fields: list): #- Return listof Tuple[object, str]
-        pass # Lookup any contents: the field and log are optional (as [])
-
-    # Log-based ops
-    def list_logs(self) -> list:
-        pass # Returns a list of logs in file_name: ["product_backlog","sprint_backlog",...]
-    def list_fields(self) -> list:
-        pass # Returns the list of fields for each story: ["id","priority","estimate",...]
-    def read_log(self, log: str = None) -> list:
-        pass # Returns all entries in the log, or list of all entries in the file if log=None
-    def create_swimlane(self, log_name: str):
-        pass
-    def update_swimlane(self, old_name:str, new_name:str):
-        pass
-
-
-class json_reader(json_interface):
+class json_reader():
     def __init__(self, file_path: str):
         self._file_path = file_path
-        with open(file=self._file_path, mode="r+") as f:
+        with open(file=self._file_path, mode="r") as f:
             self._j = json.load(f) # Load file into memory
         self._list_logs = list(self._j.keys())
 
@@ -98,11 +26,21 @@ class json_reader(json_interface):
         self._list_logs.remove('metadata')
 
         # Hard coded fields because it's hard to read them in (in case file is empty)
+        # TODO: add description field when this feature is implemented
         self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
 
+    def write_to_file(self):
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+                return 1
+        except: return 0
 
+    # ================
     # Entry-based ops
-
+    # ================
     def create(self, entry: object, log: str):
         try:
             if log not in self._list_logs:
@@ -201,7 +139,9 @@ class json_reader(json_interface):
             read_log(l)
         return found
 
-    # Log-based ops
+    # ======================
+    # Log/swimlane-based ops
+    # ======================
 
     def list_logs(self) -> list:
         return self._list_logs
@@ -259,10 +199,6 @@ class json_reader(json_interface):
     # ===========
     #   METADATA
     # ===========
-
-    def get_sid(self):
-        return self._j["metadata"]["sid"]
-
     def increment_sid(self):
         try: 
             with open(file=self._file_path, mode="r+") as f:
@@ -272,3 +208,11 @@ class json_reader(json_interface):
                     f.truncate()
                     return 1
         except: return 0
+
+    def read_metadata_field(self, field:str):
+        # fields are: "sid", "story_count", "current_sprint", "current_sprint_starts", current_sprint_ends", "id_to_name"
+        return self._j["metadata"][field]
+
+    def write_metadata_field(self, field:str, value:any):
+        self._j["metadata"][field] = value
+        return self.write_to_file()

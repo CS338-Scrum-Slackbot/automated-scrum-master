@@ -21,14 +21,14 @@ class ScrumBoard:
     def create_story(self, story, log):
         if log in ['previous_sprint', 'archived']:
             return 0
-        sid = self.reader.get_sid()
+        sid = self.reader.read_metadata_field("sid")
         story["id"] = sid
         print(f'Creating story: {story} in log {log}')
         success = self.reader.create(story, log)
         if not success:
             return 0
         else:
-            self.reader.increment_sid()
+            self.reader.write_metadata_field("sid", sid+1)
             return sid
 
 
