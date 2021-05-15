@@ -61,6 +61,10 @@ class ModalEditor:
         modal = UPDATE_SWIMLANE_MODAL if action=="update" else DELETE_SWIMLANE_MODAL
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)     # Open reader
         logs = self.reader.list_user_gen_logs()                 # Get lists from reader
+        if action=="delete":
+            for idx in range(len(logs)):
+                num_stories = len(self.reader.read_log(logs[idx]))
+                logs[idx] += f" ({num_stories})"
         log_block = self._generate_select_options(logs, "log")  # Get option list for log list
         # Overwrite modal options with the compiled options
         modal['blocks'][1]["element"]["options"] = log_block

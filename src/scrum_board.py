@@ -19,12 +19,18 @@ class ScrumBoard:
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
 
     def create_story(self, story, log):
+        if log in ['previous_sprint', 'archived']:
+            return 0
         sid = self.reader.get_sid()
         story["id"] = sid
-        self.reader.increment_sid()
         print(f'Creating story: {story} in log {log}')
-        answer = self.reader.create(story, log)
-        return sid if sid else answer
+        success = self.reader.create(story, log)
+        if not success:
+            return 0
+        else:
+            self.reader.increment_sid()
+            return sid
+
 
     def read_story(self, id, log):  # [id: int, log: str = None]
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
@@ -33,6 +39,9 @@ class ScrumBoard:
         elif obj is None and log is not None:
             return f"Story not found in {log}, try a different swimlane?\nYou can also read the whole board using `read story {id}`"
         return [obj, log_str]
+
+    def get_logs(self):
+        return self.reader._list_logs
 
     def read_log(self, log):
         story_list = self.reader.read_log(log=log)
@@ -44,6 +53,8 @@ class ScrumBoard:
 
     def update_story(self, story, log, new_log):
         print(f'UPDATING STORY: {story}')
+        if log in ['previous_sprint', 'archived']:
+            return 0
         return self.reader.update(story['id'], story, log, new_log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list):
