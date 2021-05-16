@@ -199,16 +199,6 @@ class json_reader():
     # ===========
     #   METADATA
     # ===========
-    def increment_sid(self):
-        try: 
-            with open(file=self._file_path, mode="r+") as f:
-                    self._j["metadata"]["sid"] = self._j["metadata"]["sid"] + 1
-                    f.seek(0)
-                    f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                    f.truncate()
-                    return 1
-        except: return 0
-
     def read_metadata_field(self, field:str):
         # fields are: "sid", "story_count", "current_sprint", "current_sprint_starts", current_sprint_ends", "id_to_name"
         return self._j["metadata"][field]

@@ -253,7 +253,7 @@ class ScrumMaster:
     def start_sprint(self):
         self.current_sprint += 1
         jsr = jr.json_reader("data/scrum_board.json")
-        sb = jsr.read_log('sprint_backlog')
+        sb = jsr.read_log('Sprint Backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
@@ -381,9 +381,9 @@ class ScrumMaster:
 
     def _get_valid_logs(self, create=0):
         # can create a story in any swimlane EXCEPT previous_sprint and archived
-        if create: return [x for x in self.scrum_board.get_logs() if x not in ['previous_sprint','archived']]
+        if create: return [x for x in self.scrum_board.get_logs() if x not in ['Previous Sprint','Archived']]
         # can move a story to any swimlane EXCEPT previous_sprint
-        else: return [x for x in self.scrum_board.get_logs() if x != 'previous_sprint']
+        else: return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
         print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
@@ -480,13 +480,8 @@ class ScrumMaster:
         duration_in_seconds = duration * seconds_table[unit]
         unix_start = int(datetime.strptime(f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
         unix_end = unix_start + duration_in_seconds
-        with open('data/scrum_board.json', mode="r+") as f:
-            js = json.load(f)
-            js['metadata']['current_sprint_starts'] = unix_start
-            js['metadata']['current_sprint_ends'] = unix_end
-            f.seek(0)
-            f.write(json.dumps(js, indent=4))
-            f.truncate()
+        self.scrum_board.write_metadata_field('current_sprint_starts', unix_start)
+        self.scrum_board.write_metadata_field('current_sprint_ends', unix_end)
 
         # TODO:
         # schedule a message for when the sprint ends (unix_end)
