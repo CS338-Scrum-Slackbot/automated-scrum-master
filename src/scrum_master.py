@@ -257,8 +257,8 @@ class ScrumMaster:
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
-            jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
-            jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
+            jsr.update(id=s['id'], new_entry=s, old_log='Sprint Backlog')
+            jsr.move(id=s['id'], dest_log='Current Sprint', src_log='Sprint Backlog')
         self._create_modal_btn(text="Set Sprint",
                                     action_id="set-sprint")
 
