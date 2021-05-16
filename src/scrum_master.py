@@ -369,11 +369,10 @@ class ScrumMaster:
 
     def _fill_delete_modal(self, modal, metadata=None):
         print(f'FILL DELETE MODAL METADATA: {metadata}')
-        #md = json.loads(metadata)
-        if metadata is not None:
+        try:
             init_value = json.loads(metadata)['story']
-        else:
-            init_value = "Write Something"
+        except:
+            init_value = ""
         modal['blocks'][1]['element']['initial_value'] = init_value #md['story']
         modal['private_metadata'] = metadata
         return modal

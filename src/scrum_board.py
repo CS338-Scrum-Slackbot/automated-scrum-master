@@ -54,7 +54,7 @@ class ScrumBoard:
         if tuples is None:
             return "Internal error: Fields or swimlanes did not match JSON."
         if len(tuples) == 0:
-            return "Didn't find anything for "+lookup_text+", try again?"
+            return f"Didn't find anything for `{lookup_text}`, try again?"
         # Extract entries only (not logs)
         result = []
         for t in tuples:
@@ -83,12 +83,12 @@ class ScrumBoard:
     #   SWIMLANES/LOGS
     # ==================
     def get_logs(self):
-        return self.reader._list_logs
+        return self.reader.list_logs()
 
     def read_log(self, log):
         story_list = self.reader.read_log(log=log)
-        if story_list is None and log is None:
-            return "No stories in your board."
+        if story_list is None:
+            return f"Swimlane `{log}` does not exist."
         elif story_list is None and log is not None:
             return f"Could not find any stories in {log}."
         return story_list

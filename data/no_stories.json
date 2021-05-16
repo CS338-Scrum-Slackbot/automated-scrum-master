@@ -1,0 +1,19 @@
+{
+    "metadata": {
+        "sid": 23,
+        "story_count": 7,
+        "current_sprint": 5,
+        "current_sprint_starts": 1620684000,
+        "current_sprint_ends": 1621288800,
+        "id_to_name": {
+            "U01TB0ZH5F1": "Brendan Lamishaw",
+            "U01TK108J86": "Neha Sharma",
+            "U01TRPZL02W": "Nathan Timmerman",
+            "U01U4CJED7T": "Caspar Popova"
+        }
+    },
+    "Product Backlog": {
+        "user_generated": false,
+        "stories": []
+    }
+}

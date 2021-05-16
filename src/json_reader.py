@@ -102,27 +102,27 @@ class json_reader():
         found = []                      # Will hold the found entries
         # Helper function for reading specific log
         get_name = __import__('scrum_master').ScrumMaster._get_member_name
-        def read_log(r_log: str):
+        def compare_field(field_, e, r_log):
+            # from scrum_master import ScrumMaster
+            if field_ == 'assigned_to':
+                s = get_name(e[field_]).lower()
+            else: 
+                s = str(e[field_]).lower() # Cast field's value to string and convert to lowercase
+            if lookup in s: 
+                found.append([e, r_log])
+                return True
+            return False
+        def helper(r_log: str):
             entries = self._j[r_log]["stories"]
             for e in entries:
-                def compare_field(field_):
-                    # from scrum_master import ScrumMaster
-                    if field_ == 'assigned_to':
-                        s = get_name(e[field_]).lower()
-                    else: 
-                        s = str(e[field_]).lower() # Cast field's value to string and convert to lowercase
-                    if lookup in s: 
-                        found.append([e, r_log])
-                        return True
-                    return False
                 for f in fields:
-                    if compare_field(f): break # If any field matches, stop comparing fields
+                    if compare_field(f, e, r_log): break # If any field matches, stop comparing fields
         if logs == []:
             logs = self.list_logs()
         if fields == []:
             fields = self.list_fields()
         for l in logs:
-            read_log(l)
+            helper(l)
         return found
 
     # ======================
