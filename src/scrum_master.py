@@ -453,7 +453,8 @@ class ScrumMaster:
         elif callback_id == "create-swimlane-modal":
             self._process_create_swimlane(payload_values)
         elif callback_id == "update-swimlane-modal":
-            self._process_update_swimlane(payload_values)
+            names = self._process_update_swimlane(payload_values)
+            return names
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
@@ -607,6 +608,7 @@ class ScrumMaster:
         new_name = self._get_plaintext_input_item(payload_values, 1)
         self.text = self.scrum_board.update_swimlane(old_name, new_name)
         self.blocks = []
+        return [old_name, new_name]
         
     @staticmethod
     def _get_member_name(id):
