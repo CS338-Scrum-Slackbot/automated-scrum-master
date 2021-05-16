@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "sid": 22,
+        "sid": 23,
         "story_count": 7,
         "current_sprint": 2,
         "current_sprint_starts": 1620684000,
@@ -15,16 +15,6 @@
     "Product Backlog": {
         "user_generated": false,
         "stories": [
-            {
-                "id": 7,
-                "priority": 1,
-                "estimate": 21,
-                "sprint": 2,
-                "status": "none",
-                "assigned_to": "None",
-                "user_type": "Customer",
-                "story": "HELLO IM 7"
-            },
             {
                 "id": 15,
                 "priority": 2,
@@ -44,6 +34,16 @@
                 "assigned_to": "U01TK108J86",
                 "user_type": "Customer",
                 "story": "Hello im 2 UPDATED"
+            },
+            {
+                "id": 7,
+                "priority": 1,
+                "estimate": 21,
+                "sprint": 2,
+                "status": "none",
+                "assigned_to": "None",
+                "user_type": "Customer",
+                "story": "Story number 7"
             }
         ]
     },
@@ -107,66 +107,7 @@
             }
         ]
     },
-    "My New Swimlane": {
-        "user_generated": true,
-        "stories": []
-    },
-    "My Second New Swimlane": {
-        "user_generated": true,
-        "stories": [
-            {
-                "id": 21,
-                "priority": 3,
-                "estimate": 1,
-                "sprint": 2,
-                "status": "in-progress",
-                "assigned_to": "U01TB0ZH5F1",
-                "user_type": "Ads",
-                "story": "10 thousand ponds UPDATED"
-            },
-            {
-                "id": 19,
-                "priority": 2,
-                "estimate": 1,
-                "sprint": 2,
-                "status": "in-progress",
-                "assigned_to": "U01U4CJED7T",
-                "user_type": "Second",
-                "story": "Second UPDATAED BABY"
-            }
-        ]
-    },
-    "My Third New Swimlane": {
-        "user_generated": true,
-        "stories": [
-            {
-                "id": 18,
-                "priority": 1,
-                "estimate": 1,
-                "sprint": 2,
-                "status": "to-do",
-                "assigned_to": "U01TRPZL02W",
-                "user_type": "peep",
-                "story": "sad"
-            }
-        ]
-    },
-    "HI LADY": {
-        "user_generated": true,
-        "stories": [
-            {
-                "id": 17,
-                "priority": 1,
-                "estimate": 1,
-                "sprint": 1,
-                "status": "in-progress",
-                "assigned_to": "U01TB0ZH5F1",
-                "user_type": "lady",
-                "story": "hey lady"
-            }
-        ]
-    },
-    "update swimlane name": {
+    "New Swimlane Updated": {
         "user_generated": true,
         "stories": []
     }
