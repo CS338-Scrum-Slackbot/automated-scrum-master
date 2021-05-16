@@ -45,55 +45,41 @@ class json_reader():
         try:
             if log not in self._list_logs:
                 return 0
-            with open(file=self._file_path, mode="r+") as f:
-                self._j[log]["stories"].append(entry)             # Add to python obj
-                f.seek(0)
-                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                f.truncate()
-            return 1
+            self._j[log]["stories"].append(entry)             # Add to python obj
+            return self.write_to_file()
         except: return 0
+
+    def refactor_helper(self, log, func):
+        if log is not None and log in self._list_logs:
+            return func(log), log
+        # Scan over logs
+        for l in self.list_logs():
+            result = func(l)
+            if (result != None):
+                return result, l
+        return None, None
 
     def read(self, id: int, log: str = None): # Return Tuple[object, str]
         # Helper function for reading specific log
-        def read_log(r_log: str) -> object:
+        def helper(r_log: str) -> object:
             entries = self._j[r_log]["stories"]
             for e in entries:
                 if e["id"] == id:
                     return e
             return None
-        # Read specified log
-        if log is not None and log in self._list_logs:
-            return read_log(log), log
-        # Scan over logs
-        for l in self.list_logs():
-            result = read_log(l)
-            if (result != None):
-                return result, l
-        return None, None
+        return self.refactor_helper(log, helper)
 
     def delete(self, id: int, log: str = None):  # Returns Tuple[object, str]
-        with open(file=self._file_path, mode="r+") as f:
-            # Helper function for deleting from specific log
-
-            def delete_from_log(l: str):
-                entries = self._j[l]["stories"] # Array of objs
-                for idx in range(0, len(entries)):
-                    if entries[idx]["id"] == id:
-                        e = self._j[l]["stories"].pop(idx) # Remove from python obj
-                        f.seek(0)
-                        f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                        f.truncate()
-                        return e
-                return None
-            # Remove from specified log
-            if log is not None and log in self._list_logs:
-                return delete_from_log(log), log
-            # Iterate over all logs if not specified
-            for l in self.list_logs():
-                result = delete_from_log(l)
-                if (result != None):
-                    return result, l
-            return None, None
+        # Helper function for deleting from specific log
+        def helper(l: str):
+            entries = self._j[l]["stories"] # Array of objs
+            for idx in range(0, len(entries)):
+                if entries[idx]["id"] == id:
+                    e = self._j[l]["stories"].pop(idx) # Remove from python obj
+                    if not self.write_to_file(): return 0 # Write to file failed
+                    else: return e # Success: return old object
+            return None
+        return self.refactor_helper(log, helper)
 
     # Return Tuple[object, str]
     def update(self, id: int, new_entry: object, old_log: str = None, new_log: str = None):
@@ -115,12 +101,12 @@ class json_reader():
         lookup = str(lookup).lower()    # Cast to string and convert to lowercase
         found = []                      # Will hold the found entries
         # Helper function for reading specific log
+        get_name = __import__('scrum_master').ScrumMaster._get_member_name
         def read_log(r_log: str):
             entries = self._j[r_log]["stories"]
             for e in entries:
                 def compare_field(field_):
                     # from scrum_master import ScrumMaster
-                    get_name = __import__('scrum_master').ScrumMaster._get_member_name
                     if field_ == 'assigned_to':
                         s = get_name(e[field_]).lower()
                     else: 
@@ -171,14 +157,10 @@ class json_reader():
         if log_name in self.list_logs() or log_name == "metadata":
             return 0 # Log already exists
         try:
-            with open(file=self._file_path, mode="r+") as f:
-                self._list_logs.append(log_name)
-                self._j[log_name] = {"user_generated": True,
+            self._list_logs.append(log_name)
+            self._j[log_name] = {"user_generated": True,
                                         "stories": [] }
-                f.seek(0)
-                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                f.truncate()
-            return 1
+            return self.write_to_file()
         except: return 0
 
     def update_swimlane(self, old_name:str, new_name:str):
@@ -187,13 +169,9 @@ class json_reader():
         elif new_name in self.list_logs() or new_name == "metadata":
             return -2  # new_name already exists
         try:
-            with open(file=self._file_path, mode="r+") as f:
-                self._list_logs = [log if log != old_name else new_name for log in self._list_logs]
-                self._j[new_name] = self._j.pop(old_name) # Transfers entries to new key while deleting the old
-                f.seek(0)
-                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                f.truncate()
-            return 1
+            self._list_logs = [log if log != old_name else new_name for log in self._list_logs]
+            self._j[new_name] = self._j.pop(old_name) # Transfers entries to new key while deleting the old
+            return self.write_to_file()
         except: return 0
 
     # ===========
