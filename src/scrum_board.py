@@ -34,7 +34,7 @@ class ScrumBoard:
             self.reader.write_metadata_field("sid", sid+1)
             return sid
 
-    def read_story(self, id, log):  # [id: int, log: str = None]
+    def read_story(self, id, log=None):  
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
         if obj is None and log is None:
             return "Story not found in your board."

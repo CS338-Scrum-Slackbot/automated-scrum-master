@@ -3,7 +3,6 @@ Class to wrap the logic of the scrum master bot
 """
 
 from scrum_board import ScrumBoard
-import json_reader as jr
 from modal_editor import ModalEditor
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.delete_story_ui import DELETE_STORY_MODAL
@@ -51,9 +50,6 @@ class ScrumMaster:
     def __init__(self):
         self.text = "\0"
         self.blocks = None
-
-        # Maintain current sprint
-        self.current_sprint = 0
 
         # Interface with JSON data
         self.scrum_board = ScrumBoard()
@@ -201,7 +197,12 @@ class ScrumMaster:
         except: 
             self.text = "Story ID must be an int."
             return
-        story, log = jr.json_reader("data/scrum_board.json").read(id)
+        result = self.scrum_board.read_story(id)
+        if isinstance(result, str):
+            self.text = result
+            return
+        story = result[0]
+        log = result[1]
         metadata = {"story":story, "log":log}
         self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=json.dumps(metadata))
 
@@ -251,14 +252,13 @@ class ScrumMaster:
                                    action_id="search-story")
 
     def start_sprint(self):
-        self.current_sprint += 1
-        jsr = jr.json_reader("data/scrum_board.json")
-        sb = jsr.read_log('Sprint Backlog')
+        curr_sprint = self.scrum_board.read_metadata_field("current_sprint") + 1
+        self.scrum_board.write_metadata_field("current_sprint", curr_sprint)
+        sb = self.scrum_board.read_log('Sprint Backlog')
         for s in sb: 
-            if s['status'] == "": s['status'] = 'to-do'
-            s['sprint'] += self.current_sprint
-            jsr.update(id=s['id'], new_entry=s, old_log='Sprint Backlog')
-            jsr.move(id=s['id'], dest_log='Current Sprint', src_log='Sprint Backlog')
+            if s['status'] == "none": s['status'] = 'to-do'
+            s['sprint'] = curr_sprint # do NOT add here
+            self.scrum_board.update_story(story=s, log='Sprint Backlog', new_log='Current Sprint',)
         self._create_modal_btn(text="Set Sprint",
                                     action_id="set-sprint")
 
@@ -362,6 +362,8 @@ class ScrumMaster:
             for x in logs
         ]
         modal['blocks'][1]['element']['options'] = swimlane_options
+        curr_sprint = str(self.scrum_board.read_metadata_field("current_sprint"))
+        modal['blocks'][4]['element']['placeholder']['text'] += curr_sprint
         modal['private_metadata'] = metadata
         return modal
 
@@ -401,7 +403,6 @@ class ScrumMaster:
         ]
         data = json.loads(metadata)
         story_update = data['story']
-        # story_update, update_log = jr.json_reader("data/demo.json").read(id)
         modal['title']['text'] = f'Update Story {story_update["id"]}'
         if 'swimlane' in data:
             private_metadata = {"story":story_update, "log": data["log"], "swimlane": data["swimlane"], "sort_by": data["sort_by"]}
@@ -417,7 +418,9 @@ class ScrumMaster:
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
                 b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
-                b['element']['initial_value'] = str(story_update['sprint']) if story_update['sprint'] else str(self.current_sprint)
+                curr_sprint = str(self.scrum_board.read_metadata_field("current_sprint"))
+                b['element']['initial_value'] = str(story_update['sprint']) #if story_update['sprint'] else curr_sprint
+                b['element']['placeholder']['text'] = "Current sprint number: "+curr_sprint
             elif b['label']['text'] == 'Priority':
                 if story_update['priority'] != -1: 
                     p = list(self.priorities.keys())[list(self.priorities.values()).index(story_update['priority'])]
@@ -543,7 +546,7 @@ class ScrumMaster:
         # print(f'\n\nmd: {json.loads(md)}\n\n')
         for action in actions:
             if action['text']['text'] == 'Update':
-                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                story, log = self.scrum_board.read_story(story['id'])
                 metadata = {"story":story, "log":log}
                 if md: 
                     mdata = json.loads(md)
