@@ -130,11 +130,26 @@ def handle_interaction():
             text_msg, interactive_msg = scrum_master.get_response()
             # if swimlane updated, need to update swimlane in private_metadata
             # IF it's the current selection
-            if response: 
-                md = json.loads(data['view']['private_metadata'])
-                if md['swimlane'] == response[0]: # old name
-                    md['swimlane'] = response[1]
-                    data['view']['private_metadata'] = json.dumps(md)
+            if response:
+                has_metadata = False 
+                try:
+                    md = json.loads(data['view']['private_metadata'])
+                    # has_metadata = True
+                    if md['swimlane'] == response[0]: # old name
+                        md['swimlane'] = response[1]
+                        data['view']['private_metadata'] = json.dumps(md)
+                    print(f'\n\nMETADATA IN UPDATE\n\n')
+                    print(json.dumps(data, indent=4))
+                    for b in data['view']['blocks'][1]['element']['options']:
+                        if b['text']['text'] == response[0]:
+                            b['text']['text'] = response[1]
+                            b['value'] = response[1]
+                except:
+                    data['view']['private_metadata'] = json.dumps({'swimlane': response[1]})
+
+                    print(f'\n\nNO METADATA IN UPDATE\n\n')
+                    print(json.dumps(data, indent=4))
+
                 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
