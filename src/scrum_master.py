@@ -252,13 +252,14 @@ class ScrumMaster:
                                    action_id="search-story")
 
     def start_sprint(self):
-        curr_sprint = self.scrum_board.read_metadata_field("current_sprint") + 1
-        self.scrum_board.write_metadata_field("current_sprint", curr_sprint)
-        sb = self.scrum_board.read_log('Sprint Backlog')
+        self.current_sprint += 1
+        jsr = jr.json_reader("data/scrum_board.json")
+        sb = jsr.read_log('sprint_backlog')
         for s in sb: 
-            if s['status'] == "none": s['status'] = 'to-do'
-            s['sprint'] = curr_sprint # do NOT add here
-            self.scrum_board.update_story(story=s, log='Sprint Backlog', new_log='Current Sprint',)
+            if s['status'] == "": s['status'] = 'to-do'
+            s['sprint'] += self.current_sprint
+            jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
+            jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
         self._create_modal_btn(text="Set Sprint",
                                     action_id="set-sprint")
 
@@ -585,11 +586,11 @@ class ScrumMaster:
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
         stories = self.scrum_board.search_story(lookup_text=lookup_text, logs=swimlanes, fields=fields )
+        self.blocks = []
         if isinstance(stories, str):
             self.text = stories # Handles error case of string from scrum_board
             return
         # Otherwise, stories is a list of objs that are pretty-printed.
-        self.blocks = []
         for story in stories:
             self.blocks += self._story_to_msg(story)
         self.text = "Story:"
