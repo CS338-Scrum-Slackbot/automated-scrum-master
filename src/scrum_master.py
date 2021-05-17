@@ -370,7 +370,7 @@ class ScrumMaster:
         ]
         modal['blocks'][1]['element']['options'] = swimlane_options
         curr_sprint = str(self.scrum_board.read_metadata_field("current_sprint"))
-        modal['blocks'][4]['element']['placeholder']['text'] += curr_sprint
+        modal['blocks'][4]['element']['placeholder']['text'] = "Current sprint number: "+curr_sprint
         modal['private_metadata'] = metadata
         return modal
 
