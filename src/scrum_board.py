@@ -31,7 +31,6 @@ class ScrumBoard:
             self.reader.increment_sid()
             return sid
 
-
     def read_story(self, id, log):  # [id: int, log: str = None]
         obj, log_str = self.reader.read(id=id, log=log)  # Read from json
         if obj is None and log is None:
@@ -83,11 +82,11 @@ class ScrumBoard:
         if story_obj is None or source_log is None:
             return "Story with \"ID " + str(story_id) + "\" does not exist."
 
-        if source_log == "archived":
+        if source_log == "Archived":
             return "Story with \"ID " + str(story_id) + "\" has already been deleted."
 
         moved_story, new_log = self.reader.move(
-            story_id, 'archived', source_log)
+            story_id, "Archived", source_log)
 
         if moved_story == None or new_log == None:
             return "Could not delete \"ID " + str(story_id) + "\" story."
@@ -100,14 +99,20 @@ class ScrumBoard:
     def create_swimlane(self, log_name: str):
         if self.reader.create_swimlane(log_name):
             return f"Successfully created new swimlane {log_name}."
-        else: return f"Swimlane {log_name} already exists: try creating a different name, or update this one using `update swimlane`."
+        else:
+            return f"Swimlane {log_name} already exists: try creating a different name, or update this one using `update swimlane`."
 
-    def update_swimlane(self, old_name:str, new_name:str):
-        result =  self.reader.update_swimlane(old_name, new_name)
-        if result == 1: return f"Successfully updated {old_name} to {new_name}."
-        elif result == -1: return f"Swimlane {old_name} does not exist." # This should not happen bc of the modal
-        elif result == -2: return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
-        else: return "Internal error."
+    def update_swimlane(self, old_name: str, new_name: str):
+        result = self.reader.update_swimlane(old_name, new_name)
+        if result == 1:
+            return f"Successfully updated {old_name} to {new_name}."
+        elif result == -1:
+            # This should not happen bc of the modal
+            return f"Swimlane {old_name} does not exist."
+        elif result == -2:
+            return f"Swimlane {new_name} already exists: try updating {old_name} with a different name."
+        else:
+            return "Internal error."
 
     def list_user_swimlanes(self):
         return self.reader.list_user_gen_logs()

@@ -99,21 +99,17 @@ def register_or_update_member(payload):
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
-    print('\n\nINTERACT POST\n\n')
-    # print(json.dumps(data, indent=4))
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
-        if 'view' in data:
-            print('\n\nVIEW CHANGED\n\n')
-            if data['view']['type'] == 'home':
-                if data['actions'][0]['action_id'] in view_actions:
-                    action_id = data['actions'][0]['action_id']
-                    value = data['actions'][0]['value']
-                    send_modal(data['trigger_id'], modal=scrum_master.create_modal(
-                        action_id, metadata=value))
-                else:
-                    updateHome(data, init=0)
+        if 'view' in data and data['view']['type'] == 'home':
+            if data['actions'][0]['action_id'] in view_actions:
+                action_id = data['actions'][0]['action_id']
+                value = data['actions'][0]['value']
+                send_modal(data['trigger_id'], modal=scrum_master.create_modal(
+                    action_id, metadata=value))
+            else:
+                updateHome(data, init=0)
         else:
             try:
                 # Get the action_id and value fields from the event payload

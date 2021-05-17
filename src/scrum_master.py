@@ -379,7 +379,10 @@ class ScrumMaster:
         return modal
 
     def _fill_delete_modal(self, modal, metadata=None):
-        modal['blocks'][1]['element']['initial_value'] = metadata if metadata != "None" else ""
+        if metadata != "None":
+            md = json.loads(metadata)
+            modal['blocks'][1]['element']['initial_value'] = md['story']
+            modal['private_metadata'] = metadata
         return modal
 
     def _fill_confirm_delete_modal(self, modal, metadata):
@@ -462,7 +465,6 @@ class ScrumMaster:
 
     def process_modal_submission(self, payload, callback_id):
         payload_values = list(payload['view']['state']['values'].values())
-        metadata = payload['view']['private_metadata']
 
         # Add an if-clause here with your callback_id used in the modal
         if callback_id == "create-story-modal":
@@ -470,7 +472,8 @@ class ScrumMaster:
         elif callback_id == "delete-story-modal":
             return self._process_delete_story(payload_values)
         elif callback_id == "confirm-delete-modal":
-            self._process_confirm_delete(metadata)
+            md = json.loads(payload['view']['private_metadata'])
+            self._process_confirm_delete(md)
         elif callback_id == "confirm-story-modal":
             self._process_confirm_story(payload_values)
         elif callback_id == "search-story-modal":
@@ -499,8 +502,9 @@ class ScrumMaster:
         payload_values = list(payload['view']['state']['values'].values())
 
         story_id_list = self._process_delete_story(payload_values)
+        metadata = {"story": story_id_list}
         injected_view = self._fill_confirm_delete_modal(
-            modal=CONFIRM_DELETE_MODAL, metadata=story_id_list)
+            modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata))
 
         return injected_view
 
@@ -620,7 +624,8 @@ class ScrumMaster:
         return ",".join(story_id_list)
 
     def _process_confirm_delete(self, payload_values):
-        story_id_list = payload_values.split(",")
+        story_ids = payload_values
+        story_id_list = story_ids['story'].split(",")
 
         for story_id in story_id_list:
             response = self.scrum_board.delete_story(int(story_id))
