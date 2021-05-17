@@ -151,6 +151,7 @@ class ScrumMaster:
 
         ui = list(itertools.chain(swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
         # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
+        print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
