@@ -98,7 +98,7 @@ def register_or_update_member(payload):
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
-    print(data)
+
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':

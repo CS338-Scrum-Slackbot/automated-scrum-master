@@ -235,7 +235,7 @@ class ScrumMaster:
             return ""
 
     def _fill_delete_modal(self, modal, metadata=None):
-        modal['blocks'][1]['element']['initial_value'] = metadata if metadata else ""
+        modal['blocks'][1]['element']['initial_value'] = metadata if metadata != "None" else ""
         return modal
 
     def _fill_confirm_delete_modal(self, modal, metadata):
@@ -415,7 +415,7 @@ class ScrumMaster:
 
     def _process_confirm_delete(self, payload_values):
         story_id_list = payload_values.split(",")
-        print(story_id_list)
+
         for story_id in story_id_list:
             response = self.scrum_board.delete_story(int(story_id))
             self.text = self.text + "\n" + response
