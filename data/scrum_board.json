@@ -22,8 +22,8 @@
                 "sprint": 2,
                 "status": "none",
                 "assigned_to": "None",
-                "user_type": "Customer",
-                "story": "HELLO IM 7"
+                "user_type": "customer",
+                "story": "As a user, I want to modify story 7."
             },
             {
                 "id": 15,
@@ -32,8 +32,8 @@
                 "sprint": 1,
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
-                "user_type": "create",
-                "story": "hi testing create metadata"
+                "user_type": "tester",
+                "story": "As a tester, I want to create metadata."
             },
             {
                 "id": 2,
@@ -42,8 +42,8 @@
                 "sprint": 2,
                 "status": "completed",
                 "assigned_to": "U01TK108J86",
-                "user_type": "Customer",
-                "story": "Hello im 2 UPDATED"
+                "user_type": "customer",
+                "story": "As a customer, I want to update a story."
             }
         ]
     },
@@ -58,7 +58,7 @@
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to modify a story."
             }
         ]
     },
@@ -88,7 +88,7 @@
                 "status": "completed",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to delete a story."
             }
         ]
     },
@@ -102,8 +102,8 @@
                 "sprint": 2,
                 "status": "none",
                 "assigned_to": "U01TB0ZH5F1",
-                "user_type": "Test",
-                "story": "Test"
+                "user_type": "tester",
+                "story": "As a tester, I want to program."
             }
         ]
     },
@@ -132,8 +132,8 @@
                 "sprint": 2,
                 "status": "in-progress",
                 "assigned_to": "U01TB0ZH5F1",
-                "user_type": "Ads",
-                "story": "10 thousand ponds UPDATED"
+                "user_type": "user",
+                "story": "As a user, I want to create a swimlane"
             },
             {
                 "id": 19,
@@ -142,8 +142,8 @@
                 "sprint": 2,
                 "status": "in-progress",
                 "assigned_to": "U01U4CJED7T",
-                "user_type": "Second",
-                "story": "Second UPDATAED BABY"
+                "user_type": "user",
+                "story": "I want to create another story"
             }
         ]
     },
@@ -157,32 +157,9 @@
                 "sprint": 2,
                 "status": "to-do",
                 "assigned_to": "U01TRPZL02W",
-                "user_type": "peep",
-                "story": "sad"
+                "user_type": "student",
+                "story": "I need to study for my exam"
             }
         ]
-    },
-    "HI LADY": {
-        "user_generated": true,
-        "stories": [
-            {
-                "id": 17,
-                "priority": 1,
-                "estimate": 1,
-                "sprint": 1,
-                "status": "in-progress",
-                "assigned_to": "U01TB0ZH5F1",
-                "user_type": "lady",
-                "story": "hey lady"
-            }
-        ]
-    },
-    "update swimlane name": {
-        "user_generated": true,
-        "stories": []
-    },
-    "Another song r": {
-        "user_generated": true,
-        "stories": []
     }
 }

@@ -94,7 +94,7 @@ class json_reader():
         entry, src_log = self.delete(id, src_log)
         if entry is None or src_log is None:
             return None  # Deletion failed
-        self.create(entry, dest_log)
+        assert self.create(entry, dest_log)
         return entry, src_log
 
     def search(self, lookup: any, logs: list, fields: list): #- Return listof Tuple[object, str]
@@ -173,6 +173,24 @@ class json_reader():
             self._j[new_name] = self._j.pop(old_name) # Transfers entries to new key while deleting the old
             return self.write_to_file()
         except: return 0
+
+    def delete_swimlane(self, log_name:str):
+        if log_name not in self.list_logs():
+            return -2
+        if log_name not in self.list_user_gen_logs():
+            return -1
+        if self._j[log_name]["stories"] != []:
+            return 0
+        try:
+            with open(file=self._file_path, mode="r+") as f:
+                self._j.pop(log_name)
+                self._list_logs.remove(log_name)
+                f.seek(0)
+                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
+                f.truncate()
+            return 1
+        except:
+            return -3
 
     # ===========
     #   METADATA
