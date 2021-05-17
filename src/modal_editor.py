@@ -3,7 +3,7 @@ import copy
 import json_reader as jr
 from block_ui.search_story_ui import SEARCH_STORY_MODAL
 from block_ui.create_swimlane_ui import CREATE_SWIMLANE_MODAL
-from block_ui.update_swimlane_ui import UPDATE_SWIMLANE_MODAL
+from block_ui.update_swimlane_ui import UPDATE_SWIMLANE_MODAL, NO_SWIMLANES_MODAL
 from block_ui.delete_swimlane_ui import DELETE_SWIMLANE_MODAL
 
 SCRUM_BOARD = 'data/scrum_board.json'
@@ -61,6 +61,8 @@ class ModalEditor:
         modal = UPDATE_SWIMLANE_MODAL if action=="update" else DELETE_SWIMLANE_MODAL
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)     # Open reader
         logs = self.reader.list_user_gen_logs()                 # Get lists from reader
+        if len(logs) == 0:
+            return NO_SWIMLANES_MODAL
         if action=="delete":
             for idx in range(len(logs)):
                 num_stories = len(self.reader.read_log(logs[idx]))

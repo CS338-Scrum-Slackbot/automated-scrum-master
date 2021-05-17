@@ -61,3 +61,27 @@ UPDATE_SWIMLANE_MODAL = {
 
 	]
 }
+
+NO_SWIMLANES_MODAL = {
+	"type": "modal",
+	"title": {
+		"type": "plain_text",
+		"text": "Update Swimlane",
+		"emoji": True
+	},
+	"close": {
+		"type": "plain_text",
+		"text": "Close",
+		"emoji": True
+	},
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "plain_text",
+				"text": "No swimlanes can be updated.",
+				"emoji": True
+			}
+		}
+	]
+}
