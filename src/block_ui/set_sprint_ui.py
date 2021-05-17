@@ -32,7 +32,7 @@ SET_SPRINT_MODAL = {
 						"text": "Select a date",
 						"emoji": True
 					},
-					"action_id": "actionId-0"
+					"action_id": "sprint-date"
 				},
 				{
 					"type": "timepicker",
@@ -42,7 +42,7 @@ SET_SPRINT_MODAL = {
 						"text": "Select time",
 						"emoji": True
 					},
-					"action_id": "actionId-5"
+					"action_id": "sprint-time"
 				}
 			]
 		},
@@ -113,7 +113,7 @@ SET_SPRINT_MODAL = {
 							"value": "value-2"
 						}
 					],
-					"action_id": "static_select-action"
+					"action_id": "duration"
 				},
 				{
 					"type": "static_select",
@@ -148,7 +148,17 @@ SET_SPRINT_MODAL = {
 							"value": "value-2"
 						}
 					],
-					"action_id": "static_select-action-2"
+					"action_id": "unit"
+				}
+			]
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Note: 1 month is equivalent to 4 weeks.",
+					"emoji": True
 				}
 			]
 		}
