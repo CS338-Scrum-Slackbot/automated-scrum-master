@@ -463,7 +463,8 @@ class ScrumMaster:
         elif callback_id == "create-swimlane-modal":
             self._process_create_swimlane(payload_values)
         elif callback_id == "update-swimlane-modal":
-            self._process_update_swimlane(payload_values)
+            names = self._process_update_swimlane(payload_values)
+            return names
         elif callback_id == "delete-swimlane-modal":
             self._process_delete_swimlane(payload_values)
         elif callback_id == "example-modal":
@@ -613,6 +614,7 @@ class ScrumMaster:
         new_name = self._get_plaintext_input_item(payload_values, 1)
         self.text = self.scrum_board.update_swimlane(old_name, new_name)
         self.blocks = []
+        return [old_name, new_name]
 
     def _process_delete_swimlane(self, payload_values):
         selected_option = self._get_dropdown_select_item(payload_values, 0)

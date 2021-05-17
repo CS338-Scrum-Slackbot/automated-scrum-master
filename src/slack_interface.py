@@ -123,12 +123,19 @@ def handle_interaction():
             print(f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
 
             # Extract relevant data from modal
-            scrum_master.process_modal_submission(
+            response = scrum_master.process_modal_submission(
                 data, callback_id)
             
             # Get text and block response from backend
             text_msg, interactive_msg = scrum_master.get_response()
-
+            # if swimlane updated, need to update swimlane in private_metadata
+            # IF it's the current selection
+            if response: 
+                md = json.loads(data['view']['private_metadata'])
+                if md['swimlane'] == response[0]: # old name
+                    md['swimlane'] = response[1]
+                    data['view']['private_metadata'] = json.dumps(md)
+                
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
             updateHome(data, init=0, after_button=True)
