@@ -3,7 +3,7 @@ import copy
 import json_reader as jr
 from block_ui.search_story_ui import SEARCH_STORY_MODAL
 from block_ui.create_swimlane_ui import CREATE_SWIMLANE_MODAL
-from block_ui.update_swimlane_ui import UPDATE_SWIMLANE_MODAL
+from block_ui.update_swimlane_ui import UPDATE_SWIMLANE_MODAL, NO_SWIMLANES_MODAL
 
 SCRUM_BOARD = 'data/scrum_board.json'
 
@@ -60,6 +60,8 @@ class ModalEditor:
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
         # Get lists from reader
         logs = self.reader.list_user_gen_logs()
+        if len(logs) == 0:
+            return NO_SWIMLANES_MODAL
 
         # Get option list for log list
         log_block = self._generate_select_options(logs, "log")
