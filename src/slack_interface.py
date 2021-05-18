@@ -7,7 +7,6 @@ from slackeventsapi import SlackEventAdapter
 from flask import Flask, request
 import json
 from dotenv import load_dotenv
-import json_reader
 from pathlib import Path
 import slack
 import os
