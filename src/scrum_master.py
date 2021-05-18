@@ -74,6 +74,7 @@ class ScrumMaster:
         sort_by_block = []
 
         init_option, sort_by = None, None
+        old_swimlane = None
         if metadata and metadata != 'None':
             print(f'UPDATE HOME METADATA: {metadata}, {type(metadata)}')
             md = json.loads(metadata)
@@ -81,8 +82,9 @@ class ScrumMaster:
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option: sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
-
-            init_option = "Product Backlog"
+            if 'old_swimlane' in md:
+                old_swimlane = md['old_swimlane']
+            # init_option = "Product Backlog"
             print(init_option, sort_by)
         
         if not init_option:
@@ -98,7 +100,9 @@ class ScrumMaster:
                 else: sort_by = None
             else: sort_by = None
 
-        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", "sort_by": sort_by if sort_by else "UNSORTED"}
+        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", 
+                        "sort_by": sort_by if sort_by else "UNSORTED",
+                        "old_swimlane": old_swimlane if old_swimlane else "NONE"}
 
         if init_option: 
             # print(f'INIT OPTION!!!!!! {init_option}')

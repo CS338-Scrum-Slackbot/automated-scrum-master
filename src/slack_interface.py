@@ -11,6 +11,7 @@ import json_reader
 from pathlib import Path
 import slack
 import os
+import time
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -136,16 +137,17 @@ def handle_interaction():
                     md = json.loads(data['view']['private_metadata'])
                     # has_metadata = True
                     if md['swimlane'] == response[0]: # old name
-                        md['swimlane'] = "Product Backlog" #response[1]
+                        md['swimlane'] = response[1] #"Product Backlog" #response[1]
+                        md['old_swimlane'] = response[0]
                         data['view']['private_metadata'] = json.dumps(md)
                     # print(f'\n\nMETADATA IN UPDATE\n\n')
                     # print(json.dumps(data, indent=4))
                     for b in data['view']['blocks'][1]['element']['options']:
                         if b['text']['text'] == response[0]:
-                            b['text']['text'] = "Product Backlog"#response[1]
-                            b['value'] = "Product Backlog" #response[1]
+                            b['text']['text'] = response[1]#"Product Backlog"#
+                            b['value'] = response[1]#"Product Backlog" #
                 except:
-                    data['view']['private_metadata'] = json.dumps({'swimlane': "Product Backlog"})#response[1]})
+                    data['view']['private_metadata'] = json.dumps({'swimlane': response[1], 'old_swimlane': response[0]})#"Product Backlog"})#response[1]})
 
                     # print(f'\n\nNO METADATA IN UPDATE\n\n')
                     # print(json.dumps(data, indent=4))
@@ -195,12 +197,18 @@ def displayHome(payload):
 
 def updateHome(payload, init, after_button=False):
     button_metadata = None
+    # time.sleep(1)
     if after_button: 
         print('\n\nAFTER BUTTON\n\n')
         # print(json.dumps(payload, indent=4))
         button_metadata = payload['view']['private_metadata']
     if init:
         user_id = payload.get("event", {}).get("user")
+        md = json.loads(payload['event']['view']['private_metadata'])
+        sw = scrum_master.scrum_board.list_user_swimlanes()
+        if md['swimlane'] in sw:
+            md['swimlane'] = "Product Backlog"
+        payload['event']['view']['private_metadata'] = json.dumps(md)
         view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
     else:
         user_id = payload['user']['id']
@@ -208,7 +216,7 @@ def updateHome(payload, init, after_button=False):
 
     print(json.dumps(view, indent=4))
     client.views_publish(user_id=user_id, view=view)
-    view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
+    # view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
     client.views_publish(user_id=user_id, view=view)
     
 

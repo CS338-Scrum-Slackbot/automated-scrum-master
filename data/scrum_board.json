@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "sid": 24,
+        "sid": 25,
         "story_count": 7,
         "current_sprint": 2,
         "current_sprint_starts": 1620684000,
@@ -107,8 +107,19 @@
             }
         ]
     },
-    "dsadasdasd": {
+    "WADS": {
         "user_generated": true,
-        "stories": []
+        "stories": [
+            {
+                "id": 24,
+                "priority": 3,
+                "estimate": 1,
+                "sprint": 1,
+                "status": "to-do",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "test",
+                "story": "test"
+            }
+        ]
     }
 }
