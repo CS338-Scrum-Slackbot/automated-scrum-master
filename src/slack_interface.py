@@ -136,19 +136,19 @@ def handle_interaction():
                     md = json.loads(data['view']['private_metadata'])
                     # has_metadata = True
                     if md['swimlane'] == response[0]: # old name
-                        md['swimlane'] = response[1]
+                        md['swimlane'] = "Product Backlog" #response[1]
                         data['view']['private_metadata'] = json.dumps(md)
-                    print(f'\n\nMETADATA IN UPDATE\n\n')
-                    print(json.dumps(data, indent=4))
+                    # print(f'\n\nMETADATA IN UPDATE\n\n')
+                    # print(json.dumps(data, indent=4))
                     for b in data['view']['blocks'][1]['element']['options']:
                         if b['text']['text'] == response[0]:
-                            b['text']['text'] = response[1]
-                            b['value'] = response[1]
+                            b['text']['text'] = "Product Backlog"#response[1]
+                            b['value'] = "Product Backlog" #response[1]
                 except:
-                    data['view']['private_metadata'] = json.dumps({'swimlane': response[1]})
+                    data['view']['private_metadata'] = json.dumps({'swimlane': "Product Backlog"})#response[1]})
 
-                    print(f'\n\nNO METADATA IN UPDATE\n\n')
-                    print(json.dumps(data, indent=4))
+                    # print(f'\n\nNO METADATA IN UPDATE\n\n')
+                    # print(json.dumps(data, indent=4))
 
                 
             # Send message to slack channel
@@ -190,6 +190,7 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
+    print(f'\n\n\nDISPLAY HOME EVENT\n\n\n')
     updateHome(payload, init=not 'view' in payload)
 
 def updateHome(payload, init, after_button=False):
@@ -205,6 +206,9 @@ def updateHome(payload, init, after_button=False):
         user_id = payload['user']['id']
         view = scrum_master.update_home(payload, metadata=button_metadata)
 
+    print(json.dumps(view, indent=4))
+    client.views_publish(user_id=user_id, view=view)
+    view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
     client.views_publish(user_id=user_id, view=view)
     
 

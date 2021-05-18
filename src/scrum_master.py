@@ -81,6 +81,8 @@ class ScrumMaster:
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option: sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
+
+            init_option = "Product Backlog"
             print(init_option, sort_by)
         
         if not init_option:
@@ -151,7 +153,7 @@ class ScrumMaster:
 
         ui = list(itertools.chain(swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
         # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
-        print(json.dumps(ui, indent=4))
+        # print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
@@ -421,7 +423,7 @@ class ScrumMaster:
                 b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
                 b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
-                b['element']['initial_value'] = str(story_update['sprint']) if story_update['sprint'] else str(self.current_sprint)
+                b['element']['initial_value'] = str(story_update['sprint']) if story_update['sprint'] else str(self.scrum_board.get_sid())
             elif b['label']['text'] == 'Priority':
                 if story_update['priority'] != -1: 
                     p = list(self.priorities.keys())[list(self.priorities.values()).index(story_update['priority'])]
