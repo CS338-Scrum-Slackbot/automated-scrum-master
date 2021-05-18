@@ -17,6 +17,19 @@ import re
 from datetime import datetime
 import itertools
 
+emojis = {
+            "priority": {
+                -1: "None ",
+                1: ":large_green_square:",
+                2: ":large_yellow_square:",
+                3: ":large_red_square:"
+            },
+            "status": {
+                "to-do": ":inbox_tray:",
+                "in-progress": ":clock2:",
+                "completed": ":white_check_mark:"
+            }
+        }
 
 class ScrumMaster:
     # Interface with JSON data
@@ -185,12 +198,14 @@ class ScrumMaster:
 
 
     def create_story(self):
-        self._create_modal_btn(text="Create Story",
+        msg, blocks = self._create_modal_btn(text="Create Story",
                                    action_id="create-story")
+        self.text, self.blocks = msg, blocks
 
     def delete_story(self):
-        self._create_modal_btn(text="Delete Story",
+        msg, blocks = self._create_modal_btn(text="Delete Story",
                                    action_id="delete-story")
+        self.text, self.blocks = msg, blocks
 
     def update_story(self):
         try: 
@@ -205,7 +220,10 @@ class ScrumMaster:
         story = result[0]
         log = result[1]
         metadata = {"story":story, "log":log}
-        self._create_modal_btn(text=f"Update Story {id}", action_id="update-story", metadata=json.dumps(metadata))
+        msg, blocks = self._create_modal_btn(text=f"Update Story {id}", 
+                                             action_id="update-story", 
+                                             metadata=json.dumps(metadata))
+        self.text, self.blocks = msg, blocks
 
     def read_story(self):
         try:
@@ -249,8 +267,9 @@ class ScrumMaster:
             self.text = "Story:"
 
     def search_story(self):
-        self._create_modal_btn(text="Search story",
-                                   action_id="search-story")
+        msg, blocks = self._create_modal_btn(text="Search story",
+                                            action_id="search-story")
+        self.text, self.blocks = msg, blocks
 
     def start_sprint(self):
         self.current_sprint += 1
@@ -265,16 +284,19 @@ class ScrumMaster:
                                     action_id="set-sprint")
 
     def create_swimlane(self):
-        self._create_modal_btn(text="Create swimlane",
-                                   action_id="create-swimlane")
+        msg, blocks = self._create_modal_btn(text="Create swimlane",
+                                            action_id="create-swimlane")
+        self.text, self.blocks = msg, blocks
 
     def update_or_delete_swimlane(self, action: str): # Where action="update" or "delete"
         if len(self.scrum_board.list_user_swimlanes()) == 0:
             # if there are no user-generated swimlanes ..
             self.text = f"You have no swimlanes to {action}. You cannot {action} default swimlanes, but you may create new ones using `create swimlane`."
             return
-        else: self._create_modal_btn(text=f"{action.title()} swimlane",
-                                   action_id=f"{action}-swimlane")
+        else: 
+            msg, blocks = self._create_modal_btn(text="Update swimlane",
+                                                action_id="update-swimlane")
+            self.text, self.blocks = msg, blocks
 
     def process_user_msg(self, text: str):
         """
@@ -309,7 +331,8 @@ class ScrumMaster:
 
         IMPORTANT!!! Remember what action_id you used because you will need to use it in create_modal
         """
-        self.blocks = [
+
+        blocks = [
             {
                 "type": "actions",
                 "elements": [
@@ -325,7 +348,9 @@ class ScrumMaster:
                 ],
             }
         ] if text != "" else None
-        self.text = ""
+        
+        msg = ""
+        return msg, blocks
 
     def create_modal(self, action_id, metadata):
         # Add an if-clause to parse what happens if we receive your action_id to create a modal
@@ -544,41 +569,57 @@ class ScrumMaster:
             self.blocks = None
 
 
-    def _story_to_msg(self, story, add_divider = False, md=""):
+    def _story_to_msg(self, story):
+        story_data, log = self.scrum_board.read_story(story['id'], log=None)
         block = copy.deepcopy(READ_STORY_BLOCK)
-        story_content = block[0]['fields']
-        actions = block[1]['elements']
+        
+        story_content, actions = block[3]['fields'], block[5]['elements']
+        
+        # Set the context field to the story's log
+        block[1]['elements'][0]['text'] = f"{' '.join([tag[0].upper() + tag[1:] for tag in log.split('_')])}"
 
-        for k, v in story.items():
-            # if v:
-            label = [tag[0].upper() + tag[1:] for tag in k.split('_')]
-            story_content.append({
-                "type": "mrkdwn",
-                "text": f"*{' '.join(label)}:* {ScrumMaster._get_member_name(v) if k=='assigned_to' else v}",
-            })
+        for k, v in story_data.items():
+            if v:
+                if k=="id":
+                    block[0]['text']['text'] = f"Story ID: {v}"
+                else:
+                    story_content.append({
+                        "type": "mrkdwn",
+                        "text": self._get_msg_text(k, v)
+                    })
 
-        # print(f'\n\nmd: {json.loads(md)}\n\n')
         for action in actions:
             if action['text']['text'] == 'Update':
-                story, log = self.scrum_board.read_story(story['id'])
-                metadata = {"story":story, "log":log}
-                if md: 
-                    mdata = json.loads(md)
-                    metadata["swimlane"] = mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
+                metadata = {"story":story_data, "log":log}
                 action['action_id'] = "update-story"
                 action['value'] = json.dumps(metadata)
             else:
                 action['action_id'] = "delete-story"
-                metadata = {"story": f"story {str(story['id'])}"}
-                if md: 
-                    mdata = json.loads(md)
-                    metadata["swimlane"] =  mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
-                action['value'] = json.dumps(metadata)
-
-        if add_divider: block.append({"type": "divider"})
+                action['value'] = f"story {str(story['id'])}"
         return block
+
+    def _get_msg_text(self, key, val):
+        label = ' '.join([tag[0].upper() + tag[1:] for tag in key.split('_')])
+        text = f"*{label}:* "
+
+        if label=="Priority" or label=="Status":
+            try:
+                emoji = emojis[key][val]
+            except KeyError:
+                emoji = ""
+            
+            if label=="Priority":
+                for k, v in self.priorities.items():
+                    if v==val:
+                        val = k
+                        break
+            return text + f"{val}\t" + emoji
+        elif label=="Assigned To":
+            return text + self._get_member_name(val)
+        elif label=="Estimate" or label=="Sprint" or label=="User Type" or label=="Story":
+            return text + f"{val}"
+        else:
+            return ""
 
 
     def _process_delete_story(self, payload_values):
