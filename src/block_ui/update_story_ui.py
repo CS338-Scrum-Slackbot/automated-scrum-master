@@ -83,7 +83,7 @@ UPDATE_STORY_MODAL = {
 				"action_id": "plain_text_input-action",
 				"placeholder": {
 					"type": "plain_text",
-					"text": "Sprint number"
+					"text": "Current sprint number: "
 				},
                 "initial_value": "1"
 			},

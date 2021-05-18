@@ -24,12 +24,12 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-
 CHANNEL = "#test"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
 SCRUM_BOARD = 'data/scrum_board.json'
+view_actions = ['update-story', 'delete-story', 'create-story', 'update-swimlane','create-swimlane']
 
 def get_member(id):
     try: 
@@ -89,34 +89,70 @@ def register_or_update_member(payload):
 @app.route('/slack/interactive', methods=['POST'])
 def handle_interaction():
     data = json.loads(request.form["payload"])
+    print('\n\nINTERACT POST\n\n')
+    # print(json.dumps(data, indent=4))
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
-        try:
-            # Get the action_id and value fields from the event payload
-            action_id = data['actions'][0]['action_id']
-            value = data['actions'][0]['value']
-        except KeyError as e:
-            print("Unexpected payload. Doing nothing...")
-            return ''
-        # Send a modal with our obtained trigger_id
-        # Which modal to send is evaluated in scrum_master based on the provided action_id
-        send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
+        if 'view' in data:
+            print('\n\nVIEW CHANGED\n\n')
+            if data['view']['type'] == 'home':
+                if data['actions'][0]['action_id'] in view_actions:
+                    action_id = data['actions'][0]['action_id']
+                    value = data['actions'][0]['value']
+                    send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
+                else:
+                    updateHome(data, init=0)
+        else: 
+            try:
+                # Get the action_id and value fields from the event payload
+                action_id = data['actions'][0]['action_id']
+                value = data['actions'][0]['value']
+            except KeyError as e:
+                print("Unexpected payload. Doing nothing...")
+                return ''
+            # Send a modal with our obtained trigger_id
+            # Which modal to send is evaluated in scrum_master based on the provided action_id
+            send_modal(data['trigger_id'], modal=scrum_master.create_modal(action_id, metadata=value))
 
     # A view submission payload is received when a user submits a modal
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
+            print(f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
 
             # Extract relevant data from modal
-            scrum_master.process_modal_submission(
+            response = scrum_master.process_modal_submission(
                 data, callback_id)
             
             # Get text and block response from backend
             text_msg, interactive_msg = scrum_master.get_response()
+            # if swimlane updated, need to update swimlane in private_metadata
+            # IF it's the current selection
+            if response:
+                has_metadata = False 
+                try:
+                    md = json.loads(data['view']['private_metadata'])
+                    # has_metadata = True
+                    if md['swimlane'] == response[0]: # old name
+                        md['swimlane'] = response[1]
+                        data['view']['private_metadata'] = json.dumps(md)
+                    print(f'\n\nMETADATA IN UPDATE\n\n')
+                    print(json.dumps(data, indent=4))
+                    for b in data['view']['blocks'][1]['element']['options']:
+                        if b['text']['text'] == response[0]:
+                            b['text']['text'] = response[1]
+                            b['value'] = response[1]
+                except:
+                    data['view']['private_metadata'] = json.dumps({'swimlane': response[1]})
 
+                    print(f'\n\nNO METADATA IN UPDATE\n\n')
+                    print(json.dumps(data, indent=4))
+
+                
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
+            updateHome(data, init=0, after_button=True)
 
         except KeyError as e:
             if e=='callback_id':
@@ -153,15 +189,23 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
-    print('\n\nAPP HOME OPENED\n\n')
-    print(json.dumps(payload, indent=4))
-    user_id = payload.get("event", {}).get("user")
-    print(f'\n\nUSER ID: {user_id}')
-    view = scrum_master.update_home()
-    client.views_publish(user_id=user_id, view=view)
+    updateHome(payload, init=not 'view' in payload)
 
-def updateHome(user):
-    pass
+def updateHome(payload, init, after_button=False):
+    button_metadata = None
+    if after_button: 
+        print('\n\nAFTER BUTTON\n\n')
+        # print(json.dumps(payload, indent=4))
+        button_metadata = payload['view']['private_metadata']
+    if init:
+        user_id = payload.get("event", {}).get("user")
+        view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
+    else:
+        user_id = payload['user']['id']
+        view = scrum_master.update_home(payload, metadata=button_metadata)
+
+    client.views_publish(user_id=user_id, view=view)
+    
 
 
 if __name__ == '__main__':

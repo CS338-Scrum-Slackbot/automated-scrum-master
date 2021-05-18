@@ -1,10 +1,10 @@
 {
     "metadata": {
-        "sid": 11,
+        "sid": 23,
         "story_count": 7,
         "current_sprint": 2,
-        "current_sprint_starts": "2021-05-23 09:00",
-        "current_sprint_ends": "2021-05-30 09:00",
+        "current_sprint_starts": 1620684000,
+        "current_sprint_ends": 1621288800,
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
             "U01TK108J86": "Neha Sharma",
@@ -12,52 +12,42 @@
             "U01U4CJED7T": "Caspar Popova"
         }
     },
-    "product_backlog": {
+    "Product Backlog": {
         "user_generated": false,
         "stories": [
             {
-                "id": 2,
-                "priority": -1,
-                "estimate": -1,
-                "sprint": 2,
-                "status": "",
-                "assigned_to": "U01TK108J86",
-                "user_type": "customer",
-                "story": "I want to update a story."
-            },
-            {
-                "id": 6,
-                "priority": -1,
-                "estimate": -1,
-                "sprint": 2,
-                "status": "",
-                "assigned_to": "",
-                "user_type": "customer",
-                "story": "create story test"
-            },
-            {
                 "id": 7,
-                "priority": -1,
-                "estimate": -1,
-                "sprint": 2,
-                "status": "",
-                "assigned_to": "",
-                "user_type": "customer",
-                "story": "create story test"
-            },
-            {
-                "id": 1,
-                "priority": 2,
+                "priority": 1,
                 "estimate": 21,
                 "sprint": 2,
+                "status": "none",
+                "assigned_to": "None",
+                "user_type": "customer",
+                "story": "As a user, I want to modify story 7."
+            },
+            {
+                "id": 15,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 1,
+                "status": "to-do",
+                "assigned_to": "U01TK108J86",
+                "user_type": "tester",
+                "story": "As a tester, I want to create metadata."
+            },
+            {
+                "id": 2,
+                "priority": 1,
+                "estimate": 3,
+                "sprint": 2,
                 "status": "completed",
-                "assigned_to": "U01TRPZL02W",
-                "user_type": "Nathan",
-                "story": "I want my code to work."
+                "assigned_to": "U01TK108J86",
+                "user_type": "customer",
+                "story": "As a customer, I want to update a story."
             }
         ]
     },
-    "sprint_backlog": {
+    "Sprint Backlog": {
         "user_generated": false,
         "stories": [
             {
@@ -68,11 +58,11 @@
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to modify a story."
             }
         ]
     },
-    "current_sprint": {
+    "Current Sprint": {
         "user_generated": false,
         "stories": [
             {
@@ -87,7 +77,7 @@
             }
         ]
     },
-    "previous_sprints": {
+    "Previous Sprint": {
         "user_generated": false,
         "stories": [
             {
@@ -98,11 +88,11 @@
                 "status": "completed",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to delete a story."
             }
         ]
     },
-    "archived": {
+    "Archived": {
         "user_generated": false,
         "stories": [
             {
@@ -112,8 +102,63 @@
                 "sprint": 2,
                 "status": "none",
                 "assigned_to": "U01TB0ZH5F1",
-                "user_type": "Test",
-                "story": "Test"
+                "user_type": "tester",
+                "story": "As a tester, I want to program."
+            }
+        ]
+    },
+    "My New Swimlane": {
+        "user_generated": true,
+        "stories": [
+            {
+                "id": 22,
+                "priority": 3,
+                "estimate": 21,
+                "sprint": 4,
+                "status": "none",
+                "assigned_to": "U01TB0ZH5F1",
+                "user_type": "user",
+                "story": "refactor test"
+            }
+        ]
+    },
+    "My Second New Swimlane": {
+        "user_generated": true,
+        "stories": [
+            {
+                "id": 22,
+                "priority": 3,
+                "estimate": 1,
+                "sprint": 2,
+                "status": "in-progress",
+                "assigned_to": "U01TB0ZH5F1",
+                "user_type": "user",
+                "story": "As a user, I want to create a swimlane"
+            },
+            {
+                "id": 19,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 2,
+                "status": "in-progress",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "user",
+                "story": "I want to create another story"
+            }
+        ]
+    },
+    "My Third New Swimlane": {
+        "user_generated": true,
+        "stories": [
+            {
+                "id": 18,
+                "priority": 1,
+                "estimate": 1,
+                "sprint": 2,
+                "status": "to-do",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "student",
+                "story": "I need to study for my exam"
             }
         ]
     }
