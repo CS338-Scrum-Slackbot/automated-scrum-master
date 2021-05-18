@@ -1,7 +1,29 @@
 READ_STORY_BLOCK = [
 		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": ""
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": ""
+				}
+			]
+		},
+		{
+			"type": "divider"
+		},
+		{
 			"type": "section",
 			"fields": []
+		},
+		{
+			"type": "divider"
 		},
 		{
 			"type": "actions",
@@ -25,5 +47,8 @@ READ_STORY_BLOCK = [
 					"value": "delete-story"
 				}
 			]
+		},
+		{
+			"type": "divider"
 		}
 ]

@@ -7,7 +7,6 @@ from slackeventsapi import SlackEventAdapter
 from flask import Flask, request
 import json
 from dotenv import load_dotenv
-import json_reader
 from pathlib import Path
 import slack
 import os
@@ -26,7 +25,7 @@ BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
 
-CHANNEL = "#test"
+CHANNEL = "#app_mention"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
