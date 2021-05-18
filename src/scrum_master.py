@@ -257,12 +257,12 @@ class ScrumMaster:
                                    action_id="search-story")
 
     def start_sprint(self):
-        self.current_sprint += 1
+        self.scrum_board.increment_sid()
         jsr = jr.json_reader("data/scrum_board.json")
         sb = jsr.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
-            s['sprint'] += self.current_sprint
+            s['sprint'] = self.scrum_board.get_sid()
             jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
             jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
         self._create_modal_btn(text="Set Sprint",
