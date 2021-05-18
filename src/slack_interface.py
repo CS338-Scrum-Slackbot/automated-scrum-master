@@ -216,7 +216,7 @@ def updateHome(payload, init, after_button=False):
     print(json.dumps(view, indent=4))
     client.views_publish(user_id=user_id, view=view)
     # view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
-    client.views_publish(user_id=user_id, view=view)
+    # client.views_publish(user_id=user_id, view=view)
     
 
 

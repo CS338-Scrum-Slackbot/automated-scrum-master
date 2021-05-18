@@ -278,12 +278,13 @@ class ScrumMaster:
         self.text, self.blocks = msg, blocks
 
     def start_sprint(self):
-        self.scrum_board.increment_sid()
+        curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
+        self.scrum_board.write_metadata_field(field="current_sprint", value=curr_sprint+1)
         jsr = jr.json_reader("data/scrum_board.json")
         sb = jsr.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
-            s['sprint'] = self.scrum_board.get_sid()
+            s['sprint'] = curr_sprint+1
             jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
             jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
         self._create_modal_btn(text="Set Sprint",
