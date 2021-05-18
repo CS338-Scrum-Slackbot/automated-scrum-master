@@ -139,7 +139,7 @@ class ScrumMaster:
                 flatten = lambda *n: (e for a in n
                     for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
                 if sort_by: stories = sorted(stories, key = lambda x: x[sort_by])
-                story_blocks = flatten([self._story_to_msg(story, add_divider=True, md=json.dumps(metadata2)) for story in stories])
+                story_blocks = flatten([self._story_to_msg(story, md=json.dumps(metadata2)) for story in stories])
             else:
                 story_blocks = [{
                                     "type": "section",
@@ -569,7 +569,7 @@ class ScrumMaster:
             self.blocks = None
 
 
-    def _story_to_msg(self, story):
+    def _story_to_msg(self, story, md=""):
         story_data, log = self.scrum_board.read_story(story['id'], log=None)
         block = copy.deepcopy(READ_STORY_BLOCK)
         
@@ -589,13 +589,23 @@ class ScrumMaster:
                     })
 
         for action in actions:
-            if action['text']['text'] == 'Update':
-                metadata = {"story":story_data, "log":log}
+             if action['text']['text'] == 'Update':
+                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                metadata = {"story":story, "log":log}
+                if md: 
+                    mdata = json.loads(md)
+                    metadata["swimlane"] = mdata["swimlane"]
+                    metadata["sort_by"] = mdata["sort_by"]
                 action['action_id'] = "update-story"
                 action['value'] = json.dumps(metadata)
             else:
                 action['action_id'] = "delete-story"
-                action['value'] = f"story {str(story['id'])}"
+                metadata = {"story": f"story {str(story['id'])}"}
+                if md: 
+                    mdata = json.loads(md)
+                    metadata["swimlane"] =  mdata["swimlane"]
+                    metadata["sort_by"] = mdata["sort_by"]
+                action['value'] = json.dumps(metadata)
         return block
 
     def _get_msg_text(self, key, val):
