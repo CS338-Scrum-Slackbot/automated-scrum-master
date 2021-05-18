@@ -294,8 +294,8 @@ class ScrumMaster:
             self.text = f"You have no swimlanes to {action}. You cannot {action} default swimlanes, but you may create new ones using `create swimlane`."
             return
         else: 
-            msg, blocks = self._create_modal_btn(text="Update swimlane",
-                                                action_id="update-swimlane")
+            msg, blocks = self._create_modal_btn(text=f"{action.title()} swimlane",
+                                                action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
     def process_user_msg(self, text: str):
