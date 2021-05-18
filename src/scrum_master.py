@@ -273,8 +273,8 @@ class ScrumMaster:
 
     def start_sprint(self):
         self.current_sprint += 1
-        jsr = jr.json_reader("data/scrum_board.json")
-        sb = jsr.read_log('sprint_backlog')
+        # jsr = jr.json_reader("data/scrum_board.json")
+        sb = self.reader.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] += self.current_sprint
@@ -589,8 +589,8 @@ class ScrumMaster:
                     })
 
         for action in actions:
-             if action['text']['text'] == 'Update':
-                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+            if action['text']['text'] == 'Update':
+                story, log = self.reader.read(story['id'])
                 metadata = {"story":story, "log":log}
                 if md: 
                     mdata = json.loads(md)
