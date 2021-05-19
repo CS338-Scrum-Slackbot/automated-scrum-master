@@ -1,9 +1,9 @@
-UPDATE_SWIMLANE_MODAL = {
+DELETE_SWIMLANE_MODAL = {
 	"type": "modal",
-    "callback_id": "update-swimlane-modal",
+    "callback_id": "delete-swimlane-modal",
 	"title": {
 		"type": "plain_text",
-		"text": "Update swimlane",
+		"text": "Delete swimlane",
 	},
 	"submit": {
 		"type": "plain_text",
@@ -14,8 +14,8 @@ UPDATE_SWIMLANE_MODAL = {
             "type": "section",
             "text": 
                 {
-                    "type": "plain_text",
-                    "text": "You cannot update default swimlanes.",
+                    "type": "mrkdwn",
+                    "text": "Any stories in a deleted swimlane will be moved to `archived `. You cannot delete default swimlanes.",
                 }
 		},
         {
@@ -44,44 +44,7 @@ UPDATE_SWIMLANE_MODAL = {
                 ],
                 "action_id": "static_select-action"
             }
-        },
-        {
-            "type": "input",
-            "element": {
-                "type": "plain_text_input",
-                "multiline": False,
-                "action_id": "plain_text_input-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "New swimlane name",
-                "emoji": True
-            }
         }
 
-	]
-}
-
-NO_SWIMLANES_MODAL = {
-	"type": "modal",
-	"title": {
-		"type": "plain_text",
-		"text": "Update Swimlane",
-		"emoji": True
-	},
-	"close": {
-		"type": "plain_text",
-		"text": "Close",
-		"emoji": True
-	},
-	"blocks": [
-		{
-			"type": "section",
-			"text": {
-				"type": "plain_text",
-				"text": "No swimlanes can be updated.",
-				"emoji": True
-			}
-		}
 	]
 }

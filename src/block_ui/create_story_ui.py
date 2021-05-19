@@ -100,7 +100,7 @@ CREATE_STORY_MODAL = {
                         "type": "plain_text_input",
                         "placeholder": {
                             "type": "plain_text",
-                            "text": "Sprint number"
+                            "text": "Current sprint number: "
                         },
                         "action_id": "plain_text_input-action"
                     },
