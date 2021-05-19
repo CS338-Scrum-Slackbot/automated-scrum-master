@@ -2,7 +2,7 @@
     "metadata": {
         "sid": 23,
         "story_count": 7,
-        "current_sprint": 21,
+        "current_sprint": 23,
         "current_sprint_starts": 0,
         "current_sprint_ends": 0,
         "sprint_duration": 0,
@@ -63,7 +63,7 @@
                 "id": 3,
                 "priority": 1,
                 "estimate": 16,
-                "sprint": 16,
+                "sprint": 17,
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
