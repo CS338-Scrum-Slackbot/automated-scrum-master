@@ -112,9 +112,9 @@ def handle_interaction():
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
 
-        result = client.chat_scheduledMessages_list()
-        for msg in result["scheduled_messages"]:
-            print(msg)
+        # result = client.chat_scheduledMessages_list()
+        # for msg in result["scheduled_messages"]:
+        #     print(msg)
 
         if 'view' in data:
             # print('\n\nVIEW CHANGED\n\n')
@@ -282,8 +282,8 @@ def schedule_message(time, text="", blocks=[]):
         )
         return result
 
-    except Exception as e:
-        print("Error scheduling message: {}".format(e))
+    except:
+        # print("Error scheduling message: {}".format(e))
         return None
         # logger.error("Error scheduling message: {}".format(e))
 

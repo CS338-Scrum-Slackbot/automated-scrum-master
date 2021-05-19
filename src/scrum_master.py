@@ -346,6 +346,8 @@ class ScrumMaster:
             self.update_or_delete_swimlane("update")
         elif "delete swimlane" in text.lower():
             self.update_or_delete_swimlane("delete")
+        elif "end demo" in text.lower():
+            self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
@@ -606,8 +608,8 @@ class ScrumMaster:
                 self.move_sb_to_sprint()
                 sprint_end = self.scrum_board.read_metadata_field('current_sprint_ends')
                 self.text += f"Sprint {curr_sprint+1} has started and ends {datetime.fromtimestamp(sprint_end).strftime('%Y-%m-%d at %H:%M')}"
-            else:
-                self.text = "Failed to end sprint. Please try again or manually set a new sprint."
+        else:
+            self.text = "Failed to end sprint. Please try again or manually set a new sprint."
 
     def handle_sprint_submission(self, start, end, success=None):
         self.text = ""
