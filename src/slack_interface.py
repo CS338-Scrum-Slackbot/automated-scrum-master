@@ -211,7 +211,7 @@ def end_sprint():
 def extend_sprint():
     # NOTE: extends sprint by 1 day
     # schedule a new end message
-    day = 60#86400
+    day = 300#86400
     sprint_start = scrum_master.scrum_board.read_metadata_field('current_sprint_starts')
     sprint_end = scrum_master.scrum_board.read_metadata_field('current_sprint_ends')
     new_end = sprint_end + day
@@ -236,7 +236,7 @@ def schedule_sprint_end_message(payload_values):
         'weeks': 604800,
         'months': 2419200,
     }
-    duration_in_seconds = 60#duration * seconds_table[unit]
+    duration_in_seconds = 300#duration * seconds_table[unit]
     unix_start = int(datetime.strptime(f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
     unix_end = unix_start + duration_in_seconds
 
