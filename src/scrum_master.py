@@ -590,7 +590,7 @@ class ScrumMaster:
 
         for action in actions:
             if action['text']['text'] == 'Update':
-                story, log = self.reader.read(story['id'])
+                story, log = self.scrum_board.read_story(story['id'])
                 metadata = {"story":story, "log":log}
                 if md: 
                     mdata = json.loads(md)
