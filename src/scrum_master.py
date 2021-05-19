@@ -280,13 +280,12 @@ class ScrumMaster:
     def start_sprint(self):
         curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
         self.scrum_board.write_metadata_field(field="current_sprint", value=curr_sprint+1)
-        jsr = jr.json_reader("data/scrum_board.json")
-        sb = jsr.read_log('sprint_backlog')
+        sb = self.reader.read_log('sprint_backlog')
         for s in sb: 
             if s['status'] == "": s['status'] = 'to-do'
             s['sprint'] = curr_sprint+1
-            jsr.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
-            jsr.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
+            self.reader.update(id=s['id'], new_entry=s, old_log='sprint_backlog')
+            self.reader.move(id=s['id'], dest_log='current_sprint', src_log='sprint_backlog')
         self._create_modal_btn(text="Set Sprint",
                                     action_id="set-sprint")
 
@@ -301,8 +300,8 @@ class ScrumMaster:
             self.text = f"You have no swimlanes to {action}. You cannot {action} default swimlanes, but you may create new ones using `create swimlane`."
             return
         else: 
-            msg, blocks = self._create_modal_btn(text="Update swimlane",
-                                                action_id="update-swimlane")
+            msg, blocks = self._create_modal_btn(text=f"{action.title()} swimlane",
+                                                action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
     def process_user_msg(self, text: str):
@@ -597,7 +596,7 @@ class ScrumMaster:
 
         for action in actions:
             if action['text']['text'] == 'Update':
-                story, log = jr.json_reader("data/scrum_board.json").read(story['id'])
+                story, log = self.scrum_board.read_story(story['id'])
                 metadata = {"story":story, "log":log}
                 if md: 
                     mdata = json.loads(md)
