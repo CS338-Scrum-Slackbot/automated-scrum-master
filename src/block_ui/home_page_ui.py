@@ -179,6 +179,33 @@ SORT_DROPDOWN = [
 		}
 ]
 
+SPRINT_HEADER = [
+	{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Sprint 2",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "*Started:*"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*Ends:*"
+				}
+			]
+		},
+		{
+			"type": "divider"
+		}
+]
+
 RADIO_INIT_OPTION =  {
 						"value": "",
 						"text": {
