@@ -63,6 +63,15 @@ SET_SPRINT_MODAL = {
 						"text": "Duration",
 						"emoji": True
 					},
+					"initial_option":
+						{
+							"text": {
+								"type": "plain_text",
+								"text": "1",
+								"emoji": True
+							},
+							"value": "1"
+						},
 					"options": [
 						{
 							"text": {
@@ -70,7 +79,7 @@ SET_SPRINT_MODAL = {
 								"text": "1",
 								"emoji": True
 							},
-							"value": "value-0"
+							"value": "1"
 						},
 						{
 							"text": {
@@ -78,7 +87,7 @@ SET_SPRINT_MODAL = {
 								"text": "2",
 								"emoji": True
 							},
-							"value": "value-1"
+							"value": "2"
 						},
 						{
 							"text": {
@@ -86,7 +95,7 @@ SET_SPRINT_MODAL = {
 								"text": "3",
 								"emoji": True
 							},
-							"value": "value-2"
+							"value": "3"
 						},
 						{
 							"text": {
@@ -94,7 +103,7 @@ SET_SPRINT_MODAL = {
 								"text": "4",
 								"emoji": True
 							},
-							"value": "value-2"
+							"value": "4"
 						},
 						{
 							"text": {
@@ -102,7 +111,7 @@ SET_SPRINT_MODAL = {
 								"text": "5",
 								"emoji": True
 							},
-							"value": "value-2"
+							"value": "5"
 						},
 						{
 							"text": {
@@ -110,7 +119,7 @@ SET_SPRINT_MODAL = {
 								"text": "6",
 								"emoji": True
 							},
-							"value": "value-2"
+							"value": "6"
 						}
 					],
 					"action_id": "duration"
@@ -122,6 +131,15 @@ SET_SPRINT_MODAL = {
 						"text": "Unit of time",
 						"emoji": True
 					},
+					"initial_option":
+						{
+							"text": {
+								"type": "plain_text",
+								"text": "weeks",
+								"emoji": True
+							},
+							"value": "week"
+						},
 					"options": [
 						{
 							"text": {
@@ -129,7 +147,7 @@ SET_SPRINT_MODAL = {
 								"text": "days",
 								"emoji": True
 							},
-							"value": "value-0"
+							"value": "day"
 						},
 						{
 							"text": {
@@ -137,7 +155,7 @@ SET_SPRINT_MODAL = {
 								"text": "weeks",
 								"emoji": True
 							},
-							"value": "value-1"
+							"value": "week"
 						},
 						{
 							"text": {
@@ -145,7 +163,7 @@ SET_SPRINT_MODAL = {
 								"text": "months",
 								"emoji": True
 							},
-							"value": "value-2"
+							"value": "month"
 						}
 					],
 					"action_id": "unit"

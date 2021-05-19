@@ -2,14 +2,19 @@
     "metadata": {
         "sid": 23,
         "story_count": 7,
-        "current_sprint": 2,
-        "current_sprint_starts": 1620684000,
-        "current_sprint_ends": 1621288800,
+        "current_sprint": 21,
+        "current_sprint_starts": 0,
+        "current_sprint_ends": 0,
+        "sprint_duration": 0,
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
             "U01TK108J86": "Neha Sharma",
             "U01TRPZL02W": "Nathan Timmerman",
             "U01U4CJED7T": "Caspar Popova"
+        },
+        "scheduled_messages": {
+            "type_of_message": "id",
+            "end_sprint": 0
         }
     },
     "Product Backlog": {
@@ -49,31 +54,20 @@
     },
     "Sprint Backlog": {
         "user_generated": false,
-        "stories": [
-            {
-                "id": 3,
-                "priority": 1,
-                "estimate": 20,
-                "sprint": 2,
-                "status": "to-do",
-                "assigned_to": "U01TK108J86",
-                "user_type": "customer",
-                "story": "I want to modify a story."
-            }
-        ]
+        "stories": []
     },
     "Current Sprint": {
         "user_generated": false,
         "stories": [
             {
-                "id": 4,
-                "priority": 3,
-                "estimate": 4,
-                "sprint": 2,
-                "status": "in-progress",
-                "assigned_to": "U01U4CJED7T",
+                "id": 3,
+                "priority": 1,
+                "estimate": 16,
+                "sprint": 16,
+                "status": "to-do",
+                "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to modify a story."
             }
         ]
     },
@@ -89,6 +83,16 @@
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
                 "story": "I want to delete a story."
+            },
+            {
+                "id": 4,
+                "priority": 3,
+                "estimate": 1,
+                "sprint": 7,
+                "status": "completed",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "customer",
+                "story": "I want to update a story."
             }
         ]
     },

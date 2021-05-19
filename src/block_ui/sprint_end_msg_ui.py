@@ -49,7 +49,7 @@ SPRINT_END_MSG = {
 					"style": "danger",
 					"text": {
 						"type": "plain_text",
-						"text": "End Sprint",
+						"text": "End Current Sprint & Start New Sprint",
 						"emoji": True
 					},
 					"value": "click_me_123",
