@@ -11,7 +11,8 @@ from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
 from block_ui.set_sprint_ui import SET_SPRINT_MODAL
 from block_ui.sprint_end_msg_ui import SPRINT_END_MSG
-from block_ui.home_page_ui import * #INIT_HOME_PAGE, SWIMLANE_HEADER, SWIMLANE_FOOTER, SORT_DROPDOWN, STORY_BLOCK, RADIO_INIT_OPTION, SWIMLANE_OPTION
+# INIT_HOME_PAGE, SWIMLANE_HEADER, SWIMLANE_FOOTER, SORT_DROPDOWN, STORY_BLOCK, RADIO_INIT_OPTION, SWIMLANE_OPTION
+from block_ui.home_page_ui import *
 import json
 import copy
 import re
@@ -19,18 +20,19 @@ from datetime import datetime
 import itertools
 
 emojis = {
-            "priority": {
-                -1: "None ",
-                1: ":large_green_square:",
-                2: ":large_yellow_square:",
-                3: ":large_red_square:"
-            },
-            "status": {
-                "to-do": ":inbox_tray:",
-                "in-progress": ":clock2:",
-                "completed": ":white_check_mark:"
-            }
-        }
+    "priority": {
+        -1: "None ",
+        1: ":large_green_square:",
+        2: ":large_yellow_square:",
+        3: ":large_red_square:"
+    },
+    "status": {
+        "to-do": ":inbox_tray:",
+        "in-progress": ":clock2:",
+        "completed": ":white_check_mark:"
+    }
+}
+
 
 class ScrumMaster:
     # Interface with JSON data
@@ -70,7 +72,7 @@ class ScrumMaster:
 
         # Modal editor
         self.editor = ModalEditor()
-    
+
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
         self.scrum_board.write_metadata_field('current_sprint_ends', 0)
@@ -96,96 +98,106 @@ class ScrumMaster:
             md = json.loads(metadata)
             # print('\n\nSTORY IN METADATA\n\n')
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
-            if init_option: sort_by_block = SORT_DROPDOWN
+            if init_option:
+                sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
             if 'old_swimlane' in md:
                 old_swimlane = md['old_swimlane']
             # init_option = "Product Backlog"
             # print(init_option, sort_by)
-        
+
         if not init_option:
             if 'swimlane_select' in payload['view']['state']['values']:
                 init_option = payload['view']['state']['values']['swimlane_select']['swimlane_select']['selected_option']['value']
                 sort_by_block = SORT_DROPDOWN
-            else: init_option = None
+            else:
+                init_option = None
 
         if not sort_by:
             if 'sort_by' in payload['view']['state']['values']:
                 if payload['view']['state']['values']['sort_by']['sort_by']['selected_option']:
                     sort_by = payload['view']['state']['values']['sort_by']['sort_by']['selected_option']['value']
-                else: sort_by = None
-            else: sort_by = None
+                else:
+                    sort_by = None
+            else:
+                sort_by = None
 
-        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", 
-                        "sort_by": sort_by if sort_by else "UNSORTED",
-                        "old_swimlane": old_swimlane if old_swimlane else "NONE"}
+        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED",
+                     "sort_by": sort_by if sort_by else "UNSORTED",
+                     "old_swimlane": old_swimlane if old_swimlane else "NONE"}
 
-        if init_option: 
+        if init_option:
             # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
-                                    {
-                                        "type": "header",
-                                        "text": {
-                                            "type": "plain_text",
-                                            "text": init_option,
-                                            "emoji": True
-                                        }
-                                    }
-                                ]
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": init_option,
+                        "emoji": True
+                    }
+                }
+            ]
             swimlane_footer = [
-                                {
-                                        "type": "context",
-                                        "elements": [
-                                            {
-                                                "type": "plain_text",
-                                                "text": "/ "+init_option,
-                                                "emoji": True
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "type": "divider"
-                                    },
-                                    {
-                                        "type": "divider"
-                                    }
-                            ]
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "plain_text",
+                            "text": "/ "+init_option,
+                            "emoji": True
+                        }
+                    ]
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "divider"
+                }
+            ]
             stories = self.scrum_board.read_log(init_option)
             if not isinstance(stories, str):
                 flatten = lambda *n: (e for a in n
-                    for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
-                if sort_by: stories = sorted(stories, key = lambda x: x[sort_by])
-                story_blocks = flatten([self._story_to_msg(story, md=json.dumps(metadata2)) for story in stories])
+                                      for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
+                if sort_by:
+                    stories = sorted(stories, key=lambda x: x[sort_by])
+                story_blocks = flatten(
+                    [self._story_to_msg(story, md=json.dumps(metadata2)) for story in stories])
             else:
                 story_blocks = [{
-                                    "type": "section",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "There are no stories in this swimlane.",
-                                        "emoji": True
-                                    }
-                                }]
+                    "type": "section",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "There are no stories in this swimlane.",
+                        "emoji": True
+                    }
+                }]
 
-        swimlane_select = self.populate_swimlanes(INIT_HOME_PAGE, init_option=init_option)
+        swimlane_select = self.populate_swimlanes(
+            INIT_HOME_PAGE, init_option=init_option)
         for x in range(len(swimlane_select[3]['elements'])):
             swimlane_select[3]['elements'][x]['value'] = json.dumps(metadata2)
-        
-        sprint_start = self.scrum_board.read_metadata_field('current_sprint_starts')
-        sprint_end = self.scrum_board.read_metadata_field('current_sprint_ends')
+
+        sprint_start = self.scrum_board.read_metadata_field(
+            'current_sprint_starts')
+        sprint_end = self.scrum_board.read_metadata_field(
+            'current_sprint_ends')
         curr_sprint = self.scrum_board.read_metadata_field('current_sprint')
         sprint_header = SPRINT_HEADER
         if sprint_start:
             sprint_header[0]['text']['text'] = f'Sprint {curr_sprint}'
-            sprint_header[1]['elements'][0]['text'] = f"*Started:* {datetime.fromtimestamp(sprint_start).strftime('%Y-%m-%d at %H:%M')}"
-            sprint_header[1]['elements'][1]['text'] = f"*Ends:* {datetime.fromtimestamp(sprint_end).strftime('%Y-%m-%d at %H:%M')}"
+            sprint_header[1]['elements'][0][
+                'text'] = f"*Started:* {datetime.fromtimestamp(sprint_start).strftime('%Y-%m-%d at %H:%M')}"
+            sprint_header[1]['elements'][1][
+                'text'] = f"*Ends:* {datetime.fromtimestamp(sprint_end).strftime('%Y-%m-%d at %H:%M')}"
         else:
             sprint_header[0]['text']['text'] = "No sprint in progress."
             sprint_header[1]['elements'][0]['text'] = "To start a sprint, tell Miyagi \"set sprint\"."
             sprint_header[1]['elements'][1]['text'] = " "
 
-
-
-        ui = list(itertools.chain(sprint_header, swimlane_select, swimlane_header, sort_by_block, story_blocks, swimlane_footer))
+        ui = list(itertools.chain(sprint_header, swimlane_select,
+                                  swimlane_header, sort_by_block, story_blocks, swimlane_footer))
         # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
         # print(json.dumps(ui, indent=4))
 
@@ -199,8 +211,6 @@ class ScrumMaster:
             "private_metadata":  json.dumps(metadata2)
         }
         return view
-
-
 
     def populate_swimlanes(self, blocks, init_option=None):
         swimlanes = self.scrum_board.get_logs()
@@ -217,30 +227,28 @@ class ScrumMaster:
         ]
         if init_option:
             blocks[0]['accessory']['initial_option'] = {
-						"value": init_option,
-						"text": {
-							"type": "plain_text",
-							"text": init_option
-						}
-					}
+                "value": init_option,
+                "text": {
+                    "type": "plain_text",
+                    "text": init_option
+                }
+            }
         return blocks
-
-
 
     def create_story(self):
         msg, blocks = self._create_modal_btn(text="Create Story",
-                                   action_id="create-story")
+                                             action_id="create-story")
         self.text, self.blocks = msg, blocks
 
     def delete_story(self):
         msg, blocks = self._create_modal_btn(text="Delete Story",
-                                   action_id="delete-story")
+                                             action_id="delete-story")
         self.text, self.blocks = msg, blocks
 
     def update_story(self):
-        try: 
+        try:
             id = int(self.text.split(' ')[-1])
-        except: 
+        except:
             self.text = "Story ID must be an int."
             return
         result = self.scrum_board.read_story(id)
@@ -249,9 +257,9 @@ class ScrumMaster:
             return
         story = result[0]
         log = result[1]
-        metadata = {"story":story, "log":log}
-        msg, blocks = self._create_modal_btn(text=f"Update Story {id}", 
-                                             action_id="update-story", 
+        metadata = {"story": story, "log": log}
+        msg, blocks = self._create_modal_btn(text=f"Update Story {id}",
+                                             action_id="update-story",
                                              metadata=json.dumps(metadata))
         self.text, self.blocks = msg, blocks
 
@@ -263,10 +271,10 @@ class ScrumMaster:
             return
 
         try:
-            id_text  = int(self.text.split()[2])
+            id_text = int(self.text.split()[2])
         except (ValueError, IndexError):
             id_text = None
-            
+
         read_text = " ".join(self.text.split()[2:])
         log = None
         from_idx = read_text.find("from")
@@ -278,7 +286,7 @@ class ScrumMaster:
             # If ID is specified, read specific story.
             result = self.scrum_board.read_story(id=id_text, log=log)
             if isinstance(result, str):
-                self.text = result # Handles error case of string from scrum_board
+                self.text = result  # Handles error case of string from scrum_board
                 return
             # Otherwise, stories is one obj that is pretty-printed.
             story = result[0]
@@ -290,7 +298,7 @@ class ScrumMaster:
             stories = self.scrum_board.read_log(log=log)
             self.blocks = []
             if isinstance(stories, str):
-                self.text = stories # Handles error case of string from scrum_board
+                self.text = stories  # Handles error case of string from scrum_board
                 return
             for story in stories:
                 self.blocks += self._story_to_msg(story)
@@ -298,27 +306,28 @@ class ScrumMaster:
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
-                                            action_id="search-story")
+                                             action_id="search-story")
         self.text, self.blocks = msg, blocks
 
     def set_sprint(self):
         msg, blocks = self._create_modal_btn(text="Set Sprint",
-                                    action_id="set-sprint")
+                                             action_id="set-sprint")
         self.text, self.blocks = msg, blocks
 
     def create_swimlane(self):
         msg, blocks = self._create_modal_btn(text="Create swimlane",
-                                            action_id="create-swimlane")
+                                             action_id="create-swimlane")
         self.text, self.blocks = msg, blocks
 
-    def update_or_delete_swimlane(self, action: str): # Where action="update" or "delete"
+    # Where action="update" or "delete"
+    def update_or_delete_swimlane(self, action: str):
         if len(self.scrum_board.list_user_swimlanes()) == 0:
             # if there are no user-generated swimlanes ..
             self.text = f"You have no swimlanes to {action}. You cannot {action} default swimlanes, but you may create new ones using `create swimlane`."
             return
-        else: 
+        else:
             msg, blocks = self._create_modal_btn(text=f"{action.title()} swimlane",
-                                                action_id=f"{action}-swimlane")
+                                                 action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
     def process_user_msg(self, text: str):
@@ -373,7 +382,7 @@ class ScrumMaster:
                 ],
             }
         ] if text != "" else None
-        
+
         msg = ""
         return msg, blocks
 
@@ -390,16 +399,16 @@ class ScrumMaster:
         elif action_id == 'set-sprint':
             return self.init_sprint_modal(SET_SPRINT_MODAL)
         elif action_id == "create-swimlane":
-            modal =  self.editor.edit_create_swimlane_modal()
+            modal = self.editor.edit_create_swimlane_modal()
             modal['private_metadata'] = metadata
             return modal
         elif action_id == "update-swimlane":
-            modal =  self.editor.edit_update_or_delete_swimlane_modal("update")
+            modal = self.editor.edit_update_or_delete_swimlane_modal("update")
             modal['private_metadata'] = metadata
             return modal
         elif action_id == "delete-swimlane":
             modal = self.editor.edit_update_or_delete_swimlane_modal("delete")
-            modal['private_metadata'] = metadata
+            modal['private_metadata'] = json.dumps({"swimlane": "UNSELECTED"})
             return modal
         elif action_id == "example":
             return EXAMPLE_MODAL
@@ -420,7 +429,8 @@ class ScrumMaster:
             for x in logs
         ]
         modal['blocks'][1]['element']['options'] = swimlane_options
-        curr_sprint = str(self.scrum_board.read_metadata_field("current_sprint"))
+        curr_sprint = str(
+            self.scrum_board.read_metadata_field("current_sprint"))
         modal['blocks'][4]['element']['placeholder']['text'] = "Current sprint number: "+curr_sprint
         modal['private_metadata'] = metadata
         return modal
@@ -431,10 +441,9 @@ class ScrumMaster:
             init_value = json.loads(metadata)['story']
         except:
             init_value = ""
-        modal['blocks'][1]['element']['initial_value'] = init_value #md['story']
+        modal['blocks'][1]['element']['initial_value'] = init_value  # md['story']
         modal['private_metadata'] = metadata
         return modal
-
 
     def init_sprint_modal(self, modal):
         print('INIT SPRINT MODAL')
@@ -447,16 +456,18 @@ class ScrumMaster:
         # if there is a sprint that already exists, tell user this
         # to ensure they actually want to reset sprint
         if exists:
-            curr_sprint_start = self.scrum_board.read_metadata_field("current_sprint_starts")
-            curr_sprint_end = self.scrum_board.read_metadata_field("current_sprint_ends")
+            curr_sprint_start = self.scrum_board.read_metadata_field(
+                "current_sprint_starts")
+            curr_sprint_end = self.scrum_board.read_metadata_field(
+                "current_sprint_ends")
             prepend = {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*WARNING:* _You already have a sprint set that" + \
-                        f" started on {datetime.fromtimestamp(curr_sprint_start).strftime('%Y-%m-%d at %H:%M')}" + \
-                            f" and ends on {datetime.fromtimestamp(curr_sprint_end).strftime('%Y-%m-%d at %H:%M')}." + \
-                                " You may set a new sprint, but this will *end the current sprint* and start a new one!_"
+                    "text": f"*WARNING:* _You already have a sprint set that" +
+                        f" started on {datetime.fromtimestamp(curr_sprint_start).strftime('%Y-%m-%d at %H:%M')}" +
+                            f" and ends on {datetime.fromtimestamp(curr_sprint_end).strftime('%Y-%m-%d at %H:%M')}." +
+                    " You may set a new sprint, but this will *end the current sprint* and start a new one!_"
                 }
             }
             modal_with_warning = copy.deepcopy(modal)
@@ -467,9 +478,11 @@ class ScrumMaster:
 
     def _get_valid_logs(self, create=0):
         # can create a story in any swimlane EXCEPT previous_sprint and archived
-        if create: return [x for x in self.scrum_board.get_logs() if x not in ['Previous Sprint','Archived']]
+        if create:
+            return [x for x in self.scrum_board.get_logs() if x not in ['Previous Sprint', 'Archived']]
         # can move a story to any swimlane EXCEPT previous_sprint
-        else: return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
+        else:
+            return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
         # print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
@@ -489,33 +502,42 @@ class ScrumMaster:
         story_update = data['story']
         modal['title']['text'] = f'Update Story {story_update["id"]}'
         if 'swimlane' in data:
-            private_metadata = {"story":story_update, "log": data["log"], "swimlane": data["swimlane"], "sort_by": data["sort_by"]}
+            private_metadata = {
+                "story": story_update, "log": data["log"], "swimlane": data["swimlane"], "sort_by": data["sort_by"]}
         else:
-            private_metadata = {"story":story_update, "log": data["log"]}
-        modal['private_metadata'] = json.dumps(private_metadata) #f'{story_update["id"]},{data["log"]}'
+            private_metadata = {"story": story_update, "log": data["log"]}
+        # f'{story_update["id"]},{data["log"]}'
+        modal['private_metadata'] = json.dumps(private_metadata)
         for b in modal['blocks']:
             if b['label']['text'] == 'Swimlane':
                 b['element']['options'] = swimlane_options
                 b['element']['initial_option']['text']['text'] = data['log']
                 b['element']['initial_option']['value'] = data['log']
             elif b['label']['text'] == 'Estimate':
-                b['element']['initial_option']['text']['text'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
-                b['element']['initial_option']['value'] = str(story_update['estimate']) if story_update['estimate'] != -1 else "1"
+                b['element']['initial_option']['text']['text'] = str(
+                    story_update['estimate']) if story_update['estimate'] != -1 else "1"
+                b['element']['initial_option']['value'] = str(
+                    story_update['estimate']) if story_update['estimate'] != -1 else "1"
             elif b['label']['text'] == 'Sprint':
-                curr_sprint = str(self.scrum_board.read_metadata_field("current_sprint"))
-                b['element']['initial_value'] = str(story_update['sprint']) #if story_update['sprint'] else curr_sprint
+                curr_sprint = str(
+                    self.scrum_board.read_metadata_field("current_sprint"))
+                # if story_update['sprint'] else curr_sprint
+                b['element']['initial_value'] = str(story_update['sprint'])
                 b['element']['placeholder']['text'] = "Current sprint number: "+curr_sprint
             elif b['label']['text'] == 'Priority':
-                if story_update['priority'] != -1: 
-                    p = list(self.priorities.keys())[list(self.priorities.values()).index(story_update['priority'])]
+                if story_update['priority'] != -1:
+                    p = list(self.priorities.keys())[
+                        list(self.priorities.values()).index(story_update['priority'])]
                     b['element']['initial_option']['text']['text'] = p
                     b['element']['initial_option']['value'] = p.lower()
                 else:
                     b['element']['initial_option']['text']['text'] = 'Low'
                     b['element']['initial_option']['value'] = 'low'
             elif b['label']['text'] == 'Status':
-                b['element']['initial_option']['text']['text'] = story_update['status'].capitalize() if story_update['status'] else 'None'
-                b['element']['initial_option']['value'] = story_update['status'].lower() if story_update['status'] else 'none'
+                b['element']['initial_option']['text']['text'] = story_update['status'].capitalize(
+                ) if story_update['status'] else 'None'
+                b['element']['initial_option']['value'] = story_update['status'].lower(
+                ) if story_update['status'] else 'none'
             elif b['label']['text'] == 'User Type':
                 b['element']['initial_value'] = story_update['user_type'].capitalize()
             elif b['label']['text'] == 'Story Title':
@@ -550,63 +572,76 @@ class ScrumMaster:
             # print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
             # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
-                payload_values, [md["story"]["id"],md["log"]])#payload['view']['private_metadata'].split(','))
+                payload_values, [md["story"]["id"], md["log"]])  # payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
-            pass 
+            pass
             # ignore because this is handled in slack_interface.py
             # since we need the client to schedule a message
         else:
             pass
-    
+
     def move_sb_to_sprint(self):
         curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
-        self.scrum_board.write_metadata_field(field="current_sprint", value=curr_sprint+1)
+        self.scrum_board.write_metadata_field(
+            field="current_sprint", value=curr_sprint+1)
         sb = self.scrum_board.read_log('Sprint Backlog')
-        for s in sb: 
-            if s['status'] == "": s['status'] = 'to-do'
+        for s in sb:
+            if s['status'] == "":
+                s['status'] = 'to-do'
             s['sprint'] = curr_sprint+1
-            self.scrum_board.update_story(s, "Sprint Backlog", "Current Sprint")
+            self.scrum_board.update_story(
+                s, "Sprint Backlog", "Current Sprint")
 
     def start_new_sprint(self):
-        sprint_start = self.scrum_board.read_metadata_field('current_sprint_starts')
-        sprint_end = self.scrum_board.read_metadata_field('current_sprint_ends')
-        sprint_duration = self.scrum_board.read_metadata_field('sprint_duration')
+        sprint_start = self.scrum_board.read_metadata_field(
+            'current_sprint_starts')
+        sprint_end = self.scrum_board.read_metadata_field(
+            'current_sprint_ends')
+        sprint_duration = self.scrum_board.read_metadata_field(
+            'sprint_duration')
 
-        self.scrum_board.write_metadata_field('current_sprint_starts', sprint_start + sprint_duration)
-        self.scrum_board.write_metadata_field('current_sprint_ends', sprint_end + sprint_duration)
+        self.scrum_board.write_metadata_field(
+            'current_sprint_starts', sprint_start + sprint_duration)
+        self.scrum_board.write_metadata_field(
+            'current_sprint_ends', sprint_end + sprint_duration)
 
         # self.move_sb_to_sprint()
 
     def extend_sprint(self, new_end, success):
         # NOTE: extends sprint by ONE day
         if success:
-            curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
-            self.scrum_board.write_metadata_field('current_sprint_ends', new_end)
+            curr_sprint = self.scrum_board.read_metadata_field(
+                "current_sprint")
+            self.scrum_board.write_metadata_field(
+                'current_sprint_ends', new_end)
             self.text = f"Sprint {curr_sprint} successfully extended." + \
                 f" It now ends on {datetime.fromtimestamp(new_end).strftime('%Y-%m-%d at %H:%M')}"
         else:
             self.text = 'Extending sprint failed. Please try again.'
 
-
-    def end_sprint(self, button=False, success=True): 
+    def end_sprint(self, button=False, success=True):
         if success:
             # NOTE: ALSO STARTS NEW SPRINT
-            curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
+            curr_sprint = self.scrum_board.read_metadata_field(
+                "current_sprint")
             self.text = f"Sprint {curr_sprint} has ended!\n"
-            
+
             curr_sprint_log = self.scrum_board.read_log('Current Sprint')
             for s in curr_sprint_log:
                 if s['status'] == 'completed':
                     # move to previous sprints
-                    self.scrum_board.update_story(s, "Current Sprint", "Previous Sprint")
+                    self.scrum_board.update_story(
+                        s, "Current Sprint", "Previous Sprint")
                 else:
                     s['sprint'] += 1
-                    self.scrum_board.update_story(s, "Current Sprint", "Current Sprint")
-            
+                    self.scrum_board.update_story(
+                        s, "Current Sprint", "Current Sprint")
+
             self.start_new_sprint()
-            if button: 
+            if button:
                 self.move_sb_to_sprint()
-                sprint_end = self.scrum_board.read_metadata_field('current_sprint_ends')
+                sprint_end = self.scrum_board.read_metadata_field(
+                    'current_sprint_ends')
                 self.text += f"Sprint {curr_sprint+1} has started and ends {datetime.fromtimestamp(sprint_end).strftime('%Y-%m-%d at %H:%M')}"
         else:
             self.text = "Failed to end sprint. Please try again or manually set a new sprint."
@@ -614,13 +649,15 @@ class ScrumMaster:
     def handle_sprint_submission(self, start, end, success=None):
         self.text = ""
         if success:
-            curr_sprint_start = self.scrum_board.read_metadata_field("current_sprint_starts")
+            curr_sprint_start = self.scrum_board.read_metadata_field(
+                "current_sprint_starts")
             # if a sprint already exists, user was warned and still set a new one.
             # so end the current sprint
-            if curr_sprint_start !=0:
+            if curr_sprint_start != 0:
                 self.end_sprint()
 
-            self.scrum_board.write_metadata_field('current_sprint_starts', start)
+            self.scrum_board.write_metadata_field(
+                'current_sprint_starts', start)
             self.scrum_board.write_metadata_field('current_sprint_ends', end)
             self.scrum_board.write_metadata_field('sprint_duration', end-start)
 
@@ -628,20 +665,21 @@ class ScrumMaster:
             self.move_sb_to_sprint()
 
             # save scheduled message in metadata
-            self.save_sched_message('end_sprint', success["scheduled_message_id"]) 
+            self.save_sched_message(
+                'end_sprint', success["scheduled_message_id"])
             # sched_msgs = self.scrum_board.read_metadata_field("scheduled_messages")
             # msg_id = success["scheduled_message_id"]
             # sched_msgs['end_sprint'] = msg_id
             # self.scrum_board.write_metadata_field('scheduled_messages', sched_msgs)
-            
-            curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
+
+            curr_sprint = self.scrum_board.read_metadata_field(
+                "current_sprint")
             self.text += f"Sprint {curr_sprint} has been set!\nIt begins on {datetime.fromtimestamp(start).strftime('%Y-%m-%d at %H:%M')} " + \
-                        f"and ends on {datetime.fromtimestamp(end).strftime('%Y-%m-%d at %H:%M')}."
+                f"and ends on {datetime.fromtimestamp(end).strftime('%Y-%m-%d at %H:%M')}."
             self.blocks = None
         else:
             self.text = "Failed to set sprint. Please try again."
             self.blocks = None
-
 
     def save_sched_message(self, field, msg_id):
         sched_msgs = self.scrum_board.read_metadata_field("scheduled_messages")
@@ -654,25 +692,28 @@ class ScrumMaster:
 
     def check_if_sprint_exists(self):
         sched_msgs = self.scrum_board.read_metadata_field("scheduled_messages")
-        return sched_msgs['end_sprint'] # will be 0 if not set
+        return sched_msgs['end_sprint']  # will be 0 if not set
 
     def get_sprint_end_msg(self, start, end):
         msg = SPRINT_END_MSG
         new_sprint = self.scrum_board.read_metadata_field("current_sprint") + 1
         msg['blocks'][0]['text']['text'] = f"Sprint {new_sprint} has ended!"
-        msg['blocks'][1]['elements'][0]['text'] = f"*Started:* {datetime.fromtimestamp(start).strftime('%Y-%m-%d at %H:%M')}"
-        msg['blocks'][1]['elements'][1]['text'] = f"*Ended:* {datetime.fromtimestamp(end).strftime('%Y-%m-%d at %H:%M')}"
+        msg['blocks'][1]['elements'][0][
+            'text'] = f"*Started:* {datetime.fromtimestamp(start).strftime('%Y-%m-%d at %H:%M')}"
+        msg['blocks'][1]['elements'][1][
+            'text'] = f"*Ended:* {datetime.fromtimestamp(end).strftime('%Y-%m-%d at %H:%M')}"
         return msg
-
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1
         # print(f'\n\nPROCESS UPDATE SUBMISSION MD: {metadata}\n\n')
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
-        priority = self.priorities[self._get_radio_group_item(payload_values, 6).capitalize()]
+        priority = self.priorities[self._get_radio_group_item(
+            payload_values, 6).capitalize()]
         status = self._get_radio_group_item(payload_values, 5)
         assigned_to = self._get_userselect_item(payload_values, 4)
-        try: sprint = int(self._get_plaintext_input_item(payload_values, 3))
+        try:
+            sprint = int(self._get_plaintext_input_item(payload_values, 3))
         except:
             self.text = "Sprint must be an integer."
             self.blocks = None
@@ -682,38 +723,38 @@ class ScrumMaster:
         swimlane = self._get_dropdown_select_item(payload_values, 0)
 
         story = {
-                "id": int(metadata[0]) if metadata else None,
-                "priority": priority,
-                "estimate": estimate,
-                "sprint": sprint,
-                "status": status,
-                "assigned_to": assigned_to,
-                "user_type": user_type,
-                "story": story_title
-                }
+            "id": int(metadata[0]) if metadata else None,
+            "priority": priority,
+            "estimate": estimate,
+            "sprint": sprint,
+            "status": status,
+            "assigned_to": assigned_to,
+            "user_type": user_type,
+            "story": story_title
+        }
 
         if metadata:
-            update = self.scrum_board.update_story(story, metadata[1], swimlane)
+            update = self.scrum_board.update_story(
+                story, metadata[1], swimlane)
             self.text = f"Story {int(metadata[0])} updated successfully!" if update else f"Failed to update story {int(metadata[0])}."
             self.blocks = None
-        else: 
+        else:
             created_sid = self.scrum_board.create_story(story, swimlane)
             self.text = f"Story {created_sid} created successfully!" if created_sid else "Failed to create story."
             self.blocks = None
 
-
     def _story_to_msg(self, story, md=""):
         story_data, log = self.scrum_board.read_story(story['id'], log=None)
         block = copy.deepcopy(READ_STORY_BLOCK)
-        
+
         story_content, actions = block[3]['fields'], block[5]['elements']
-        
+
         # Set the context field to the story's log
         block[1]['elements'][0]['text'] = f"{' '.join([tag[0].upper() + tag[1:] for tag in log.split('_')])}"
 
         for k, v in story_data.items():
             if v:
-                if k=="id":
+                if k == "id":
                     block[0]['text']['text'] = f"Story ID: {v}"
                 else:
                     story_content.append({
@@ -724,8 +765,8 @@ class ScrumMaster:
         for action in actions:
             if action['text']['text'] == 'Update':
                 story, log = self.scrum_board.read_story(story['id'])
-                metadata = {"story":story, "log":log}
-                if md: 
+                metadata = {"story": story, "log": log}
+                if md:
                     mdata = json.loads(md)
                     metadata["swimlane"] = mdata["swimlane"]
                     metadata["sort_by"] = mdata["sort_by"]
@@ -734,9 +775,9 @@ class ScrumMaster:
             else:
                 action['action_id'] = "delete-story"
                 metadata = {"story": f"story {str(story['id'])}"}
-                if md: 
+                if md:
                     mdata = json.loads(md)
-                    metadata["swimlane"] =  mdata["swimlane"]
+                    metadata["swimlane"] = mdata["swimlane"]
                     metadata["sort_by"] = mdata["sort_by"]
                 action['value'] = json.dumps(metadata)
         return block
@@ -745,25 +786,24 @@ class ScrumMaster:
         label = ' '.join([tag[0].upper() + tag[1:] for tag in key.split('_')])
         text = f"*{label}:* "
 
-        if label=="Priority" or label=="Status":
+        if label == "Priority" or label == "Status":
             try:
                 emoji = emojis[key][val]
             except KeyError:
                 emoji = ""
-            
-            if label=="Priority":
+
+            if label == "Priority":
                 for k, v in self.priorities.items():
-                    if v==val:
+                    if v == val:
                         val = k
                         break
             return text + f"{val}\t" + emoji
-        elif label=="Assigned To":
+        elif label == "Assigned To":
             return text + self._get_member_name(val)
-        elif label=="Estimate" or label=="Sprint" or label=="User Type" or label=="Story":
+        elif label == "Estimate" or label == "Sprint" or label == "User Type" or label == "Story":
             return text + f"{val}"
         else:
             return ""
-
 
     def _process_delete_story(self, payload_values):
         story_id_string = self._get_plaintext_input_item(payload_values, 0)
@@ -779,10 +819,11 @@ class ScrumMaster:
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
-        stories = self.scrum_board.search_story(lookup_text=lookup_text, logs=swimlanes, fields=fields )
+        stories = self.scrum_board.search_story(
+            lookup_text=lookup_text, logs=swimlanes, fields=fields)
         self.blocks = []
         if isinstance(stories, str):
-            self.text = stories # Handles error case of string from scrum_board
+            self.text = stories  # Handles error case of string from scrum_board
             return
         # Otherwise, stories is a list of objs that are pretty-printed.
         for story in stories:
@@ -804,10 +845,10 @@ class ScrumMaster:
     def _process_delete_swimlane(self, payload_values):
         selected_option = self._get_dropdown_select_item(payload_values, 0)
         idx = selected_option.find("(")
-        name = selected_option[:idx-1] # need to remove " (X)" notation
+        name = selected_option[:idx-1]  # need to remove " (X)" notation
         self.text = self.scrum_board.delete_swimlane(name)
         self.blocks = []
-        
+
     @staticmethod
     def _get_member_name(id):
         with open('data/scrum_board.json') as f:
@@ -816,7 +857,7 @@ class ScrumMaster:
             return id_to_name[id]
         except KeyError:
             return id
-    
+
     # Methods to help parse modal submission payload fields
     @staticmethod
     def _get_userselect_item(payload_values, index):
