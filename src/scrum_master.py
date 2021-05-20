@@ -116,6 +116,9 @@ class ScrumMaster:
                 else: sort_by = None
             else: sort_by = None
 
+        if init_option and init_option not in self.scrum_board.get_logs():
+                init_option = "Product Backlog"
+
         metadata2 = {"swimlane": init_option if init_option else "UNSELECTED", 
                         "sort_by": sort_by if sort_by else "UNSORTED",
                         "old_swimlane": old_swimlane if old_swimlane else "NONE"}
