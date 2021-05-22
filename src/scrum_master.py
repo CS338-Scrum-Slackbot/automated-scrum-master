@@ -819,8 +819,12 @@ class ScrumMaster:
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
+        include_archived = self._get_checkboxes_action(payload_values, 3)
+        print(f"result from function: {include_archived}")
+        include_archived = False if include_archived == [] else True
+        print(f"result after processing: {include_archived}")
         stories = self.scrum_board.search_story(
-            lookup_text=lookup_text, logs=swimlanes, fields=fields)
+            lookup_text=lookup_text, logs=swimlanes, fields=fields, include_archived=include_archived)
         self.blocks = []
         if isinstance(stories, str):
             self.text = stories  # Handles error case of string from scrum_board
@@ -873,7 +877,6 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
-        # print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod
@@ -883,6 +886,10 @@ class ScrumMaster:
         for x in selected_options:
             selected_text.append(x['text']['text'])
         return selected_text
+
+    @staticmethod
+    def _get_checkboxes_action(payload_values, index):
+        return payload_values[index]["actionId-0"]['selected_options']
 
     def get_response(self):
         # self.text is the textual message to be displayed by bot

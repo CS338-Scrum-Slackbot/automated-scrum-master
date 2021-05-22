@@ -48,7 +48,12 @@ class ScrumBoard:
             return 0
         return self.reader.update(story['id'], story, log, new_log)
 
-    def search_story(self, lookup_text: str, logs: list, fields: list):
+    def search_story(self, lookup_text: str, logs: list, fields: list, include_archived: bool):
+        print(f"scrum board called with {include_archived}")
+        if not include_archived and len(logs) == 0:
+            logs = self.get_logs()[:] # Need to copy list
+            logs.remove("Archived")
+            print("scrum board has changed log list")
         tuples = self.reader.search(
             lookup=lookup_text, logs=logs, fields=fields)
         if tuples is None:
@@ -118,7 +123,7 @@ class ScrumBoard:
         elif result == -2: return f"`{log_name}` does not exist."
         elif result == -1: return f"`{log_name}` is a default log and may not be deleted."
         elif result == 0: return f"Failed to move stories from `{log_name}` before deletion."
-        return f"`{log_name}` successfully deleted; {len(ids)} stories moved to `archived`."
+        return f"`{log_name}` successfully deleted; {len(ids)} stories moved to `Archived`."
 
     def list_user_swimlanes(self):
         return self.reader.list_user_gen_logs()

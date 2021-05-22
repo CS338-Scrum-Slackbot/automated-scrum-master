@@ -86,6 +86,25 @@ SEARCH_STORY_MODAL = {
                         ],
 				"action_id": "multi_static_select-action"
 			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "checkboxes",
+					"options": [
+						{
+							"text": {
+								"type": "plain_text",
+								"text": "Include archived stories",
+								"emoji": True
+							},
+							"value": "value-0"
+						}
+					],
+					"action_id": "actionId-0"
+				}
+			]
 		}
 
 	]

@@ -3,9 +3,9 @@
         "sid": 25,
         "story_count": 7,
         "current_sprint": 27,
-        "current_sprint_starts": 1621466460,
-        "current_sprint_ends": 1621466520,
-        "sprint_duration": 60,
+        "current_sprint_starts": 0,
+        "current_sprint_ends": 0,
+        "sprint_duration": 0,
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
             "U01TK108J86": "Neha Sharma",
@@ -14,7 +14,7 @@
         },
         "scheduled_messages": {
             "type_of_message": "id",
-            "end_sprint": "Q0235KZHCQY"
+            "end_sprint": 0
         }
     },
     "Product Backlog": {
