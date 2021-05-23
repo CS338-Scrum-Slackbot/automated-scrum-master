@@ -27,7 +27,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#neha-test"
 
 # delete all scheduled messages on start-up
 result = client.chat_scheduledMessages_list()
@@ -125,15 +125,16 @@ def handle_interaction():
         # for msg in result["scheduled_messages"]:
         #     print(msg)
 
-        if 'view' in data and data['view']['type'] == 'home':
+        if 'view' in data:
             # print('\n\nVIEW CHANGED\n\n')
-            if data['actions'][0]['action_id'] in view_actions:
-                action_id = data['actions'][0]['action_id']
-                value = data['actions'][0]['value']
-                send_modal(data['trigger_id'], modal=scrum_master.create_modal(
-                    action_id, metadata=value))
-            else:
-                updateHome(data, init=0)
+            if data['view']['type'] == 'home':
+                if data['actions'][0]['action_id'] in view_actions:
+                    action_id = data['actions'][0]['action_id']
+                    value = data['actions'][0]['value']
+                    send_modal(data['trigger_id'], modal=scrum_master.create_modal(
+                        action_id, metadata=value))
+                else:
+                    updateHome(data, init=0)
         else:
             try:
                 # Get the action_id and value fields from the event payload
@@ -144,11 +145,7 @@ def handle_interaction():
                 return ''
             # Send a modal with our obtained trigger_id
             # Which modal to send is evaluated in scrum_master based on the provided action_id
-            if action_id == "confirm-delete":
-                view_id = data['view']['id']
-                injected_view = scrum_master.process_delete_sequence(data)
-                client.views_update(view=injected_view, view_id=view_id)
-            elif action_id == 'end-sprint':
+            if action_id == 'end-sprint':
                 end_sprint()
                 text_msg, interactive_msg = scrum_master.get_response()
                 send_message(text_msg, interactive_msg)
@@ -169,6 +166,10 @@ def handle_interaction():
                 print("START SPRINT MODAL SUBMITTED")
                 schedule_sprint_end_message(
                     list(data['view']['state']['values'].values()))
+
+            if callback_id == "delete-story-modal" or callback_id == "delete-swimlane-modal":
+                injected_modal = scrum_master.process_delete_sequence(data)
+                return injected_modal
             # Extract relevant data from modal
             response = scrum_master.process_modal_submission(
                 data, callback_id)
@@ -202,6 +203,7 @@ def handle_interaction():
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
+            print("here")
             updateHome(data, init=0, after_button=True)
 
         except KeyError as e:

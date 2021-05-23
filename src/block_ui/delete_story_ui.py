@@ -4,17 +4,20 @@ DELETE_STORY_MODAL = {
         "text": "Delete Story"
     },
     "type": "modal",
+    "submit": {
+        "type": "plain_text",
+        "text": "Submit",
+    },
     "callback_id": "delete-story-modal",
     "blocks": [
         {
             "type": "divider"
         },
         {
-            "dispatch_action": True,
             "type": "input",
             "element": {
                     "type": "plain_text_input",
-                    "action_id": "confirm-delete"
+                    "action_id": "plain_text_input-action"
             },
             "label": {
                 "type": "plain_text",
