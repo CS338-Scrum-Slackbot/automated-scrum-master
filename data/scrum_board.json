@@ -1,15 +1,20 @@
 {
     "metadata": {
-        "sid": 23,
+        "sid": 25,
         "story_count": 7,
-        "current_sprint": 2,
-        "current_sprint_starts": 1620684000,
-        "current_sprint_ends": 1621288800,
+        "current_sprint": 27,
+        "current_sprint_starts": 1621466460,
+        "current_sprint_ends": 1621466520,
+        "sprint_duration": 60,
         "id_to_name": {
             "U01TB0ZH5F1": "Brendan Lamishaw",
             "U01TK108J86": "Neha Sharma",
             "U01TRPZL02W": "Nathan Timmerman",
             "U01U4CJED7T": "Caspar Popova"
+        },
+        "scheduled_messages": {
+            "type_of_message": "id",
+            "end_sprint": "Q0235KZHCQY"
         }
     },
     "Product Backlog": {
@@ -44,36 +49,45 @@
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
                 "story": "As a customer, I want to update a story."
+            },
+            {
+                "id": 23,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 24,
+                "status": "none",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "tester",
+                "story": "Test"
+            },
+            {
+                "id": 24,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 25,
+                "status": "none",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "user",
+                "story": "As a user, I want to make a new story."
             }
         ]
     },
     "Sprint Backlog": {
         "user_generated": false,
-        "stories": [
-            {
-                "id": 3,
-                "priority": 1,
-                "estimate": 20,
-                "sprint": 2,
-                "status": "to-do",
-                "assigned_to": "U01TK108J86",
-                "user_type": "customer",
-                "story": "I want to modify a story."
-            }
-        ]
+        "stories": []
     },
     "Current Sprint": {
         "user_generated": false,
         "stories": [
             {
-                "id": 4,
-                "priority": 3,
-                "estimate": 4,
-                "sprint": 2,
-                "status": "in-progress",
-                "assigned_to": "U01U4CJED7T",
+                "id": 3,
+                "priority": 1,
+                "estimate": 16,
+                "sprint": 18,
+                "status": "to-do",
+                "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to modify a story."
             }
         ]
     },
@@ -89,6 +103,16 @@
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
                 "story": "I want to delete a story."
+            },
+            {
+                "id": 4,
+                "priority": 3,
+                "estimate": 1,
+                "sprint": 7,
+                "status": "completed",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "customer",
+                "story": "I want to update a story."
             }
         ]
     },
@@ -104,12 +128,7 @@
                 "assigned_to": "U01TB0ZH5F1",
                 "user_type": "tester",
                 "story": "As a tester, I want to program."
-            }
-        ]
-    },
-    "My New Swimlane": {
-        "user_generated": true,
-        "stories": [
+            },
             {
                 "id": 22,
                 "priority": 3,
@@ -119,12 +138,7 @@
                 "assigned_to": "U01TB0ZH5F1",
                 "user_type": "user",
                 "story": "refactor test"
-            }
-        ]
-    },
-    "My Second New Swimlane": {
-        "user_generated": true,
-        "stories": [
+            },
             {
                 "id": 22,
                 "priority": 3,
@@ -161,5 +175,28 @@
                 "story": "I need to study for my exam"
             }
         ]
+    },
+    "WADS": {
+        "user_generated": true,
+        "stories": [
+            {
+                "id": 24,
+                "priority": 3,
+                "estimate": 1,
+                "sprint": 1,
+                "status": "to-do",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "test",
+                "story": "test"
+            }
+        ]
+    },
+    "Parking Lot": {
+        "user_generated": true,
+        "stories": []
+    },
+    "Parking Lot 2": {
+        "user_generated": true,
+        "stories": []
     }
 }
