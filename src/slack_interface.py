@@ -24,7 +24,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # Class to handle bot logic
 scrum_master = ScrumMaster()
@@ -47,7 +47,6 @@ def get_all_members():
 
 def populate_members():
     members = get_all_members()
-    # print(json.dumps(members, indent=4))
     id_to_name = {x['id']: x['real_name']
                   for x in members if not x['is_bot'] and x['real_name'] != 'Slackbot'}
     with open(file=SCRUM_BOARD, mode="r+") as f:
@@ -133,8 +132,6 @@ def handle_interaction():
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
-            print(
-                f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
 
             # Extract relevant data from modal
             response = scrum_master.process_modal_submission(
@@ -152,8 +149,6 @@ def handle_interaction():
                     if md['swimlane'] == response[0]:  # old name
                         md['swimlane'] = response[1]
                         data['view']['private_metadata'] = json.dumps(md)
-                    print(f'\n\nMETADATA IN UPDATE\n\n')
-                    print(json.dumps(data, indent=4))
                     for b in data['view']['blocks'][1]['element']['options']:
                         if b['text']['text'] == response[0]:
                             b['text']['text'] = response[1]
@@ -161,9 +156,6 @@ def handle_interaction():
                 except:
                     data['view']['private_metadata'] = json.dumps(
                         {'swimlane': response[1]})
-
-                    print(f'\n\nNO METADATA IN UPDATE\n\n')
-                    print(json.dumps(data, indent=4))
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
@@ -179,14 +171,12 @@ def handle_interaction():
 
 @slack_event_adapter.on('team_join')
 def team_join_event(payload):
-    print('TEAM JOIN DETECTED!!')
     register_or_update_member(payload)
     return ''
 
 
 @slack_event_adapter.on('user_change')
 def user_change_event(payload):
-    print('USER CHANGE DETECTED!!')
     register_or_update_member(payload)
     return ''
 
@@ -214,8 +204,6 @@ def displayHome(payload):
 def updateHome(payload, init, after_button=False):
     button_metadata = None
     if after_button:
-        print('\n\nAFTER BUTTON\n\n')
-        # print(json.dumps(payload, indent=4))
         button_metadata = payload['view']['private_metadata']
     if init:
         user_id = payload.get("event", {}).get("user")

@@ -73,8 +73,6 @@ class ScrumMaster:
         self.editor = ModalEditor()
 
     def update_home(self, payload, metadata=""):
-        # print(json.dumps(payload, indent=4))
-        # print(f'\n\nUPDATE HOME METADATA: {metadata}\n\n')
         swimlane_select = []
         story_blocks = []
         swimlane_header = []
@@ -83,14 +81,11 @@ class ScrumMaster:
 
         init_option, sort_by = None, None
         if metadata and metadata != 'None':
-            print(f'UPDATE HOME METADATA: {metadata}, {type(metadata)}')
             md = json.loads(metadata)
-            print('\n\nSTORY IN METADATA\n\n')
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option:
                 sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
-            print(init_option, sort_by)
 
         if not init_option:
             if 'swimlane_select' in payload['view']['state']['values']:
@@ -98,7 +93,7 @@ class ScrumMaster:
                 sort_by_block = SORT_DROPDOWN
             else:
                 init_option = None
-
+        
         if not sort_by:
             if 'sort_by' in payload['view']['state']['values']:
                 if payload['view']['state']['values']['sort_by']['sort_by']['selected_option']:
@@ -108,11 +103,13 @@ class ScrumMaster:
             else:
                 sort_by = None
 
+        if init_option not in self.scrum_board.get_logs():
+            init_option = "Product Backlog"
+
         metadata2 = {"swimlane": init_option if init_option else "UNSELECTED",
                      "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option:
-            # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
                 {
                     "type": "header",
@@ -164,8 +161,6 @@ class ScrumMaster:
 
         ui = list(itertools.chain(swimlane_select, swimlane_header,
                                   sort_by_block, story_blocks, swimlane_footer))
-        # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
-        print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
@@ -431,7 +426,6 @@ class ScrumMaster:
         else: return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
-        print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
         logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
@@ -518,8 +512,6 @@ class ScrumMaster:
             pass
         elif callback_id == "update-story-modal":
             md = json.loads(payload['view']['private_metadata'])
-            print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
-            # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
                 payload_values, [md["story"]["id"], md["log"]])  # payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
@@ -529,16 +521,17 @@ class ScrumMaster:
 
     def process_delete_sequence(self, payload):
         payload_values = list(payload['view']['state']['values'].values())
+        metadata = json.loads(payload['view']['private_metadata'])
 
         story_id_list = self._process_delete_story(payload_values)
-        metadata = {"story": story_id_list}
+        metadata['story'] = story_id_list
+        # metadata = {"story": story_id_list}
         injected_view = self._fill_confirm_delete_modal(
             modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata))
 
         return injected_view
 
     def _process_start_sprint_submission(self, payload_values):
-        print(json.dumps(payload_values, indent=4))
         start_date = payload_values[0]['sprint-date']['selected_date']
         start_time = payload_values[0]['sprint-time']['selected_time']
         duration = int(payload_values[1]['duration']
@@ -565,7 +558,6 @@ class ScrumMaster:
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
         # i = 0 if metadata else 1
-        print(f'\n\nPROCESS UPDATE SUBMISSION MD: {metadata}\n\n')
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(
             payload_values, 6).capitalize()]
@@ -742,7 +734,6 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
-        print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod

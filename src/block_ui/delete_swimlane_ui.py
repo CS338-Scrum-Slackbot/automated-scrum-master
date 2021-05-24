@@ -46,5 +46,5 @@ DELETE_SWIMLANE_MODAL = {
             }
         }
 
-	]
+	],
 }
