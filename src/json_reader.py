@@ -117,12 +117,10 @@ class json_reader():
             for e in entries:
                 for f in fields:
                     if compare_field(f, e, r_log): break # If any field matches, stop comparing fields
-        print(f"json reader received {logs}")
         if logs == []:
             logs = self.list_logs()
         if fields == []:
             fields = self.list_fields()
-        print(f"json reader using {logs}")
         for l in logs:
             helper(l)
         return found

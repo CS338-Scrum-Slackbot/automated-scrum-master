@@ -26,7 +26,6 @@ class ScrumBoard:
             return 0
         sid = self.reader.read_metadata_field("sid")
         story["id"] = sid
-        print(f'Creating story: {story} in log {log}')
         success = self.reader.create(story, log)
         if not success:
             return 0
@@ -43,17 +42,18 @@ class ScrumBoard:
         return [obj, log_str]
 
     def update_story(self, story, log, new_log):
-        print(f'UPDATING STORY: {story}')
         if log in ['Previous Sprint', 'Archived']:
             return 0
         return self.reader.update(story['id'], story, log, new_log)
 
     def search_story(self, lookup_text: str, logs: list, fields: list, include_archived: bool):
-        print(f"scrum board called with {include_archived}")
-        if not include_archived and len(logs) == 0:
-            logs = self.get_logs()[:] # Need to copy list
-            logs.remove("Archived")
-            print("scrum board has changed log list")
+        if len(logs) == 0:
+            logs = self.get_logs()[:]
+            if not include_archived:
+                logs.remove("Archived")
+        else:
+            if include_archived:
+                logs.append("Archived")
         tuples = self.reader.search(
             lookup=lookup_text, logs=logs, fields=fields)
         if tuples is None:

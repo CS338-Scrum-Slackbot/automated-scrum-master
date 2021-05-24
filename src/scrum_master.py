@@ -820,9 +820,7 @@ class ScrumMaster:
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
         include_archived = self._get_checkboxes_action(payload_values, 3)
-        print(f"result from function: {include_archived}")
         include_archived = False if include_archived == [] else True
-        print(f"result after processing: {include_archived}")
         stories = self.scrum_board.search_story(
             lookup_text=lookup_text, logs=swimlanes, fields=fields, include_archived=include_archived)
         self.blocks = []
