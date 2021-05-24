@@ -302,6 +302,13 @@ class ScrumMaster:
                 return
             for story in stories:
                 self.blocks += self._story_to_msg(story)
+            
+            # Make sure stories are under 50 blocks
+            self.blocks = self.blocks[:50]
+            for i in range(len(self.blocks)-1, 0, -1):
+                if self.blocks[i]['type'] == 'actions':
+                    self.blocks = self.blocks[:i+2]
+                    break
             self.text = "Story:"
 
     def search_story(self):
@@ -319,6 +326,15 @@ class ScrumMaster:
                                              action_id="create-swimlane")
         self.text, self.blocks = msg, blocks
 
+    def _get_my_stories(self, user_id):
+        name = self._get_member_name(user_id)
+        stories = self.scrum_board.search_story(name, [], [])
+        
+        self.blocks = []
+        for story in stories:
+            self.blocks += self._story_to_msg(story)
+        self.text = "Hello! Here are your stories."
+
     # Where action="update" or "delete"
     def update_or_delete_swimlane(self, action: str):
         if len(self.scrum_board.list_user_swimlanes()) == 0:
@@ -330,32 +346,35 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
-    def process_user_msg(self, text: str):
+    def process_user_msg(self, text: str, user_id=None):
         """
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         Command: "create a story" will make a button that opens a create story modal
         """
-        self.text = text
+        self.text = text.lower()
+        is_in = lambda x, y: [True for z in x if z in y]
 
-        if "create story" in text.lower():
+        if "create story" in text:
             self.create_story()
-        elif "delete story" in text.lower():
+        elif "delete story" in text:
             self.delete_story()
-        elif "update story" in text.lower():
+        elif "update story" in text:
             self.update_story()
-        elif "read story" in text.lower():
+        elif "read story" in text:
             self.read_story()
-        elif "search story" in text.lower():
+        elif "search story" in text:
             self.search_story()
-        elif "set sprint" in text.lower():
+        elif "set sprint" in text:
             self.set_sprint()
-        elif "create swimlane" in text.lower():
+        elif "create swimlane" in text:
             self.create_swimlane()
-        elif "update swimlane" in text.lower():
+        elif "update swimlane" in text:
             self.update_or_delete_swimlane("update")
-        elif "delete swimlane" in text.lower():
+        elif "delete swimlane" in text:
             self.update_or_delete_swimlane("delete")
-        elif "end demo" in text.lower():
+        elif "hello" in text or is_in(("me", "my"), text):
+            self._get_my_stories(user_id)
+        elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         else:
             self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
