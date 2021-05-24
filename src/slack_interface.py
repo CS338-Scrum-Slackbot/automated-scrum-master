@@ -2,6 +2,7 @@
 Handles interaction with Slack
 """
 
+from sys import call_tracing
 from scrum_master import ScrumMaster
 from slackeventsapi import SlackEventAdapter
 from flask import Flask, request
@@ -10,6 +11,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import slack
 import os
+import time
+from datetime import datetime
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -26,11 +29,27 @@ BOT_ID = client.api_call("auth.test")["user_id"]
 # TODO: Change CHANNEL when developing locally"
 CHANNEL = "#nathan"
 
+# delete all scheduled messages on start-up
+result = client.chat_scheduledMessages_list()
+for msg in result["scheduled_messages"]:
+    print(msg['id'])
+    try:
+        result = client.chat_deleteScheduledMessage(
+            channel=CHANNEL,
+            scheduled_message_id=msg['id']
+        )
+    except:
+        pass
+
+
 # Class to handle bot logic
 scrum_master = ScrumMaster()
 SCRUM_BOARD = 'data/scrum_board.json'
 view_actions = ['update-story', 'delete-story',
                 'create-story', 'update-swimlane', 'create-swimlane']
+
+# reset sprint info in json:
+scrum_master.reset_sprint_info()
 
 
 def get_member(id):
@@ -100,7 +119,14 @@ def handle_interaction():
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
+
+        # result = client.chat_scheduledMessages_list()
+        # for msg in result["scheduled_messages"]:
+        #     print(msg)
+
         if 'view' in data and data['view']['type'] == 'home':
+            # print('\n\nVIEW CHANGED\n\n')
+            # if data['view']['type'] == 'home':
             if data['actions'][0]['action_id'] in view_actions:
                 action_id = data['actions'][0]['action_id']
                 value = data['actions'][0]['value']
@@ -121,10 +147,15 @@ def handle_interaction():
                 view_id = data['view']['id']
                 injected_view = scrum_master.process_delete_sequence(data)
                 client.views_update(view=injected_view, view_id=view_id)
-
+            elif action_id == 'end-sprint':
+                end_sprint()
+                text_msg, interactive_msg = scrum_master.get_response()
+                send_message(text_msg, interactive_msg)
+            elif action_id == 'extend-sprint':
+                extend_sprint()
+                text_msg, interactive_msg = scrum_master.get_response()
+                send_message(text_msg, interactive_msg)
             else:
-                # Send a modal with our obtained trigger_id
-                # Which modal to send is evaluated in scrum_master based on the provided action_id
                 send_modal(data['trigger_id'], modal=scrum_master.create_modal(
                     action_id, metadata=value))
 
@@ -132,7 +163,11 @@ def handle_interaction():
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
-
+            # print(f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
+            if callback_id == "start-sprint-modal":
+                print("START SPRINT MODAL SUBMITTED")
+                schedule_sprint_end_message(
+                    list(data['view']['state']['values'].values()))
             # Extract relevant data from modal
             response = scrum_master.process_modal_submission(
                 data, callback_id)
@@ -142,10 +177,8 @@ def handle_interaction():
             # if swimlane updated, need to update swimlane in private_metadata
             # IF it's the current selection
             if response:
-                has_metadata = False
                 try:
                     md = json.loads(data['view']['private_metadata'])
-                    # has_metadata = True
                     if md['swimlane'] == response[0]:  # old name
                         md['swimlane'] = response[1]
                         data['view']['private_metadata'] = json.dumps(md)
@@ -169,8 +202,113 @@ def handle_interaction():
     return ''
 
 
+def end_sprint():
+    # schedule a new end message
+    sprint_end = scrum_master.scrum_board.read_metadata_field(
+        'current_sprint_ends')
+    sprint_duration = scrum_master.scrum_board.read_metadata_field(
+        'sprint_duration')
+
+    new_end = sprint_end + sprint_duration
+    end_msg = scrum_master.get_sprint_end_msg(sprint_end, new_end)
+    # delete old message if necessary:
+    old_msg_id = scrum_master.get_end_sprint_msg_id()
+    delete_scheduled_message(old_msg_id)
+    success = schedule_message(new_end, blocks=end_msg['blocks'])
+    # call scrum_master.end_sprint()
+    scrum_master.end_sprint(button=True, success=success)
+
+
+def extend_sprint():
+    # NOTE: extends sprint by 1 day
+    # schedule a new end message
+    day = 300  # 86400
+    sprint_start = scrum_master.scrum_board.read_metadata_field(
+        'current_sprint_starts')
+    sprint_end = scrum_master.scrum_board.read_metadata_field(
+        'current_sprint_ends')
+    new_end = sprint_end + day
+
+    end_msg = scrum_master.get_sprint_end_msg(sprint_start, new_end)
+    # delete old message if necessary:
+    old_msg_id = scrum_master.get_end_sprint_msg_id()
+    delete_scheduled_message(old_msg_id)
+    success = schedule_message(new_end, blocks=end_msg['blocks'])
+    if success:
+        scrum_master.save_sched_message(
+            'end_sprint', success["scheduled_message_id"])
+    scrum_master.extend_sprint(new_end=new_end, success=success)
+
+
+def schedule_sprint_end_message(payload_values):
+    # print(json.dumps(payload_values, indent=4))
+    start_date = payload_values[0]['sprint-date']['selected_date']
+    start_time = payload_values[0]['sprint-time']['selected_time']
+    duration = int(payload_values[1]['duration']
+                   ['selected_option']['text']['text'])
+    unit = payload_values[1]['unit']['selected_option']['text']['text']
+    seconds_table = {
+        'days': 86400,
+        'weeks': 604800,
+        'months': 2419200,
+    }
+    duration_in_seconds = 300  # duration * seconds_table[unit]
+    unix_start = int(datetime.strptime(
+        f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
+    unix_end = unix_start + duration_in_seconds
+
+    print(f'SPRINT STARTS: {unix_start} AND ENDS {unix_end}')
+
+    # Q022FRWA1GT
+
+    # if already have an end_sprint msg scheduled, need to delete it:
+    exists = scrum_master.check_if_sprint_exists()
+    if exists:
+        print("SPRINT EXISTS ALREADY")
+        delete_scheduled_message(exists)
+    else:
+        print("SPRINT DOESN'T EXIST")
+
+    # schedule a message:
+    print("GETTING END MESSAGE")
+    end_msg = scrum_master.get_sprint_end_msg(unix_start, unix_end)
+    print("SCHEDULING MESSAGE")
+    success = schedule_message(unix_end, blocks=end_msg['blocks'])
+    print("HANDLING SPRINT SUBMISSION")
+    scrum_master.handle_sprint_submission(
+        unix_start, unix_end, success=success)
+
+
+def delete_scheduled_message(message_id):
+    try:
+        result = client.chat_deleteScheduledMessage(
+            channel=CHANNEL,
+            scheduled_message_id=message_id
+        )
+        return result['ok']
+    except:
+        return 0
+
+
+def schedule_message(time, text="", blocks=[]):
+    try:
+        result = client.chat_scheduleMessage(
+            channel=CHANNEL,
+            text=text,
+            blocks=blocks,
+            post_at=time
+        )
+        return result
+
+    except:
+        # print("Error scheduling message: {}".format(e))
+        return None
+        # logger.error("Error scheduling message: {}".format(e))
+
+
 @slack_event_adapter.on('team_join')
 def team_join_event(payload):
+    # print('TEAM JOIN DETECTED!!')
     register_or_update_member(payload)
     return ''
 
@@ -198,6 +336,7 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
+    # print(f'\n\n\nDISPLAY HOME EVENT\n\n\n')
     updateHome(payload, init=not 'view' in payload)
 
 
@@ -213,6 +352,7 @@ def updateHome(payload, init, after_button=False):
         user_id = payload['user']['id']
         view = scrum_master.update_home(payload, metadata=button_metadata)
 
+    # print(json.dumps(view, indent=4))
     client.views_publish(user_id=user_id, view=view)
 
 
