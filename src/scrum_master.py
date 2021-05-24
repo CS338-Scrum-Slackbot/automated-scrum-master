@@ -126,6 +126,10 @@ class ScrumMaster:
                      "sort_by": sort_by if sort_by else "UNSORTED",
                      "old_swimlane": old_swimlane if old_swimlane else "NONE"}
 
+        logs = self.scrum_board.get_logs()
+        if init_option not in logs:
+            init_option = None
+            
         if init_option:
             # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
@@ -161,7 +165,7 @@ class ScrumMaster:
                 flatten = lambda *n: (e for a in n
                                       for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
                 if sort_by:
-                    stories = sorted(stories, key=lambda x: x[sort_by])
+                    stories = sorted(stories, key=lambda x: x[sort_by], reverse=True)
                 story_blocks = flatten(
                     [self._story_to_msg(story, md=json.dumps(metadata2)) for story in stories])
             else:
