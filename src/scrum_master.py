@@ -590,7 +590,7 @@ class ScrumMaster:
 
         if callback_id == "delete-story-modal":
             story_id_list = self._process_delete_story(payload_values)
-            metadata = {"story": story_id_list}
+            metadata['story'] = story_id_list
             injected_view = self._fill_confirm_delete_modal(
                 modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-story-modal")
         else:
