@@ -21,16 +21,6 @@
         "user_generated": false,
         "stories": [
             {
-                "id": 7,
-                "priority": 1,
-                "estimate": 21,
-                "sprint": 2,
-                "status": "none",
-                "assigned_to": "None",
-                "user_type": "customer",
-                "story": "As a user, I want to modify story 7."
-            },
-            {
                 "id": 15,
                 "priority": 2,
                 "estimate": 1,
@@ -49,26 +39,6 @@
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
                 "story": "As a customer, I want to update a story."
-            },
-            {
-                "id": 23,
-                "priority": 2,
-                "estimate": 1,
-                "sprint": 24,
-                "status": "none",
-                "assigned_to": "U01TRPZL02W",
-                "user_type": "tester",
-                "story": "Test"
-            },
-            {
-                "id": 24,
-                "priority": 2,
-                "estimate": 1,
-                "sprint": 25,
-                "status": "none",
-                "assigned_to": "U01U4CJED7T",
-                "user_type": "user",
-                "story": "As a user, I want to make a new story."
             }
         ]
     },
@@ -94,16 +64,6 @@
     "Previous Sprint": {
         "user_generated": false,
         "stories": [
-            {
-                "id": 5,
-                "priority": 3,
-                "estimate": 4,
-                "sprint": 1,
-                "status": "completed",
-                "assigned_to": "U01U4CJED7T",
-                "user_type": "customer",
-                "story": "I want to delete a story."
-            },
             {
                 "id": 4,
                 "priority": 3,
@@ -158,12 +118,7 @@
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "user",
                 "story": "I want to create another story"
-            }
-        ]
-    },
-    "My Third New Swimlane": {
-        "user_generated": true,
-        "stories": [
+            },
             {
                 "id": 18,
                 "priority": 1,
@@ -173,30 +128,37 @@
                 "assigned_to": "U01TRPZL02W",
                 "user_type": "student",
                 "story": "I need to study for my exam"
-            }
-        ]
-    },
-    "WADS": {
-        "user_generated": true,
-        "stories": [
+            },
             {
                 "id": 24,
-                "priority": 3,
+                "priority": 2,
                 "estimate": 1,
+                "sprint": 25,
+                "status": "none",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "user",
+                "story": "As a user, I want to make a new story."
+            },
+            {
+                "id": 5,
+                "priority": 3,
+                "estimate": 4,
                 "sprint": 1,
-                "status": "to-do",
+                "status": "completed",
+                "assigned_to": "U01U4CJED7T",
+                "user_type": "customer",
+                "story": "I want to delete a story."
+            },
+            {
+                "id": 23,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 24,
+                "status": "none",
                 "assigned_to": "U01TRPZL02W",
-                "user_type": "test",
-                "story": "test"
+                "user_type": "tester",
+                "story": "Test"
             }
         ]
-    },
-    "Parking Lot": {
-        "user_generated": true,
-        "stories": []
-    },
-    "Parking Lot 2": {
-        "user_generated": true,
-        "stories": []
     }
 }
