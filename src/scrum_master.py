@@ -93,19 +93,12 @@ class ScrumMaster:
         sort_by_block = []
 
         init_option, sort_by = None, None
-        old_swimlane = None
         if metadata and metadata != 'None':
-            # print(f'UPDATE HOME METADATA: {metadata}, {type(metadata)}')
             md = json.loads(metadata)
-            # print('\n\nSTORY IN METADATA\n\n')
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option:
                 sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
-            if 'old_swimlane' in md:
-                old_swimlane = md['old_swimlane']
-            # init_option = "Product Backlog"
-            # print(init_option, sort_by)
 
         if not init_option:
             if 'swimlane_select' in payload['view']['state']['values']:
@@ -126,12 +119,13 @@ class ScrumMaster:
             else:
                 sort_by = None
 
+        if init_option not in self.scrum_board.get_logs():
+            init_option = "Product Backlog"
+
         metadata2 = {"swimlane": init_option if init_option else "UNSELECTED",
-                     "sort_by": sort_by if sort_by else "UNSORTED",
-                     "old_swimlane": old_swimlane if old_swimlane else "NONE"}
+                     "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option:
-            # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
                 {
                     "type": "header",
@@ -202,8 +196,6 @@ class ScrumMaster:
 
         ui = list(itertools.chain(sprint_header, swimlane_select,
                                   swimlane_header, sort_by_block, story_blocks, swimlane_footer))
-        # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
-        # print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
@@ -493,7 +485,6 @@ class ScrumMaster:
             return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
-        # print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
         logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
@@ -583,8 +574,6 @@ class ScrumMaster:
             pass
         elif callback_id == "update-story-modal":
             md = json.loads(payload['view']['private_metadata'])
-            # print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
-            # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
                 payload_values, [md["story"]["id"], md["log"]])  # payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
@@ -597,14 +586,13 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
+        metadata = json.loads(payload['view']['private_metadata'])
 
         if callback_id == "delete-story-modal":
             story_id_list = self._process_delete_story(payload_values)
-            print(story_id_list, "story")
             metadata = {"story": story_id_list}
             injected_view = self._fill_confirm_delete_modal(
                 modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-story-modal")
-            print(injected_view, "inject")
         else:
             swimlane = self._process_delete_swimlane(payload_values)
             metadata = {"swimlane": swimlane}
@@ -612,6 +600,32 @@ class ScrumMaster:
                 modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-swimlane-modal")
 
         return injected_view
+
+    def _process_start_sprint_submission(self, payload_values):
+        start_date = payload_values[0]['sprint-date']['selected_date']
+        start_time = payload_values[0]['sprint-time']['selected_time']
+        duration = int(payload_values[1]['duration']
+                       ['selected_option']['text']['text'])
+        unit = payload_values[1]['unit']['selected_option']['text']['text']
+        seconds_table = {
+            'days': 86400,
+            'weeks': 604800,
+            'months': 2419200,
+        }
+        duration_in_seconds = duration * seconds_table[unit]
+        unix_start = int(datetime.strptime(
+            f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
+        unix_end = unix_start + duration_in_seconds
+        self.scrum_board.write_metadata_field(
+            'current_sprint_starts', unix_start)
+        self.scrum_board.write_metadata_field('current_sprint_ends', unix_end)
+
+        # TODO:
+        # schedule a message for when the sprint ends (unix_end)
+
+        self.text = f"Sprint has been set!\nIt begins on {start_date} at {start_time} " + \
+                    f"and ends on {datetime.fromtimestamp(unix_end).strftime('%Y-%m-%d at %H:%M')}."
+        self.blocks = None
 
     def move_sb_to_sprint(self):
         curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
@@ -915,7 +929,6 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
-        # print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod
