@@ -39,16 +39,6 @@
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
                 "story": "As a customer, I want to update a story."
-            },
-            {
-                "id": 23,
-                "priority": 2,
-                "estimate": 1,
-                "sprint": 24,
-                "status": "none",
-                "assigned_to": "U01TRPZL02W",
-                "user_type": "tester",
-                "story": "Test"
             }
         ]
     },
@@ -158,6 +148,16 @@
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
                 "story": "I want to delete a story."
+            },
+            {
+                "id": 23,
+                "priority": 2,
+                "estimate": 1,
+                "sprint": 24,
+                "status": "none",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "tester",
+                "story": "Test"
             }
         ]
     }

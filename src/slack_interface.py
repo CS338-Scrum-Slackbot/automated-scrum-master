@@ -193,7 +193,6 @@ def handle_interaction():
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
-            print("here")
             updateHome(data, init=0, after_button=True)
 
         except KeyError as e:
