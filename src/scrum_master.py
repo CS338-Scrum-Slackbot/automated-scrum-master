@@ -18,6 +18,9 @@ import copy
 import re
 from datetime import datetime
 import itertools
+import string
+
+SYNONYMS = 'data/synonyms.json'
 
 emojis = {
     "priority": {
@@ -72,6 +75,9 @@ class ScrumMaster:
 
         # Modal editor
         self.editor = ModalEditor()
+
+        with open(SYNONYMS, 'r') as f:
+            self.synonyms = json.load(f)
 
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
@@ -198,8 +204,6 @@ class ScrumMaster:
 
         ui = list(itertools.chain(sprint_header, swimlane_select,
                                   swimlane_header, sort_by_block, story_blocks, swimlane_footer))
-        # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
-        # print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
@@ -330,35 +334,62 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
+    def find_synonyms(self, text:str):
+        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+        text = text.translate(replace_punc).split()
+        synonyms = []
+        for word in text:
+            if word in self.synonyms:
+                synonyms.append(self.synonyms[word])
+        return synonyms
+
     def process_user_msg(self, text: str):
         """
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         Command: "create a story" will make a button that opens a create story modal
         """
         self.text = text
+        text = text.lower()
 
-        if "create story" in text.lower():
-            self.create_story()
-        elif "delete story" in text.lower():
-            self.delete_story()
-        elif "update story" in text.lower():
-            self.update_story()
-        elif "read story" in text.lower():
-            self.read_story()
-        elif "search story" in text.lower():
-            self.search_story()
-        elif "set sprint" in text.lower():
+        synonyms = self.find_synonyms(text)
+
+        if "story" in synonyms:
+            if "create" in synonyms:
+                self.create_story()
+                return
+            elif "delete" in synonyms:
+                self.delete_story()
+                return
+            elif "update" in synonyms:
+                self.update_story()
+                return
+            elif "read" in synonyms:
+                self.read_story()
+                return
+            elif "search" in synonyms:
+                self.search_story()
+                return
+        elif "sprint" in synonyms:
             self.set_sprint()
-        elif "create swimlane" in text.lower():
-            self.create_swimlane()
-        elif "update swimlane" in text.lower():
-            self.update_or_delete_swimlane("update")
-        elif "delete swimlane" in text.lower():
-            self.update_or_delete_swimlane("delete")
-        elif "end demo" in text.lower():
+            return
+        elif "swimlane" in synonyms:
+            if "create" in synonyms:
+                self.create_swimlane()
+                return
+            elif "update" in synonyms:
+                self.update_or_delete_swimlane("update")
+                return
+            elif "delete" in synonyms:
+                self.update_or_delete_swimlane("delete")
+                return
+        elif "help" in synonyms:
+            self.text = "No."
+            return
+        elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-        else:
-            self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+            return
+        
+        self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
