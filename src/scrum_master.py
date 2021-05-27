@@ -614,7 +614,11 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
-        metadata = json.loads(payload['view']['private_metadata'])
+        print(f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
+        if payload['view']['private_metadata'] != "None":
+            metadata = json.loads(payload['view']['private_metadata'])
+        else: 
+            metadata = {"swimlane": "Product Backlog", "sort_by": "UNSORTED"}
 
         if callback_id == "delete-story-modal":
             story_id_list = self._process_delete_story(payload_values)

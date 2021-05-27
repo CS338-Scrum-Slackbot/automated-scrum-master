@@ -29,16 +29,6 @@
                 "assigned_to": "U01TK108J86",
                 "user_type": "tester",
                 "story": "As a tester, I want to create metadata."
-            },
-            {
-                "id": 2,
-                "priority": 1,
-                "estimate": 3,
-                "sprint": 2,
-                "status": "completed",
-                "assigned_to": "U01TK108J86",
-                "user_type": "customer",
-                "story": "As a customer, I want to update a story."
             }
         ]
     },
@@ -158,6 +148,16 @@
                 "assigned_to": "U01TRPZL02W",
                 "user_type": "tester",
                 "story": "Test"
+            },
+            {
+                "id": 2,
+                "priority": 1,
+                "estimate": 3,
+                "sprint": 2,
+                "status": "completed",
+                "assigned_to": "U01TK108J86",
+                "user_type": "customer",
+                "story": "As a customer, I want to update a story."
             }
         ]
     }
