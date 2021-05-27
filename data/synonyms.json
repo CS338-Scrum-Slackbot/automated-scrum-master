@@ -1,7 +1,9 @@
 {
     "story": "story",
     "card": "story",
+    "cards": "story",
     "ticket": "story",
+    "tickets": "story",
     "stories": "story",
     "swimlane": "swimlane",
     "category": "swimlane",
@@ -31,7 +33,7 @@
     "construct": "create",
     "develop": "create",
     "touch": "create",
-    "mkdir": "create",
+    "mkdir": "create swimlane",
     "update": "update",
     "edit": "update",
     "change": "update",
@@ -63,7 +65,7 @@
     "omit": "delete",
     "rm": "delete",
     "kill": "delete",
-    "rmdir": "delete",
+    "rmdir": "delete swimlane",
     "help": "help",
     "man": "help"
 }

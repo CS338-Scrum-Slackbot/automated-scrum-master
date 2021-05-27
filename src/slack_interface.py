@@ -27,7 +27,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#nathan"
 
 # delete all scheduled messages on start-up
 result = client.chat_scheduledMessages_list()
@@ -66,7 +66,6 @@ def get_all_members():
 
 def populate_members():
     members = get_all_members()
-    # print(json.dumps(members, indent=4))
     id_to_name = {x['id']: x['real_name']
                   for x in members if not x['is_bot'] and x['real_name'] != 'Slackbot'}
     with open(file=SCRUM_BOARD, mode="r+") as f:
@@ -125,16 +124,16 @@ def handle_interaction():
         # for msg in result["scheduled_messages"]:
         #     print(msg)
 
-        if 'view' in data:
+        if 'view' in data and data['view']['type'] == 'home':
             # print('\n\nVIEW CHANGED\n\n')
-            if data['view']['type'] == 'home':
-                if data['actions'][0]['action_id'] in view_actions:
-                    action_id = data['actions'][0]['action_id']
-                    value = data['actions'][0]['value']
-                    send_modal(data['trigger_id'], modal=scrum_master.create_modal(
-                        action_id, metadata=value))
-                else:
-                    updateHome(data, init=0)
+            # if data['view']['type'] == 'home':
+            if data['actions'][0]['action_id'] in view_actions:
+                action_id = data['actions'][0]['action_id']
+                value = data['actions'][0]['value']
+                send_modal(data['trigger_id'], modal=scrum_master.create_modal(
+                    action_id, metadata=value))
+            else:
+                updateHome(data, init=0)
         else:
             try:
                 # Get the action_id and value fields from the event payload
@@ -166,6 +165,10 @@ def handle_interaction():
                 print("START SPRINT MODAL SUBMITTED")
                 schedule_sprint_end_message(
                     list(data['view']['state']['values'].values()))
+
+            if callback_id == "delete-story-modal" or callback_id == "delete-swimlane-modal":
+                injected_modal = scrum_master.process_delete_sequence(data)
+                return injected_modal
             # Extract relevant data from modal
             response = scrum_master.process_modal_submission(
                 data, callback_id)
@@ -177,25 +180,16 @@ def handle_interaction():
             if response:
                 try:
                     md = json.loads(data['view']['private_metadata'])
-                    # has_metadata = True
                     if md['swimlane'] == response[0]:  # old name
-                        # "Product Backlog" #response[1]
                         md['swimlane'] = response[1]
-                        md['old_swimlane'] = response[0]
                         data['view']['private_metadata'] = json.dumps(md)
-                    # print(f'\n\nMETADATA IN UPDATE\n\n')
-                    # print(json.dumps(data, indent=4))
                     for b in data['view']['blocks'][1]['element']['options']:
                         if b['text']['text'] == response[0]:
-                            # "Product Backlog"#
                             b['text']['text'] = response[1]
-                            b['value'] = response[1]  # "Product Backlog" #
+                            b['value'] = response[1]
                 except:
                     data['view']['private_metadata'] = json.dumps(
-                        {'swimlane': response[1], 'old_swimlane': response[0]})  # "Product Backlog"})#response[1]})
-
-                    # print(f'\n\nNO METADATA IN UPDATE\n\n')
-                    # print(json.dumps(data, indent=4))
+                        {'swimlane': response[1]})
 
             # Send message to slack channel
             send_message(text_msg, interactive_msg)
@@ -322,7 +316,6 @@ def team_join_event(payload):
 
 @slack_event_adapter.on('user_change')
 def user_change_event(payload):
-    # print('USER CHANGE DETECTED!!')
     register_or_update_member(payload)
     return ''
 
@@ -350,18 +343,10 @@ def displayHome(payload):
 
 def updateHome(payload, init, after_button=False):
     button_metadata = None
-    # time.sleep(1)
     if after_button:
-        # print('\n\nAFTER BUTTON\n\n')
-        # print(json.dumps(payload, indent=4), "\n\n")
         button_metadata = payload['view']['private_metadata']
     if init:
         user_id = payload.get("event", {}).get("user")
-        md = json.loads(payload['event']['view']['private_metadata'])
-        sw = scrum_master.scrum_board.list_user_swimlanes()
-        if md['swimlane'] in sw:
-            md['swimlane'] = "Product Backlog"
-        payload['event']['view']['private_metadata'] = json.dumps(md)
         view = scrum_master.update_home(
             payload['event'], metadata=payload['event']['view']['private_metadata'])
     else:
@@ -370,8 +355,6 @@ def updateHome(payload, init, after_button=False):
 
     # print(json.dumps(view, indent=4))
     client.views_publish(user_id=user_id, view=view)
-    # view = scrum_master.update_home(payload['event'], metadata=payload['event']['view']['private_metadata'])
-    # client.views_publish(user_id=user_id, view=view)
 
 
 if __name__ == '__main__':
