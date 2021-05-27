@@ -31,7 +31,8 @@ class ModalEditor:
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)  # Open reader
         # Get lists from reader
         fields = self.reader.list_fields()
-        logs = self.reader.list_logs()
+        logs = self.reader.list_logs()[:]
+        logs.remove("Archived")
 
         # Get option list for field & log lists
         field_block = self._generate_select_options(fields, "field")
