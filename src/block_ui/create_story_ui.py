@@ -303,5 +303,19 @@ CREATE_STORY_MODAL = {
                         "emoji": True
                     },
                 },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "multiline": True,
+                        "action_id": "plain_text_input-action",
+                        "initial_value": "None"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Description",
+                        "emoji": True
+                    }
+                }
             ],
 }

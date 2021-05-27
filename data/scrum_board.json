@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "sid": 25,
+        "sid": 27,
         "story_count": 7,
         "current_sprint": 27,
         "current_sprint_starts": 0,
@@ -21,14 +21,37 @@
         "user_generated": false,
         "stories": [
             {
+                "id": 25,
+                "priority": 3,
+                "estimate": 5,
+                "sprint": 27,
+                "status": "in-progress",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "test",
+                "story": "Test",
+                "description": "Description"
+            },
+            {
                 "id": 15,
                 "priority": 2,
                 "estimate": 1,
                 "sprint": 1,
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
-                "user_type": "tester",
-                "story": "As a tester, I want to create metadata."
+                "user_type": "Tester",
+                "story": "As a tester, i want to create metadata.",
+                "description": "Hey!"
+            },
+            {
+                "id": 26,
+                "priority": 3,
+                "estimate": 2,
+                "sprint": 27,
+                "status": "in-progress",
+                "assigned_to": "U01TRPZL02W",
+                "user_type": "Test",
+                "story": "As a test, i want to test.",
+                "description": "Description here again!"
             }
         ]
     },
@@ -47,7 +70,8 @@
                 "status": "to-do",
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "I want to modify a story."
+                "story": "I want to modify a story.",
+                "description": "None"
             }
         ]
     },
@@ -62,7 +86,8 @@
                 "status": "completed",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
-                "story": "I want to update a story."
+                "story": "I want to update a story.",
+                "description": "None"
             }
         ]
     },
@@ -77,7 +102,8 @@
                 "status": "none",
                 "assigned_to": "U01TB0ZH5F1",
                 "user_type": "tester",
-                "story": "As a tester, I want to program."
+                "story": "As a tester, I want to program.",
+                "description": "None"
             },
             {
                 "id": 22,
@@ -87,7 +113,8 @@
                 "status": "none",
                 "assigned_to": "U01TB0ZH5F1",
                 "user_type": "user",
-                "story": "refactor test"
+                "story": "refactor test",
+                "description": "None"
             },
             {
                 "id": 22,
@@ -97,7 +124,8 @@
                 "status": "in-progress",
                 "assigned_to": "U01TB0ZH5F1",
                 "user_type": "user",
-                "story": "As a user, I want to create a swimlane"
+                "story": "As a user, I want to create a swimlane",
+                "description": "None"
             },
             {
                 "id": 19,
@@ -107,7 +135,8 @@
                 "status": "in-progress",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "user",
-                "story": "I want to create another story"
+                "story": "I want to create another story",
+                "description": "None"
             },
             {
                 "id": 18,
@@ -117,7 +146,8 @@
                 "status": "to-do",
                 "assigned_to": "U01TRPZL02W",
                 "user_type": "student",
-                "story": "I need to study for my exam"
+                "story": "I need to study for my exam",
+                "description": "None"
             },
             {
                 "id": 24,
@@ -127,7 +157,8 @@
                 "status": "none",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "user",
-                "story": "As a user, I want to make a new story."
+                "story": "As a user, I want to make a new story.",
+                "description": "None"
             },
             {
                 "id": 5,
@@ -137,7 +168,8 @@
                 "status": "completed",
                 "assigned_to": "U01U4CJED7T",
                 "user_type": "customer",
-                "story": "I want to delete a story."
+                "story": "I want to delete a story.",
+                "description": "None"
             },
             {
                 "id": 23,
@@ -147,7 +179,8 @@
                 "status": "none",
                 "assigned_to": "U01TRPZL02W",
                 "user_type": "tester",
-                "story": "Test"
+                "story": "Test",
+                "description": "None"
             },
             {
                 "id": 2,
@@ -157,7 +190,8 @@
                 "status": "completed",
                 "assigned_to": "U01TK108J86",
                 "user_type": "customer",
-                "story": "As a customer, I want to update a story."
+                "story": "As a customer, I want to update a story.",
+                "description": "None"
             }
         ]
     }
