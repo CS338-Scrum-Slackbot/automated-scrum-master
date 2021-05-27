@@ -250,11 +250,11 @@ class ScrumMaster:
         self.text, self.blocks = msg, blocks
 
     def update_story(self):
-        try:
-            id = int(self.text.split(' ')[-1])
-        except:
-            self.text = "Story ID must be an int."
+        ids = re.findall('\d+', self.text)
+        if len(ids) == 0:
+            self.text = "You must include the ID of the story you want to update."
             return
+        id = int(ids[0])
         result = self.scrum_board.read_story(id)
         if isinstance(result, str):
             self.text = result
@@ -268,37 +268,29 @@ class ScrumMaster:
         self.text, self.blocks = msg, blocks
 
     def read_story(self):
-        try:
-            read_text = " ".join(self.text.split()[2:])
-        except ValueError:
-            self.text = "Could not understand read story command."
-            return
-
-        try:
-            id_text = int(self.text.split()[2])
-        except (ValueError, IndexError):
-            id_text = None
-
-        read_text = " ".join(self.text.split()[2:])
+        text = self.text.lower()
+        logs = self.scrum_board.get_logs()
         log = None
-        from_idx = read_text.find("from")
-        if from_idx != -1:
-            log_idx = from_idx + 5
-            log = read_text[log_idx:]
-        self.blocks = []
-        if id_text:
+        for l in logs:
+            if l.lower() in text:
+                log = l
+                break
+                
+        ids = re.findall('\d+', self.text)
+        if len(ids) > 0:
             # If ID is specified, read specific story.
-            result = self.scrum_board.read_story(id=id_text, log=log)
+            id = int(ids[0])
+            result = self.scrum_board.read_story(id=id, log=log)
             if isinstance(result, str):
                 self.text = result  # Handles error case of string from scrum_board
                 return
             # Otherwise, stories is one obj that is pretty-printed.
             story = result[0]
             log = result[1]
-            self.blocks += self._story_to_msg(story)
-            self.text = f"Story {id_text} from {log}:"
-        else:
-            # If there is no ID, return the swimlane/log/entire board.
+            self.blocks = self._story_to_msg(story)
+            self.text = f"Story {id} from {log}:"
+        elif log:
+            # If there is no ID but there is a log, return the swimlane/log/entire board.
             stories = self.scrum_board.read_log(log=log)
             self.blocks = []
             if isinstance(stories, str):
@@ -307,6 +299,8 @@ class ScrumMaster:
             for story in stories:
                 self.blocks += self._story_to_msg(story)
             self.text = "Story:"
+        else: 
+            self.text = "Could not understand read story command."
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
@@ -340,7 +334,7 @@ class ScrumMaster:
         synonyms = []
         for word in text:
             if word in self.synonyms:
-                synonyms.append(self.synonyms[word])
+                synonyms.extend(self.synonyms[word].split())
         return synonyms
 
     def process_user_msg(self, text: str):
@@ -353,43 +347,46 @@ class ScrumMaster:
 
         synonyms = self.find_synonyms(text)
 
+        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+
         if "story" in synonyms:
             if "create" in synonyms:
                 self.create_story()
-                return
             elif "delete" in synonyms:
                 self.delete_story()
-                return
             elif "update" in synonyms:
                 self.update_story()
-                return
-            elif "read" in synonyms:
-                self.read_story()
-                return
-            elif "search" in synonyms:
-                self.search_story()
-                return
+            else:
+                self.text = fail_msg
+        elif "read" in synonyms:
+            self.read_story()
+        elif "search" in synonyms:
+            self.search_story()
         elif "sprint" in synonyms:
             self.set_sprint()
-            return
         elif "swimlane" in synonyms:
             if "create" in synonyms:
                 self.create_swimlane()
-                return
             elif "update" in synonyms:
                 self.update_or_delete_swimlane("update")
-                return
             elif "delete" in synonyms:
                 self.update_or_delete_swimlane("delete")
-                return
+            else:
+                self.text = fail_msg
+        elif "update" in synonyms and re.findall('\d+', text):
+            self.update_story()
+        elif "update" in synonyms:
+            self.text = "Please specify whether you want to update a story (use the word \"story\" or specify an story ID) or a swimlane."
+        elif "create" in synonyms:
+            self.text = "Please specify whether you want to create a story or a swimlane."
+        elif "delete" in synonyms:
+            self.text = "Please specify whether you want to delete a story or a swimlane."
         elif "help" in synonyms:
             self.text = "No."
-            return
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-            return
-        
-        self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+        else:        
+            self.text = fail_msg
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
@@ -467,7 +464,6 @@ class ScrumMaster:
         return modal
 
     def _fill_delete_modal(self, modal, metadata=None):
-        # print(f'FILL DELETE MODAL METADATA: {metadata}')
         try:
             init_value = json.loads(metadata)['story']
         except:
@@ -477,8 +473,6 @@ class ScrumMaster:
         return modal
 
     def init_sprint_modal(self, modal):
-        print('INIT SPRINT MODAL')
-        print(json.dumps(modal, indent=4))
         today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
         modal['blocks'][1]['elements'][0]['initial_date'] = today[0]
         modal['blocks'][1]['elements'][1]['initial_time'] = today[1]
@@ -516,7 +510,6 @@ class ScrumMaster:
             return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
-        # print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
         logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
@@ -600,8 +593,6 @@ class ScrumMaster:
             pass
         elif callback_id == "update-story-modal":
             md = json.loads(payload['view']['private_metadata'])
-            # print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
-            # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
                 payload_values, [md["story"]["id"], md["log"]])  # payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
@@ -736,8 +727,6 @@ class ScrumMaster:
         return msg
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
-        # i = 0 if metadata else 1
-        # print(f'\n\nPROCESS UPDATE SUBMISSION MD: {metadata}\n\n')
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(
             payload_values, 6).capitalize()]
