@@ -27,7 +27,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#nathan"
+CHANNEL = "#caspar-private-test"
 
 # delete all scheduled messages on start-up
 result = client.chat_scheduledMessages_list()

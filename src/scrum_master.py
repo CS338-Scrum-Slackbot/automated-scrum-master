@@ -20,8 +20,12 @@ import re
 from datetime import datetime
 import itertools
 import string
+from spellchecker import SpellChecker
 
 SYNONYMS = 'data/synonyms.json'
+fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+spell = SpellChecker() 
+spell.word_frequency.load_dictionary('data/freq_synonyms.json')
 
 emojis = {
     "priority": {
@@ -326,27 +330,34 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
+# =========================
+
+    def normalize(self, s):
+        for p in string.punctuation:                    # Remove punctuation
+            s = s.replace(p, '')
+        s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
+        return s.lower().strip()                        # Lowercase, strip whitespace
+
     def find_synonyms(self, text:str):
-        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        text = text.translate(replace_punc).split()
+        #replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+        #text = text.translate(replace_punc).split()
+        text = text.split()
         synonyms = []
         for word in text:
             if word in self.synonyms:
                 synonyms.extend(self.synonyms[word].split())
+        print(f"Found synonyms: {synonyms}")
         return synonyms
 
-    def process_user_msg(self, text: str):
-        """
-        Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
-        Command: "create a story" will make a button that opens a create story modal
-        """
+    def spellcheck(self, text:str):
+        correct = []
+        for word in text.split(" "):
+            correct.append(spell.correction(word))
+        return " ".join(correct)
+
+    def determine_command(self, text:str):
         self.text = text
-        text = text.lower()
-
         synonyms = self.find_synonyms(text)
-
-        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
-
         if "story" in synonyms:
             if "create" in synonyms:
                 self.create_story()
@@ -385,6 +396,17 @@ class ScrumMaster:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         else:        
             self.text = fail_msg
+
+# =======================
+
+    def process_user_msg(self, text: str):
+        text = self.normalize(text)
+        print(f"After normalization: {text}")
+        self.determine_command(text)
+        if self.text == fail_msg:
+            text = self.spellcheck(text)
+            print(f"Spellchecking necessary - correct: {text}")
+            self.determine_command(text)
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
