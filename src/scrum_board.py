@@ -94,7 +94,7 @@ class ScrumBoard:
         story_list = self.reader.read_log(log=log)
         if story_list is None:
             return f"Swimlane `{log}` does not exist."
-        elif story_list is None and log is not None:
+        elif story_list == [] and log is not None:
             return f"Could not find any stories in `{log}`."
         return story_list
 

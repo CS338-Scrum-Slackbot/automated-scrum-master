@@ -93,8 +93,6 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field('scheduled_messages', sm)
 
     def update_home(self, payload, metadata=""):
-        # print(json.dumps(payload, indent=4))
-        # print(f'\n\nUPDATE HOME METADATA: {metadata}\n\n')
         sprint_header = []
         swimlane_select = []
         story_blocks = []
@@ -274,7 +272,7 @@ class ScrumMaster:
         logs = self.scrum_board.get_logs()
         log = None
         for l in logs:
-            if l.lower() in text:
+            if self.normalize(l) in text:
                 log = l
                 break
                 
@@ -302,7 +300,7 @@ class ScrumMaster:
                 self.blocks += self._story_to_msg(story)
             self.text = "Story:"
         else: 
-            self.text = "Could not understand read story command."
+            self.text = "Could not understand read command."
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
@@ -346,7 +344,6 @@ class ScrumMaster:
         for word in text:
             if word in self.synonyms:
                 synonyms.extend(self.synonyms[word].split())
-        print(f"Found synonyms: {synonyms}")
         return synonyms
 
     def spellcheck(self, text:str):
@@ -365,6 +362,8 @@ class ScrumMaster:
                 self.delete_story()
             elif "update" in synonyms:
                 self.update_story()
+            elif "search" in synonyms:
+                self.search_story()
             else:
                 self.text = fail_msg
         elif "read" in synonyms:
@@ -401,12 +400,13 @@ class ScrumMaster:
 
     def process_user_msg(self, text: str):
         text = self.normalize(text)
-        print(f"After normalization: {text}")
+        text = self.spellcheck(text)
+        print(f"Text is {text}")
+        print(str(spell.word_frequency.dictionary['story']))
         self.determine_command(text)
-        if self.text == fail_msg:
-            text = self.spellcheck(text)
-            print(f"Spellchecking necessary - correct: {text}")
-            self.determine_command(text)
+        """ if self.text == fail_msg:
+            print("Will spellcheck")
+            self.determine_command(text) """
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
