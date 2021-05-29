@@ -26,3 +26,6 @@ def run_tests():
 
 def freq(word):
     print(f"The current frequency of \'{word}\' is {spell.word_frequency.dictionary[word]}")
+
+freq('updat')
+print(spell.correction('simlane'))

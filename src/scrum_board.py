@@ -38,7 +38,7 @@ class ScrumBoard:
         if obj is None and log is None:
             return "Story not found in your board."
         elif obj is None and log is not None:
-            return f"Story not found in `{log}`, try a different swimlane?\nYou can also read the whole board using `read story {id}`"
+            return f"Story not found in `{log}`, try a different swimlane?\nYou can also read the whole board using `read {id}`"
         return [obj, log_str]
 
     def update_story(self, story, log, new_log):
