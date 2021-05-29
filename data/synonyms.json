@@ -46,6 +46,7 @@
     "vim": "update",
     "emacs": "update",
     "mv": "update",
+    "search": "search",
     "find": "search",
     "seek": "search",
     "explore": "search",

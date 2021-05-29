@@ -27,7 +27,7 @@ class json_reader():
 
         # Hard coded fields because it's hard to read them in (in case file is empty)
         # TODO: add description field when this feature is implemented
-        self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story"]
+        self._list_fields = ["id","priority","estimate","sprint","status","assigned_to","user_type","story","description"]
 
     def write_to_file(self):
         try:

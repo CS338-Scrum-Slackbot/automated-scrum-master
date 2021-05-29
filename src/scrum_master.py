@@ -593,6 +593,8 @@ class ScrumMaster:
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
                 b['element']['initial_user'] = story_update['assigned_to'] if story_update['assigned_to'] else "None"
+            elif b['label']['text'] == 'Description':
+                b['element']['initial_value'] = story_update['description']
         return modal
 
     def process_modal_submission(self, payload, callback_id):
@@ -806,6 +808,7 @@ class ScrumMaster:
         return msg
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
+        desc = self._get_plaintext_input_item(payload_values, 8)
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(
             payload_values, 6).capitalize()]
@@ -829,7 +832,8 @@ class ScrumMaster:
             "status": status,
             "assigned_to": assigned_to,
             "user_type": user_type,
-            "story": story_title
+            "story": story_title,
+            "description": desc
         }
 
         if metadata:
@@ -899,7 +903,7 @@ class ScrumMaster:
             return text + f"{val}\t" + emoji
         elif label == "Assigned To":
             return text + self._get_member_name(val)
-        elif label == "Estimate" or label == "Sprint" or label == "User Type" or label == "Story":
+        elif label == "Estimate" or label == "Sprint" or label == "User Type" or label == "Story" or label == "Description":
             return text + f"{val}"
         else:
             return ""
