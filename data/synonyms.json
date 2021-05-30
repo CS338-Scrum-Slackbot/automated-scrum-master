@@ -68,5 +68,7 @@
     "kill": "delete",
     "rmdir": "delete swimlane",
     "help": "help",
-    "man": "help"
+    "man": "help",
+    "guide": "help",
+    "instructions": "help"
 }

@@ -273,7 +273,7 @@ class ScrumMaster:
             if l.lower() in text:
                 log = l
                 break
-                
+
         ids = re.findall('\d+', self.text)
         if len(ids) > 0:
             # If ID is specified, read specific story.
@@ -297,7 +297,7 @@ class ScrumMaster:
             for story in stories:
                 self.blocks += self._story_to_msg(story)
             self.text = "Story:"
-        else: 
+        else:
             self.text = "Could not understand read story command."
 
     def search_story(self):
@@ -326,8 +326,9 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
-    def find_synonyms(self, text:str):
-        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+    def find_synonyms(self, text: str):
+        replace_punc = str.maketrans(
+            string.punctuation, ' '*len(string.punctuation))
         text = text.translate(replace_punc).split()
         synonyms = []
         for word in text:
@@ -345,7 +346,9 @@ class ScrumMaster:
 
         synonyms = self.find_synonyms(text)
 
-        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+        help_msg = "Here are the commands you can use with *@Miyagi*. Text in _italic_ represents data fields and [text] are optional fields: \n *create story*, *update story _id_*, *delete story* \n *read story [_id_] [from _swimlane name_]* \n \n *search* \n *set sprint* \n \n *create swimlane*, *update swimlane*, *delete swimlane* \n *read _swimlane name_*"
+
+        fail_msg = "Command not found. " + help_msg
 
         if "story" in synonyms:
             if "create" in synonyms:
@@ -380,10 +383,10 @@ class ScrumMaster:
         elif "delete" in synonyms:
             self.text = "Please specify whether you want to delete a story or a swimlane."
         elif "help" in synonyms:
-            self.text = "No."
+            self.text = help_msg
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-        else:        
+        else:
             self.text = fail_msg
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
@@ -616,10 +619,11 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
-        print(f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
+        print(
+            f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
         if payload['view']['private_metadata'] != "None":
             metadata = json.loads(payload['view']['private_metadata'])
-        else: 
+        else:
             metadata = {"swimlane": "Product Backlog", "sort_by": "UNSORTED"}
 
         if callback_id == "delete-story-modal":
