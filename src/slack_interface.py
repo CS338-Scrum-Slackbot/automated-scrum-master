@@ -27,7 +27,7 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#test"
+CHANNEL = "#app_mention"
 
 # delete all scheduled messages on start-up
 result = client.chat_scheduledMessages_list()
@@ -335,7 +335,7 @@ def get_app_mention(payload):
     text = event['text'].split(f'<@{BOT_ID}>')[1]
 
     if BOT_ID != user_id:
-        scrum_master.process_user_msg(text)
+        scrum_master.process_user_msg(text, user_id)
         # Potentially more scrum bot logic to follow here
         text_msg, interactive_msg = scrum_master.get_response()
         send_message(text_msg, interactive_msg)
