@@ -24,12 +24,6 @@ from spellchecker import SpellChecker
 
 SYNONYMS = 'data/synonyms.json'
 fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
-spell = SpellChecker() 
-spell.word_frequency.load_dictionary('data/freq_synonyms.json')
-with open("data/nonwords.json", "r") as f:
-    nonwords = json.load(f)
-    for word in nonwords:
-        spell.word_frequency.pop(word)
 
 emojis = {
     "priority": {
@@ -87,6 +81,13 @@ class ScrumMaster:
 
         with open(SYNONYMS, 'r') as f:
             self.synonyms = json.load(f)
+
+        self.spell = SpellChecker() 
+        self.spell.word_frequency.load_dictionary('data/freq_synonyms.json')
+        with open("data/nonwords.json", "r") as f:
+            nonwords = json.load(f)
+            for word in nonwords:
+                self.spell.word_frequency.pop(word)
 
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
@@ -335,14 +336,14 @@ class ScrumMaster:
 # =========================
 
     def normalize(self, s):
+        #replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+        #text = text.translate(replace_punc).split()
         for p in string.punctuation:                    # Remove punctuation
             s = s.replace(p, '')
         s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
         return s.lower().strip()                        # Lowercase, strip whitespace
 
     def find_synonyms(self, text:str):
-        #replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        #text = text.translate(replace_punc).split()
         text = text.split()
         synonyms = []
         for word in text:
@@ -353,7 +354,7 @@ class ScrumMaster:
     def spellcheck(self, text:str):
         correct = []
         for word in text.split(" "):
-            correct.append(spell.correction(word))
+            correct.append(self.spell.correction(word))
         return " ".join(correct)
 
     def determine_command(self, text:str):
@@ -400,13 +401,12 @@ class ScrumMaster:
         else:        
             self.text = fail_msg
 
-# =======================
-
     def process_user_msg(self, text: str):
         text = self.normalize(text)
         text = self.spellcheck(text)
-        print(str(spell.word_frequency.dictionary['story']))
         self.determine_command(text)
+
+# =======================
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
