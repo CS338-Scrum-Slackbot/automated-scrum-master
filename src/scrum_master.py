@@ -6,6 +6,7 @@ from scrum_board import ScrumBoard
 from modal_editor import ModalEditor
 from block_ui.create_story_ui import CREATE_STORY_MODAL
 from block_ui.delete_story_ui import DELETE_STORY_MODAL
+from block_ui.confirm_delete_ui import CONFIRM_DELETE_MODAL
 from block_ui.update_story_ui import UPDATE_STORY_MODAL
 from block_ui.example_modal_ui import EXAMPLE_MODAL
 from block_ui.read_story_ui import READ_STORY_BLOCK
@@ -18,6 +19,9 @@ import copy
 import re
 from datetime import datetime
 import itertools
+import string
+
+SYNONYMS = 'data/synonyms.json'
 
 emojis = {
     "priority": {
@@ -73,6 +77,9 @@ class ScrumMaster:
         # Modal editor
         self.editor = ModalEditor()
 
+        with open(SYNONYMS, 'r') as f:
+            self.synonyms = json.load(f)
+
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
         self.scrum_board.write_metadata_field('current_sprint_ends', 0)
@@ -92,23 +99,19 @@ class ScrumMaster:
         sort_by_block = []
 
         init_option, sort_by = None, None
-        old_swimlane = None
         if metadata and metadata != 'None':
-            # print(f'UPDATE HOME METADATA: {metadata}, {type(metadata)}')
             md = json.loads(metadata)
-            # print('\n\nSTORY IN METADATA\n\n')
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option:
                 sort_by_block = SORT_DROPDOWN
             sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
-            if 'old_swimlane' in md:
-                old_swimlane = md['old_swimlane']
-            # init_option = "Product Backlog"
-            # print(init_option, sort_by)
 
         if not init_option:
             if 'swimlane_select' in payload['view']['state']['values']:
                 init_option = payload['view']['state']['values']['swimlane_select']['swimlane_select']['selected_option']['value']
+                logs = self.scrum_board.get_logs()
+                if init_option not in logs:
+                    init_option = None
                 sort_by_block = SORT_DROPDOWN
             else:
                 init_option = None
@@ -122,12 +125,13 @@ class ScrumMaster:
             else:
                 sort_by = None
 
+        if init_option not in self.scrum_board.get_logs():
+            init_option = "Product Backlog"
+
         metadata2 = {"swimlane": init_option if init_option else "UNSELECTED",
-                     "sort_by": sort_by if sort_by else "UNSORTED",
-                     "old_swimlane": old_swimlane if old_swimlane else "NONE"}
+                     "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option:
-            # print(f'INIT OPTION!!!!!! {init_option}')
             swimlane_header = [
                 {
                     "type": "header",
@@ -198,8 +202,6 @@ class ScrumMaster:
 
         ui = list(itertools.chain(sprint_header, swimlane_select,
                                   swimlane_header, sort_by_block, story_blocks, swimlane_footer))
-        # print(f'\n\nUI: {json.dumps(ui, indent = 4)}\n\n')
-        # print(json.dumps(ui, indent=4))
 
         view = {
             "type": 'home',
@@ -246,11 +248,11 @@ class ScrumMaster:
         self.text, self.blocks = msg, blocks
 
     def update_story(self):
-        try:
-            id = int(self.text.split(' ')[-1])
-        except:
-            self.text = "Story ID must be an int."
+        ids = re.findall('\d+', self.text)
+        if len(ids) == 0:
+            self.text = "You must include the ID of the story you want to update."
             return
+        id = int(ids[0])
         result = self.scrum_board.read_story(id)
         if isinstance(result, str):
             self.text = result
@@ -264,37 +266,29 @@ class ScrumMaster:
         self.text, self.blocks = msg, blocks
 
     def read_story(self):
-        try:
-            read_text = " ".join(self.text.split()[2:])
-        except ValueError:
-            self.text = "Could not understand read story command."
-            return
-
-        try:
-            id_text = int(self.text.split()[2])
-        except (ValueError, IndexError):
-            id_text = None
-
-        read_text = " ".join(self.text.split()[2:])
+        text = self.text.lower()
+        logs = self.scrum_board.get_logs()
         log = None
-        from_idx = read_text.find("from")
-        if from_idx != -1:
-            log_idx = from_idx + 5
-            log = read_text[log_idx:]
-        self.blocks = []
-        if id_text:
+        for l in logs:
+            if l.lower() in text:
+                log = l
+                break
+                
+        ids = re.findall('\d+', self.text)
+        if len(ids) > 0:
             # If ID is specified, read specific story.
-            result = self.scrum_board.read_story(id=id_text, log=log)
+            id = int(ids[0])
+            result = self.scrum_board.read_story(id=id, log=log)
             if isinstance(result, str):
                 self.text = result  # Handles error case of string from scrum_board
                 return
             # Otherwise, stories is one obj that is pretty-printed.
             story = result[0]
             log = result[1]
-            self.blocks += self._story_to_msg(story)
-            self.text = f"Story {id_text} from {log}:"
-        else:
-            # If there is no ID, return the swimlane/log/entire board.
+            self.blocks = self._story_to_msg(story)
+            self.text = f"Story {id} from {log}:"
+        elif log:
+            # If there is no ID but there is a log, return the swimlane/log/entire board.
             stories = self.scrum_board.read_log(log=log)
             self.blocks = []
             if isinstance(stories, str):
@@ -310,6 +304,8 @@ class ScrumMaster:
                     self.blocks = self.blocks[:i+2]
                     break
             self.text = "Story:"
+        else: 
+            self.text = "Could not understand read story command."
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
@@ -328,12 +324,22 @@ class ScrumMaster:
 
     def _get_my_stories(self, user_id):
         name = self._get_member_name(user_id)
-        stories = self.scrum_board.search_story(name, [], [])
-        
-        self.blocks = []
-        for story in stories:
-            self.blocks += self._story_to_msg(story)
-        self.text = "Hello! Here are your stories."
+        first_name = name.split(' ')[0]
+        stories = self.scrum_board.search_story(name, [], [], include_archived=False)
+
+        if isinstance(stories, list):
+            self.blocks = [{
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"Hello {first_name}, here are your stories!",
+                }
+            }]
+            for story in stories:
+                self.blocks += self._story_to_msg(story)
+            self.text = "Hello! Here are your stories."
+        else:
+            self.text = f"Hi {first_name}, you have no stories!"
 
     # Where action="update" or "delete"
     def update_or_delete_swimlane(self, action: str):
@@ -346,38 +352,75 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
-    def process_user_msg(self, text: str, user_id=None):
+    def find_synonyms(self, text:str):
+        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+        text = text.translate(replace_punc).split()
+        synonyms = []
+        for word in text:
+            if word in self.synonyms:
+                synonyms.extend(self.synonyms[word].split())
+        return synonyms
+
+    def is_in(self, words, text_str):
+        text_lst = text_str.split(' ')
+        for word in words:
+            if word in text_lst:
+                return True
+        return False
+
+    def process_user_msg(self, text: str, user_id: str = None):
         """
         Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
         Command: "create a story" will make a button that opens a create story modal
         """
-        self.text = text.lower()
-        is_in = lambda x, y: [True for z in x if z in y]
+        self.text = text
+        text = text.lower()
+        print(text.split(' '))
 
-        if "create story" in text:
-            self.create_story()
-        elif "delete story" in text:
-            self.delete_story()
-        elif "update story" in text:
-            self.update_story()
-        elif "read story" in text:
-            self.read_story()
-        elif "search story" in text:
-            self.search_story()
-        elif "set sprint" in text:
-            self.set_sprint()
-        elif "create swimlane" in text:
-            self.create_swimlane()
-        elif "update swimlane" in text:
-            self.update_or_delete_swimlane("update")
-        elif "delete swimlane" in text:
-            self.update_or_delete_swimlane("delete")
-        elif "hello" in text or is_in(("me", "my"), text):
+        synonyms = self.find_synonyms(text)
+
+        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+
+        if self.is_in(("hello", "hi"), text) or self.is_in(("me", "my"), text):
             self._get_my_stories(user_id)
+        elif "story" in synonyms:
+            if "create" in synonyms:
+                self.create_story()
+            elif "delete" in synonyms:
+                self.delete_story()
+            elif "update" in synonyms:
+                self.update_story()
+            else:
+                self.text = fail_msg
+        elif "read" in synonyms:
+            self.read_story()
+        elif "search" in synonyms:
+            self.search_story()
+        elif "sprint" in synonyms:
+            self.set_sprint()
+        elif "swimlane" in synonyms:
+            if "create" in synonyms:
+                self.create_swimlane()
+            elif "update" in synonyms:
+                self.update_or_delete_swimlane("update")
+            elif "delete" in synonyms:
+                self.update_or_delete_swimlane("delete")
+            else:
+                self.text = fail_msg
+        elif "update" in synonyms and re.findall('\d+', text):
+            self.update_story()
+        elif "update" in synonyms:
+            self.text = "Please specify whether you want to update a story (use the word \"story\" or specify an story ID) or a swimlane."
+        elif "create" in synonyms:
+            self.text = "Please specify whether you want to create a story or a swimlane."
+        elif "delete" in synonyms:
+            self.text = "Please specify whether you want to delete a story or a swimlane."
+        elif "help" in synonyms:
+            self.text = "No."
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-        else:
-            self.text = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+        else:        
+            self.text = fail_msg
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
@@ -455,7 +498,6 @@ class ScrumMaster:
         return modal
 
     def _fill_delete_modal(self, modal, metadata=None):
-        # print(f'FILL DELETE MODAL METADATA: {metadata}')
         try:
             init_value = json.loads(metadata)['story']
         except:
@@ -464,9 +506,12 @@ class ScrumMaster:
         modal['private_metadata'] = metadata
         return modal
 
+    def _fill_confirm_delete_modal(self, modal, metadata, callback_id):
+        modal['view']['private_metadata'] = metadata
+        modal['view']['callback_id'] = callback_id
+        return modal
+
     def init_sprint_modal(self, modal):
-        print('INIT SPRINT MODAL')
-        print(json.dumps(modal, indent=4))
         today = datetime.now().strftime("%Y-%m-%d %H:%M").split()
         modal['blocks'][1]['elements'][0]['initial_date'] = today[0]
         modal['blocks'][1]['elements'][1]['initial_time'] = today[1]
@@ -504,7 +549,6 @@ class ScrumMaster:
             return [x for x in self.scrum_board.get_logs() if x != 'Previous Sprint']
 
     def _fill_update_modal(self, modal, metadata):
-        # print(f'\n\nFILL UPDATE MODEL METADATA: {metadata}\n\n')
         logs = self._get_valid_logs(create=0 if metadata else 1)
         swimlane_options = [
             {
@@ -563,6 +607,8 @@ class ScrumMaster:
                 b['element']['initial_value'] = story_update['story'].capitalize()
             elif b['label']['text'] == 'Assigned To':
                 b['element']['initial_user'] = story_update['assigned_to'] if story_update['assigned_to'] else "None"
+            elif b['label']['text'] == 'Description':
+                b['element']['initial_value'] = story_update['description']
         return modal
 
     def process_modal_submission(self, payload, callback_id):
@@ -572,7 +618,12 @@ class ScrumMaster:
         if callback_id == "create-story-modal":
             self._process_create_update_submission(payload_values)
         elif callback_id == "delete-story-modal":
-            self._process_delete_story(payload_values)
+            return self._process_delete_story(payload_values)
+        elif callback_id == "confirm-delete-story-modal":
+            md = json.loads(payload['view']['private_metadata'])
+            self._process_story_confirm_delete(md)
+        elif callback_id == "confirm-story-modal":
+            self._process_confirm_story(payload_values)
         elif callback_id == "search-story-modal":
             self._process_search_story(payload_values)
         elif callback_id == "create-swimlane-modal":
@@ -580,16 +631,15 @@ class ScrumMaster:
         elif callback_id == "update-swimlane-modal":
             names = self._process_update_swimlane(payload_values)
             return names
-        elif callback_id == "delete-swimlane-modal":
-            self._process_delete_swimlane(payload_values)
+        elif callback_id == "confirm-delete-swimlane-modal":
+            md = json.loads(payload['view']['private_metadata'])
+            self._process_swimlane_confirm_delete(md)
         elif callback_id == "example-modal":
             # Here's where you call the function to process your modal's submission
             # e.g. self._process_example_submission(payload_values)
             pass
         elif callback_id == "update-story-modal":
             md = json.loads(payload['view']['private_metadata'])
-            # print(f'\n\nPROCESS MODAL SUBMISSION MD: {md}\n\n')
-            # metadata = f'{md["story"]["id"]},{md["log"]}'
             self._process_create_update_submission(
                 payload_values, [md["story"]["id"], md["log"]])  # payload['view']['private_metadata'].split(','))
         elif callback_id == "start-sprint-modal":
@@ -598,6 +648,54 @@ class ScrumMaster:
             # since we need the client to schedule a message
         else:
             pass
+
+    def process_delete_sequence(self, payload):
+        callback_id = payload['view']['callback_id']
+        payload_values = list(payload['view']['state']['values'].values())
+        print(f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
+        if payload['view']['private_metadata'] != "None":
+            metadata = json.loads(payload['view']['private_metadata'])
+        else: 
+            metadata = {"swimlane": "Product Backlog", "sort_by": "UNSORTED"}
+
+        if callback_id == "delete-story-modal":
+            story_id_list = self._process_delete_story(payload_values)
+            metadata['story'] = story_id_list
+            injected_view = self._fill_confirm_delete_modal(
+                modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-story-modal")
+        else:
+            swimlane = self._process_delete_swimlane(payload_values)
+            metadata = {"swimlane": swimlane}
+            injected_view = self._fill_confirm_delete_modal(
+                modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-swimlane-modal")
+
+        return injected_view
+
+    def _process_start_sprint_submission(self, payload_values):
+        start_date = payload_values[0]['sprint-date']['selected_date']
+        start_time = payload_values[0]['sprint-time']['selected_time']
+        duration = int(payload_values[1]['duration']
+                       ['selected_option']['text']['text'])
+        unit = payload_values[1]['unit']['selected_option']['text']['text']
+        seconds_table = {
+            'days': 86400,
+            'weeks': 604800,
+            'months': 2419200,
+        }
+        duration_in_seconds = duration * seconds_table[unit]
+        unix_start = int(datetime.strptime(
+            f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
+        unix_end = unix_start + duration_in_seconds
+        self.scrum_board.write_metadata_field(
+            'current_sprint_starts', unix_start)
+        self.scrum_board.write_metadata_field('current_sprint_ends', unix_end)
+
+        # TODO:
+        # schedule a message for when the sprint ends (unix_end)
+
+        self.text = f"Sprint has been set!\nIt begins on {start_date} at {start_time} " + \
+                    f"and ends on {datetime.fromtimestamp(unix_end).strftime('%Y-%m-%d at %H:%M')}."
+        self.blocks = None
 
     def move_sb_to_sprint(self):
         curr_sprint = self.scrum_board.read_metadata_field("current_sprint")
@@ -724,8 +822,7 @@ class ScrumMaster:
         return msg
 
     def _process_create_update_submission(self, payload_values, metadata=[]):
-        # i = 0 if metadata else 1
-        # print(f'\n\nPROCESS UPDATE SUBMISSION MD: {metadata}\n\n')
+        desc = self._get_plaintext_input_item(payload_values, 8)
         estimate = int(self._get_dropdown_select_item(payload_values, 7))
         priority = self.priorities[self._get_radio_group_item(
             payload_values, 6).capitalize()]
@@ -749,7 +846,8 @@ class ScrumMaster:
             "status": status,
             "assigned_to": assigned_to,
             "user_type": user_type,
-            "story": story_title
+            "story": story_title,
+            "description": desc
         }
 
         if metadata:
@@ -819,27 +917,39 @@ class ScrumMaster:
             return text + f"{val}\t" + emoji
         elif label == "Assigned To":
             return text + self._get_member_name(val)
-        elif label == "Estimate" or label == "Sprint" or label == "User Type" or label == "Story":
+        elif label == "Estimate" or label == "Sprint" or label == "User Type" or label == "Story" or label == "Description":
             return text + f"{val}"
         else:
             return ""
 
     def _process_delete_story(self, payload_values):
-        story_id_string = self._get_plaintext_input_item(payload_values, 0)
+        story_id_string = self._get_plaintext_input_item(
+            payload_values, 0)
         story_id_list = re.findall(r'[0-9]+', story_id_string)
+        return ",".join(story_id_list)
+
+    def _process_story_confirm_delete(self, payload_values):
+        story_ids = payload_values
+        story_id_list = story_ids['story'].split(",")
 
         for story_id in story_id_list:
-            response = self.scrum_board.delete_story(story_id)
+            response = self.scrum_board.delete_story(int(story_id))
             self.text = self.text + "\n" + response
+        self.blocks = None
 
+    def _process_swimlane_confirm_delete(self, payload_values):
+        swimlane_name = payload_values["swimlane"]
+        self.text = self.scrum_board.delete_swimlane(swimlane_name)
         self.blocks = None
 
     def _process_search_story(self, payload_values):
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
+        include_archived = self._get_checkboxes_action(payload_values, 3)
+        include_archived = False if include_archived == [] else True
         stories = self.scrum_board.search_story(
-            lookup_text=lookup_text, logs=swimlanes, fields=fields)
+            lookup_text=lookup_text, logs=swimlanes, fields=fields, include_archived=include_archived)
         self.blocks = []
         if isinstance(stories, str):
             self.text = stories  # Handles error case of string from scrum_board
@@ -865,8 +975,7 @@ class ScrumMaster:
         selected_option = self._get_dropdown_select_item(payload_values, 0)
         idx = selected_option.find("(")
         name = selected_option[:idx-1]  # need to remove " (X)" notation
-        self.text = self.scrum_board.delete_swimlane(name)
-        self.blocks = []
+        return name
 
     @staticmethod
     def _get_member_name(id):
@@ -892,7 +1001,6 @@ class ScrumMaster:
 
     @staticmethod
     def _get_radio_group_item(payload_values, index):
-        # print(payload_values[index])
         return payload_values[index]['radio_buttons-action']['selected_option']['value']
 
     @staticmethod
@@ -902,6 +1010,10 @@ class ScrumMaster:
         for x in selected_options:
             selected_text.append(x['text']['text'])
         return selected_text
+
+    @staticmethod
+    def _get_checkboxes_action(payload_values, index):
+        return payload_values[index]["actionId-0"]['selected_options']
 
     def get_response(self):
         # self.text is the textual message to be displayed by bot
