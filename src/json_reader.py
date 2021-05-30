@@ -182,13 +182,9 @@ class json_reader():
         if self._j[log_name]["stories"] != []:
             return 0
         try:
-            with open(file=self._file_path, mode="r+") as f:
-                self._j.pop(log_name)
-                self._list_logs.remove(log_name)
-                f.seek(0)
-                f.write(json.dumps(self._j, indent=4)) # Write python obj to file
-                f.truncate()
-            return 1
+            self._j.pop(log_name)
+            self._list_logs.remove(log_name)
+            return self.write_to_file()
         except:
             return -3
 
