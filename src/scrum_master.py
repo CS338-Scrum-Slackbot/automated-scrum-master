@@ -304,6 +304,13 @@ class ScrumMaster:
                 return
             for story in stories:
                 self.blocks += self._story_to_msg(story)
+            
+            # Make sure stories are under 50 blocks
+            self.blocks = self.blocks[:50]
+            for i in range(len(self.blocks)-1, 0, -1):
+                if self.blocks[i]['type'] == 'actions':
+                    self.blocks = self.blocks[:i+2]
+                    break
             self.text = "Story:"
         else:
             self.text = "Could not understand read command."
@@ -322,6 +329,27 @@ class ScrumMaster:
         msg, blocks = self._create_modal_btn(text="Create swimlane",
                                              action_id="create-swimlane")
         self.text, self.blocks = msg, blocks
+
+    def _get_my_stories(self, user_id):
+        name = self._get_member_name(user_id)
+        first_name = name.split(' ')[0]
+
+        story_logs = list(set(self.scrum_board.get_logs()) - set(["Previous Sprint", "Archived"]))
+        stories = self.scrum_board.search_story(name, story_logs, [], include_archived=False)
+
+        if isinstance(stories, list):
+            self.blocks = [{
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"Hello {first_name}, here are your stories!",
+                }
+            }]
+            for story in stories:
+                self.blocks += self._story_to_msg(story)
+            self.text = "Hello! Here are your stories."
+        else:
+            self.text = f"Hi {first_name}, you have no stories!"
 
     # Where action="update" or "delete"
     def update_or_delete_swimlane(self, action: str):
@@ -348,26 +376,25 @@ class ScrumMaster:
                 synonyms.extend(self.synonyms[word].split())
         return synonyms
 
+    def is_in(self, words, text_str):
+        text_lst = text_str.split(' ')
+        for word in words:
+            if word in text_lst:
+                return True
+        return False
+
     def spellcheck(self, text: str):
         correct = []
         for word in text.split(" "):
             correct.append(self.spell.correction(word))
         return " ".join(correct)
 
-    def determine_command(self, text: str):
+    def determine_command(self, text: str, user_id: str):
         self.text = text
         synonyms = self.find_synonyms(text)
-        if "story" in synonyms:
-            if "create" in synonyms:
-                self.create_story()
-            elif "delete" in synonyms:
-                self.delete_story()
-            elif "update" in synonyms:
-                self.update_story()
-            elif "search" in synonyms:
-                self.search_story()
-            else:
-                self.text = fail_msg
+
+        if user_id and (self.is_in(("hello", "hi"), text) or self.is_in(("me", "my"), text)):
+            self._get_my_stories(user_id)
         elif "read" in synonyms:
             self.read_story()
         elif "search" in synonyms:
@@ -395,13 +422,24 @@ class ScrumMaster:
             self.text = help_msg
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
+        elif "story" in synonyms:
+            if "create" in synonyms:
+                self.create_story()
+            elif "delete" in synonyms:
+                self.delete_story()
+            elif "update" in synonyms:
+                self.update_story()
+            elif "search" in synonyms:
+                self.search_story()
+            else:
+                self.text = fail_msg
         else:
             self.text = fail_msg
 
-    def process_user_msg(self, text: str):
+    def process_user_msg(self, text: str, user_id: str = None):
         text = self.normalize(text)
         text = self.spellcheck(text)
-        self.determine_command(text)
+        self.determine_command(text, user_id)
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
@@ -862,24 +900,27 @@ class ScrumMaster:
                         "text": self._get_msg_text(k, v)
                     })
 
-        for action in actions:
-            if action['text']['text'] == 'Update':
-                story, log = self.scrum_board.read_story(story['id'])
-                metadata = {"story": story, "log": log}
-                if md:
-                    mdata = json.loads(md)
-                    metadata["swimlane"] = mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
-                action['action_id'] = "update-story"
-                action['value'] = json.dumps(metadata)
-            else:
-                action['action_id'] = "delete-story"
-                metadata = {"story": f"story {str(story['id'])}"}
-                if md:
-                    mdata = json.loads(md)
-                    metadata["swimlane"] = mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
-                action['value'] = json.dumps(metadata)
+        if log != "Previous Sprint" and log != "Archived":
+            for action in actions:
+                if action['text']['text'] == 'Update':
+                    story, log = self.scrum_board.read_story(story['id'])
+                    metadata = {"story": story, "log": log}
+                    if md:
+                        mdata = json.loads(md)
+                        metadata["swimlane"] = mdata["swimlane"]
+                        metadata["sort_by"] = mdata["sort_by"]
+                    action['action_id'] = "update-story"
+                    action['value'] = json.dumps(metadata)
+                else:
+                    action['action_id'] = "delete-story"
+                    metadata = {"story": f"story {str(story['id'])}"}
+                    if md:
+                        mdata = json.loads(md)
+                        metadata["swimlane"] = mdata["swimlane"]
+                        metadata["sort_by"] = mdata["sort_by"]
+                    action['value'] = json.dumps(metadata)
+        else:
+            block = block[:-2]
         return block
 
     def _get_msg_text(self, key, val):
