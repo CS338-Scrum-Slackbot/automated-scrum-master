@@ -23,7 +23,8 @@ import string
 from spellchecker import SpellChecker
 
 SYNONYMS = 'data/synonyms.json'
-fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
+help_msg = "Here are the commands you can use with *@Miyagi*. Text in _italic_ represents data fields and [text] are optional fields: \n *:heavy_plus_sign: create story* \n *:pencil2: update story _id_* \n *:heavy_multiplication_x: delete story* \n *:book: read [_id_] [from _swimlane name_]* \n *:mag: search* \n *:alarm_clock: set sprint* \n *:heavy_plus_sign: create swimlane* \n *:pencil2: update swimlane* \n *:heavy_multiplication_x: delete swimlane* \n *:newspaper: read _swimlane name_*"
+fail_msg = "Command not found. " + help_msg
 
 emojis = {
     "priority": {
@@ -82,7 +83,7 @@ class ScrumMaster:
         with open(SYNONYMS, 'r') as f:
             self.synonyms = json.load(f)
 
-        self.spell = SpellChecker() 
+        self.spell = SpellChecker()
         self.spell.word_frequency.load_dictionary('data/freq_synonyms.json')
         with open("data/nonwords.json", "r") as f:
             nonwords = json.load(f)
@@ -280,7 +281,7 @@ class ScrumMaster:
             if self.normalize(l) in text:
                 log = l
                 break
-                
+
         ids = re.findall('\d+', self.text)
         if len(ids) > 0:
             # If ID is specified, read specific story.
@@ -304,7 +305,7 @@ class ScrumMaster:
             for story in stories:
                 self.blocks += self._story_to_msg(story)
             self.text = "Story:"
-        else: 
+        else:
             self.text = "Could not understand read command."
 
     def search_story(self):
@@ -339,7 +340,7 @@ class ScrumMaster:
         s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
         return s.lower().strip()                        # Lowercase, strip whitespace
 
-    def find_synonyms(self, text:str):
+    def find_synonyms(self, text: str):
         text = text.split()
         synonyms = []
         for word in text:
@@ -347,13 +348,13 @@ class ScrumMaster:
                 synonyms.extend(self.synonyms[word].split())
         return synonyms
 
-    def spellcheck(self, text:str):
+    def spellcheck(self, text: str):
         correct = []
         for word in text.split(" "):
             correct.append(self.spell.correction(word))
         return " ".join(correct)
 
-    def determine_command(self, text:str):
+    def determine_command(self, text: str):
         self.text = text
         synonyms = self.find_synonyms(text)
         if "story" in synonyms:
@@ -391,10 +392,10 @@ class ScrumMaster:
         elif "delete" in synonyms:
             self.text = "Please specify whether you want to delete a story or a swimlane."
         elif "help" in synonyms:
-            self.text = "No."
+            self.text = help_msg
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-        else:        
+        else:
             self.text = fail_msg
 
     def process_user_msg(self, text: str):
@@ -632,10 +633,11 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
-        print(f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
+        print(
+            f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
         if payload['view']['private_metadata'] != "None":
             metadata = json.loads(payload['view']['private_metadata'])
-        else: 
+        else:
             metadata = {"swimlane": "Product Backlog", "sort_by": "UNSORTED"}
 
         if callback_id == "delete-story-modal":
@@ -682,7 +684,7 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field(
             field="current_sprint", value=curr_sprint+1)
         sb = self.scrum_board.read_log('Sprint Backlog')
-        if not isinstance(sb, str): # Indicates that sprint backlog is empty
+        if not isinstance(sb, str):  # Indicates that sprint backlog is empty
             for s in sb:
                 if s['status'] == "":
                     s['status'] = 'to-do'
