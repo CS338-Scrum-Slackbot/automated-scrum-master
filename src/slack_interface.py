@@ -27,12 +27,11 @@ client = slack.WebClient(token=os.environ.get('BOT_TOKEN'))
 BOT_ID = client.api_call("auth.test")["user_id"]
 
 # TODO: Change CHANNEL when developing locally"
-CHANNEL = "#app_mention"
+CHANNEL = "#test"
 
 # delete all scheduled messages on start-up
 result = client.chat_scheduledMessages_list()
 for msg in result["scheduled_messages"]:
-    print(msg['id'])
     try:
         result = client.chat_deleteScheduledMessage(
             channel=CHANNEL,
@@ -120,13 +119,7 @@ def handle_interaction():
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
 
-        # result = client.chat_scheduledMessages_list()
-        # for msg in result["scheduled_messages"]:
-        #     print(msg)
-
         if 'view' in data and data['view']['type'] == 'home':
-            # print('\n\nVIEW CHANGED\n\n')
-            # if data['view']['type'] == 'home':
             if data['actions'][0]['action_id'] in view_actions:
                 action_id = data['actions'][0]['action_id']
                 value = data['actions'][0]['value']
@@ -160,7 +153,6 @@ def handle_interaction():
     elif data['type'] == 'view_submission':
         try:
             callback_id = data['view']['callback_id']
-            # print(f'\n\nVIEW SUBMISSION METADATA: {data["view"]["private_metadata"]}\n\n')
             if callback_id == "start-sprint-modal":
                 print("START SPRINT MODAL SUBMITTED")
                 schedule_sprint_end_message(
@@ -223,7 +215,7 @@ def end_sprint():
 def extend_sprint():
     # NOTE: extends sprint by 1 day
     # schedule a new end message
-    day = 300  # 86400
+    day = 86400
     sprint_start = scrum_master.scrum_board.read_metadata_field(
         'current_sprint_starts')
     sprint_end = scrum_master.scrum_board.read_metadata_field(
@@ -242,7 +234,6 @@ def extend_sprint():
 
 
 def schedule_sprint_end_message(payload_values):
-    # print(json.dumps(payload_values, indent=4))
     start_date = payload_values[0]['sprint-date']['selected_date']
     start_time = payload_values[0]['sprint-time']['selected_time']
     duration = int(payload_values[1]['duration']
@@ -253,29 +244,19 @@ def schedule_sprint_end_message(payload_values):
         'weeks': 604800,
         'months': 2419200,
     }
-    duration_in_seconds = 300  # duration * seconds_table[unit]
+    duration_in_seconds = duration * seconds_table[unit]
     unix_start = int(datetime.strptime(
         f'{start_date} {start_time}', '%Y-%m-%d %H:%M').timestamp())
     unix_end = unix_start + duration_in_seconds
 
-    print(f'SPRINT STARTS: {unix_start} AND ENDS {unix_end}')
-
-    # Q022FRWA1GT
-
     # if already have an end_sprint msg scheduled, need to delete it:
     exists = scrum_master.check_if_sprint_exists()
     if exists:
-        print("SPRINT EXISTS ALREADY")
         delete_scheduled_message(exists)
-    else:
-        print("SPRINT DOESN'T EXIST")
-
+    
     # schedule a message:
-    print("GETTING END MESSAGE")
     end_msg = scrum_master.get_sprint_end_msg(unix_start, unix_end)
-    print("SCHEDULING MESSAGE")
     success = schedule_message(unix_end, blocks=end_msg['blocks'])
-    print("HANDLING SPRINT SUBMISSION")
     scrum_master.handle_sprint_submission(
         unix_start, unix_end, success=success)
 
@@ -309,7 +290,6 @@ def schedule_message(time, text="", blocks=[]):
 
 @slack_event_adapter.on('team_join')
 def team_join_event(payload):
-    # print('TEAM JOIN DETECTED!!')
     register_or_update_member(payload)
     return ''
 
@@ -337,7 +317,6 @@ def get_app_mention(payload):
 
 @slack_event_adapter.on('app_home_opened')
 def displayHome(payload):
-    # print(f'\n\n\nDISPLAY HOME EVENT\n\n\n')
     updateHome(payload, init=not 'view' in payload)
 
 
@@ -353,7 +332,6 @@ def updateHome(payload, init, after_button=False):
         user_id = payload['user']['id']
         view = scrum_master.update_home(payload, metadata=button_metadata)
 
-    # print(json.dumps(view, indent=4))
     client.views_publish(user_id=user_id, view=view)
 
 

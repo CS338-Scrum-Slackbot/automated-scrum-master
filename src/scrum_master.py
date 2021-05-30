@@ -20,8 +20,11 @@ import re
 from datetime import datetime
 import itertools
 import string
+from spellchecker import SpellChecker
 
 SYNONYMS = 'data/synonyms.json'
+help_msg = "Here are the commands you can use with *@Miyagi*. Text in _italic_ represents data fields and [text] are optional fields: \n *:heavy_plus_sign: create story* \n *:pencil2: update story _id_* \n *:heavy_multiplication_x: delete story* \n *:book: read [_id_] [from _swimlane name_]* \n *:mag: search* \n *:alarm_clock: set sprint* \n *:heavy_plus_sign: create swimlane* \n *:pencil2: update swimlane* \n *:heavy_multiplication_x: delete swimlane* \n *:newspaper: read _swimlane name_*"
+fail_msg = "Command not found. " + help_msg
 
 emojis = {
     "priority": {
@@ -80,6 +83,13 @@ class ScrumMaster:
         with open(SYNONYMS, 'r') as f:
             self.synonyms = json.load(f)
 
+        self.spell = SpellChecker()
+        self.spell.word_frequency.load_dictionary('data/freq_synonyms.json')
+        with open("data/nonwords.json", "r") as f:
+            nonwords = json.load(f)
+            for word in nonwords:
+                self.spell.word_frequency.pop(word)
+
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
         self.scrum_board.write_metadata_field('current_sprint_ends', 0)
@@ -89,8 +99,6 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field('scheduled_messages', sm)
 
     def update_home(self, payload, metadata=""):
-        # print(json.dumps(payload, indent=4))
-        # print(f'\n\nUPDATE HOME METADATA: {metadata}\n\n')
         sprint_header = []
         swimlane_select = []
         story_blocks = []
@@ -270,10 +278,10 @@ class ScrumMaster:
         logs = self.scrum_board.get_logs()
         log = None
         for l in logs:
-            if l.lower() in text:
+            if self.normalize(l) in text:
                 log = l
                 break
-                
+
         ids = re.findall('\d+', self.text)
         if len(ids) > 0:
             # If ID is specified, read specific story.
@@ -304,8 +312,8 @@ class ScrumMaster:
                     self.blocks = self.blocks[:i+2]
                     break
             self.text = "Story:"
-        else: 
-            self.text = "Could not understand read story command."
+        else:
+            self.text = "Could not understand read command."
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
@@ -325,7 +333,9 @@ class ScrumMaster:
     def _get_my_stories(self, user_id):
         name = self._get_member_name(user_id)
         first_name = name.split(' ')[0]
-        stories = self.scrum_board.search_story(name, [], [], include_archived=False)
+
+        story_logs = list(set(self.scrum_board.get_logs()) - set(["Previous Sprint", "Archived"]))
+        stories = self.scrum_board.search_story(name, story_logs, [], include_archived=False)
 
         if isinstance(stories, list):
             self.blocks = [{
@@ -352,9 +362,14 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
-    def find_synonyms(self, text:str):
-        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        text = text.translate(replace_punc).split()
+    def normalize(self, s):
+        for p in string.punctuation:                    # Remove punctuation
+            s = s.replace(p, '')
+        s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
+        return s.lower().strip()                        # Lowercase, strip whitespace
+
+    def find_synonyms(self, text: str):
+        text = text.split()
         synonyms = []
         for word in text:
             if word in self.synonyms:
@@ -368,30 +383,18 @@ class ScrumMaster:
                 return True
         return False
 
-    def process_user_msg(self, text: str, user_id: str = None):
-        """
-        Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
-        Command: "create a story" will make a button that opens a create story modal
-        """
-        self.text = text
-        text = text.lower()
-        print(text.split(' '))
+    def spellcheck(self, text: str):
+        correct = []
+        for word in text.split(" "):
+            correct.append(self.spell.correction(word))
+        return " ".join(correct)
 
+    def determine_command(self, text: str, user_id: str):
+        self.text = text
         synonyms = self.find_synonyms(text)
 
-        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
-
-        if self.is_in(("hello", "hi"), text) or self.is_in(("me", "my"), text):
+        if user_id and (self.is_in(("hello", "hi"), text) or self.is_in(("me", "my"), text)):
             self._get_my_stories(user_id)
-        elif "story" in synonyms:
-            if "create" in synonyms:
-                self.create_story()
-            elif "delete" in synonyms:
-                self.delete_story()
-            elif "update" in synonyms:
-                self.update_story()
-            else:
-                self.text = fail_msg
         elif "read" in synonyms:
             self.read_story()
         elif "search" in synonyms:
@@ -416,11 +419,27 @@ class ScrumMaster:
         elif "delete" in synonyms:
             self.text = "Please specify whether you want to delete a story or a swimlane."
         elif "help" in synonyms:
-            self.text = "No."
+            self.text = help_msg
         elif "end demo" in text:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
-        else:        
+        elif "story" in synonyms:
+            if "create" in synonyms:
+                self.create_story()
+            elif "delete" in synonyms:
+                self.delete_story()
+            elif "update" in synonyms:
+                self.update_story()
+            elif "search" in synonyms:
+                self.search_story()
+            else:
+                self.text = fail_msg
+        else:
             self.text = fail_msg
+
+    def process_user_msg(self, text: str, user_id: str = None):
+        text = self.normalize(text)
+        text = self.spellcheck(text)
+        self.determine_command(text, user_id)
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
@@ -652,10 +671,11 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
-        print(f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
+        print(
+            f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
         if payload['view']['private_metadata'] != "None":
             metadata = json.loads(payload['view']['private_metadata'])
-        else: 
+        else:
             metadata = {"swimlane": "Product Backlog", "sort_by": "UNSORTED"}
 
         if callback_id == "delete-story-modal":
@@ -702,12 +722,13 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field(
             field="current_sprint", value=curr_sprint+1)
         sb = self.scrum_board.read_log('Sprint Backlog')
-        for s in sb:
-            if s['status'] == "":
-                s['status'] = 'to-do'
-            s['sprint'] = curr_sprint+1
-            self.scrum_board.update_story(
-                s, "Sprint Backlog", "Current Sprint")
+        if not isinstance(sb, str):  # Indicates that sprint backlog is empty
+            for s in sb:
+                if s['status'] == "":
+                    s['status'] = 'to-do'
+                s['sprint'] = curr_sprint+1
+                self.scrum_board.update_story(
+                    s, "Sprint Backlog", "Current Sprint")
 
     def start_new_sprint(self):
         sprint_start = self.scrum_board.read_metadata_field(
@@ -879,24 +900,27 @@ class ScrumMaster:
                         "text": self._get_msg_text(k, v)
                     })
 
-        for action in actions:
-            if action['text']['text'] == 'Update':
-                story, log = self.scrum_board.read_story(story['id'])
-                metadata = {"story": story, "log": log}
-                if md:
-                    mdata = json.loads(md)
-                    metadata["swimlane"] = mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
-                action['action_id'] = "update-story"
-                action['value'] = json.dumps(metadata)
-            else:
-                action['action_id'] = "delete-story"
-                metadata = {"story": f"story {str(story['id'])}"}
-                if md:
-                    mdata = json.loads(md)
-                    metadata["swimlane"] = mdata["swimlane"]
-                    metadata["sort_by"] = mdata["sort_by"]
-                action['value'] = json.dumps(metadata)
+        if log != "Previous Sprint" and log != "Archived":
+            for action in actions:
+                if action['text']['text'] == 'Update':
+                    story, log = self.scrum_board.read_story(story['id'])
+                    metadata = {"story": story, "log": log}
+                    if md:
+                        mdata = json.loads(md)
+                        metadata["swimlane"] = mdata["swimlane"]
+                        metadata["sort_by"] = mdata["sort_by"]
+                    action['action_id'] = "update-story"
+                    action['value'] = json.dumps(metadata)
+                else:
+                    action['action_id'] = "delete-story"
+                    metadata = {"story": f"story {str(story['id'])}"}
+                    if md:
+                        mdata = json.loads(md)
+                        metadata["swimlane"] = mdata["swimlane"]
+                        metadata["sort_by"] = mdata["sort_by"]
+                    action['value'] = json.dumps(metadata)
+        else:
+            block = block[:-2]
         return block
 
     def _get_msg_text(self, key, val):
