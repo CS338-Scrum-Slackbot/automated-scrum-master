@@ -20,8 +20,10 @@ import re
 from datetime import datetime
 import itertools
 import string
+from spellchecker import SpellChecker
 
 SYNONYMS = 'data/synonyms.json'
+fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
 
 emojis = {
     "priority": {
@@ -80,6 +82,13 @@ class ScrumMaster:
         with open(SYNONYMS, 'r') as f:
             self.synonyms = json.load(f)
 
+        self.spell = SpellChecker() 
+        self.spell.word_frequency.load_dictionary('data/freq_synonyms.json')
+        with open("data/nonwords.json", "r") as f:
+            nonwords = json.load(f)
+            for word in nonwords:
+                self.spell.word_frequency.pop(word)
+
     def reset_sprint_info(self):
         self.scrum_board.write_metadata_field('current_sprint_starts', 0)
         self.scrum_board.write_metadata_field('current_sprint_ends', 0)
@@ -89,8 +98,6 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field('scheduled_messages', sm)
 
     def update_home(self, payload, metadata=""):
-        # print(json.dumps(payload, indent=4))
-        # print(f'\n\nUPDATE HOME METADATA: {metadata}\n\n')
         sprint_header = []
         swimlane_select = []
         story_blocks = []
@@ -270,7 +277,7 @@ class ScrumMaster:
         logs = self.scrum_board.get_logs()
         log = None
         for l in logs:
-            if l.lower() in text:
+            if self.normalize(l) in text:
                 log = l
                 break
                 
@@ -298,7 +305,7 @@ class ScrumMaster:
                 self.blocks += self._story_to_msg(story)
             self.text = "Story:"
         else: 
-            self.text = "Could not understand read story command."
+            self.text = "Could not understand read command."
 
     def search_story(self):
         msg, blocks = self._create_modal_btn(text="Search story",
@@ -326,27 +333,29 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
+    def normalize(self, s):
+        for p in string.punctuation:                    # Remove punctuation
+            s = s.replace(p, '')
+        s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
+        return s.lower().strip()                        # Lowercase, strip whitespace
+
     def find_synonyms(self, text:str):
-        replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        text = text.translate(replace_punc).split()
+        text = text.split()
         synonyms = []
         for word in text:
             if word in self.synonyms:
                 synonyms.extend(self.synonyms[word].split())
         return synonyms
 
-    def process_user_msg(self, text: str):
-        """
-        Need to make some assumptions about how users will communicate with the bot (at least pre-NLP)
-        Command: "create a story" will make a button that opens a create story modal
-        """
+    def spellcheck(self, text:str):
+        correct = []
+        for word in text.split(" "):
+            correct.append(self.spell.correction(word))
+        return " ".join(correct)
+
+    def determine_command(self, text:str):
         self.text = text
-        text = text.lower()
-
         synonyms = self.find_synonyms(text)
-
-        fail_msg = "Command not found, please use a keyword ('create', 'read', 'update', 'delete')."
-
         if "story" in synonyms:
             if "create" in synonyms:
                 self.create_story()
@@ -354,6 +363,8 @@ class ScrumMaster:
                 self.delete_story()
             elif "update" in synonyms:
                 self.update_story()
+            elif "search" in synonyms:
+                self.search_story()
             else:
                 self.text = fail_msg
         elif "read" in synonyms:
@@ -385,6 +396,11 @@ class ScrumMaster:
             self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         else:        
             self.text = fail_msg
+
+    def process_user_msg(self, text: str):
+        text = self.normalize(text)
+        text = self.spellcheck(text)
+        self.determine_command(text)
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
@@ -666,12 +682,13 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field(
             field="current_sprint", value=curr_sprint+1)
         sb = self.scrum_board.read_log('Sprint Backlog')
-        for s in sb:
-            if s['status'] == "":
-                s['status'] = 'to-do'
-            s['sprint'] = curr_sprint+1
-            self.scrum_board.update_story(
-                s, "Sprint Backlog", "Current Sprint")
+        if not isinstance(sb, str): # Indicates that sprint backlog is empty
+            for s in sb:
+                if s['status'] == "":
+                    s['status'] = 'to-do'
+                s['sprint'] = curr_sprint+1
+                self.scrum_board.update_story(
+                    s, "Sprint Backlog", "Current Sprint")
 
     def start_new_sprint(self):
         sprint_start = self.scrum_board.read_metadata_field(
