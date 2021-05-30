@@ -333,11 +333,7 @@ class ScrumMaster:
                                                  action_id=f"{action}-swimlane")
             self.text, self.blocks = msg, blocks
 
-# =========================
-
     def normalize(self, s):
-        #replace_punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-        #text = text.translate(replace_punc).split()
         for p in string.punctuation:                    # Remove punctuation
             s = s.replace(p, '')
         s = re.sub(pattern='\s+', string=s, repl=' ')   # Replace whitespace
@@ -405,8 +401,6 @@ class ScrumMaster:
         text = self.normalize(text)
         text = self.spellcheck(text)
         self.determine_command(text)
-
-# =======================
 
     def _create_modal_btn(self, text="", action_id="", metadata="None"):
         """Creates an interactive button so that we can obtain a trigger_id for modal interaction
