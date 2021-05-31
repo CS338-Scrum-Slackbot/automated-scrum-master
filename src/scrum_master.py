@@ -259,6 +259,9 @@ class ScrumMaster:
             return
         story = result[0]
         log = result[1]
+        if log == "Previous Sprint" or log == "Archived":
+            self.text = f"Cannot update story in {log}"
+            return
         metadata = {"story": story, "log": log}
         msg, blocks = self._create_modal_btn(text=f"Update Story {id}",
                                              action_id="update-story",
