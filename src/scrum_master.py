@@ -99,6 +99,7 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field('scheduled_messages', sm)
 
     def update_home(self, payload, metadata=""):
+        print(f'UPDATE HOME METADATA: {metadata}')
         sprint_header = []
         swimlane_select = []
         story_blocks = []
@@ -112,7 +113,10 @@ class ScrumMaster:
             init_option = md['swimlane'] if md['swimlane'] != 'UNSELECTED' else None
             if init_option:
                 sort_by_block = SORT_DROPDOWN
-            sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
+            if 'sort_by' in md:
+                sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
+            else: 
+                sort_by = None
 
         if not init_option:
             if 'swimlane_select' in payload['view']['state']['values']:
@@ -136,7 +140,7 @@ class ScrumMaster:
         if init_option not in self.scrum_board.get_logs():
             init_option = "Product Backlog"
 
-        metadata2 = {"swimlane": init_option if init_option else "UNSELECTED",
+        metadata2 = {"swimlane": init_option if init_option else "Product Backlog",
                      "sort_by": sort_by if sort_by else "UNSORTED"}
 
         if init_option:
@@ -185,7 +189,6 @@ class ScrumMaster:
                         "emoji": True
                     }
                 }]
-
         swimlane_select = self.populate_swimlanes(
             INIT_HOME_PAGE, init_option=init_option)
         for x in range(len(swimlane_select[3]['elements'])):
@@ -267,6 +270,9 @@ class ScrumMaster:
             return
         story = result[0]
         log = result[1]
+        if log == "Previous Sprint" or log == "Archived":
+            self.text = f"Cannot update stories in {log}."
+            return
         metadata = {"story": story, "log": log}
         msg, blocks = self._create_modal_btn(text=f"Update Story {id}",
                                              action_id="update-story",
@@ -685,7 +691,8 @@ class ScrumMaster:
                 modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-story-modal")
         else:
             swimlane = self._process_delete_swimlane(payload_values)
-            metadata = {"swimlane": swimlane}
+            # metadata = {"swimlane": swimlane}
+            metadata['swimlane-to-delete'] = swimlane
             injected_view = self._fill_confirm_delete_modal(
                 modal=CONFIRM_DELETE_MODAL, metadata=json.dumps(metadata), callback_id="confirm-delete-swimlane-modal")
 
@@ -962,7 +969,7 @@ class ScrumMaster:
         self.blocks = None
 
     def _process_swimlane_confirm_delete(self, payload_values):
-        swimlane_name = payload_values["swimlane"]
+        swimlane_name = payload_values["swimlane-to-delete"]
         self.text = self.scrum_board.delete_swimlane(swimlane_name)
         self.blocks = None
 
