@@ -51,6 +51,16 @@ INIT_HOME_PAGE = [
 					},
 					"value": "click_me_123",
 					"action_id": "update-swimlane"
+				},
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Delete Swimlane",
+						"emoji": True
+					},
+					"value": "click_me_123",
+					"action_id": "delete-swimlane"
 				}
 			]
 		}
