@@ -412,16 +412,6 @@ class ScrumMaster:
                 self.text = fail_msg
         elif "update" in synonyms and re.findall('\d+', text):
             self.update_story()
-        elif "update" in synonyms:
-            self.text = "Please specify whether you want to update a story (use the word \"story\" or specify an story ID) or a swimlane."
-        elif "create" in synonyms:
-            self.text = "Please specify whether you want to create a story or a swimlane."
-        elif "delete" in synonyms:
-            self.text = "Please specify whether you want to delete a story or a swimlane."
-        elif "help" in synonyms:
-            self.text = help_msg
-        elif "end demo" in text:
-            self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         elif "story" in synonyms:
             if "create" in synonyms:
                 self.create_story()
@@ -433,6 +423,16 @@ class ScrumMaster:
                 self.search_story()
             else:
                 self.text = fail_msg
+        elif "update" in synonyms:
+            self.text = "Please specify whether you want to update a story (use the word \"story\" or specify an story ID) or a swimlane."
+        elif "create" in synonyms:
+            self.text = "Please specify whether you want to create a story or a swimlane."
+        elif "delete" in synonyms:
+            self.text = "Please specify whether you want to delete a story or a swimlane."
+        elif "help" in synonyms:
+            self.text = help_msg
+        elif "end demo" in text:
+            self.text = "*Click :thumbsup: and Subscribe if you enjoyed the demo! Does anyone have any questions?*"
         else:
             self.text = fail_msg
 
