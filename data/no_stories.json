@@ -1,8 +1,8 @@
 {
     "metadata": {
-        "sid": 23,
-        "story_count": 7,
-        "current_sprint": 5,
+        "sid": 1,
+        "story_count": 0,
+        "current_sprint": 1,
         "current_sprint_starts": 1620684000,
         "current_sprint_ends": 1621288800,
         "id_to_name": {
@@ -13,6 +13,22 @@
         }
     },
     "Product Backlog": {
+        "user_generated": false,
+        "stories": []
+    },
+    "Sprint Backlog": {
+        "user_generated": false,
+        "stories": []
+    },
+    "Current Sprint": {
+        "user_generated": false,
+        "stories": []
+    },
+    "Previous Sprint": {
+        "user_generated": false,
+        "stories": []
+    },
+    "Archived": {
         "user_generated": false,
         "stories": []
     }
