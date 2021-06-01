@@ -99,7 +99,6 @@ class ScrumMaster:
         self.scrum_board.write_metadata_field('scheduled_messages', sm)
 
     def update_home(self, payload, metadata=""):
-        print(f'UPDATE HOME METADATA: {metadata}')
         sprint_header = []
         swimlane_select = []
         story_blocks = []
