@@ -1,3 +1,4 @@
+import re
 import json
 import copy
 import json_reader as jr
@@ -33,12 +34,17 @@ class ModalEditor:
         fields = self.reader.list_fields()
         logs = self.reader.list_logs()[:]
         logs.remove("Archived")
+        for idx in range(len(fields)):
+            f = fields[idx]
+            f = f.title()
+            f = re.sub(pattern='_', string=f, repl=' ')   # Replace underscore
+            fields[idx] = f
 
         # Get option list for field & log lists
         field_block = self._generate_select_options(fields, "field")
         log_block = self._generate_select_options(logs, "log")
 
-        # Overwrite modal options with the compiled options
+        # Overwrite modaf options with the compiled options
         modal['blocks'][2]["accessory"]["options"] = field_block
         modal['blocks'][3]["accessory"]["options"] = log_block
         return modal
@@ -50,16 +56,16 @@ class ModalEditor:
 
         # compile log/swimlane options
         message = "Existing swimlanes:\n"
-        for l in logs:
+        for f in logs:
             message += f"{l}, "
         message = message[:-2] # Crop trailing ", "
 
-        # Overwrite modal options with the compiled options
+        # Overwrite modaf options with the compiled options
         modal['blocks'][0]["text"]["text"] = message
         return modal
 
     def edit_update_or_delete_swimlane_modal(self, action:str): # same action as in scrum_master.create_modal()
-        modal = UPDATE_SWIMLANE_MODAL if action=="update" else DELETE_SWIMLANE_MODAL
+        modaf = UPDATE_SWIMLANE_MODAf if action=="update" else DELETE_SWIMLANE_MODAL
         self.reader = jr.json_reader(file_path=SCRUM_BOARD)     # Open reader
         logs = self.reader.list_user_gen_logs()                 # Get lists from reader
         if len(logs) == 0:
@@ -69,6 +75,6 @@ class ModalEditor:
                 num_stories = len(self.reader.read_log(logs[idx]))
                 logs[idx] += f" ({num_stories})"
         log_block = self._generate_select_options(logs, "log")  # Get option list for log list
-        # Overwrite modal options with the compiled options
+        # Overwrite modaf options with the compiled options
         modal['blocks'][1]["element"]["options"] = log_block
         return modal
