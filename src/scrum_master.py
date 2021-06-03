@@ -114,7 +114,7 @@ class ScrumMaster:
                 sort_by_block = SORT_DROPDOWN
             if 'sort_by' in md:
                 sort_by = md['sort_by'] if md['sort_by'] != "UNSORTED" else None
-            else: 
+            else:
                 sort_by = None
 
         if not init_option:
@@ -309,7 +309,7 @@ class ScrumMaster:
                 return
             for story in stories:
                 self.blocks += self._story_to_msg(story)
-            
+
             # Make sure stories are under 50 blocks
             self.blocks = self.blocks[:50]
             for i in range(len(self.blocks)-1, 0, -1):
@@ -339,8 +339,10 @@ class ScrumMaster:
         name = self._get_member_name(user_id)
         first_name = name.split(' ')[0]
 
-        story_logs = list(set(self.scrum_board.get_logs()) - set(["Previous Sprint", "Archived"]))
-        stories = self.scrum_board.search_story(name, story_logs, [], include_archived=False)
+        story_logs = list(set(self.scrum_board.get_logs()) -
+                          set(["Previous Sprint", "Archived"]))
+        stories = self.scrum_board.search_story(
+            name, story_logs, [], include_archived=False)
 
         if isinstance(stories, list):
             self.blocks = [{
@@ -641,8 +643,6 @@ class ScrumMaster:
         # Add an if-clause here with your callback_id used in the modal
         if callback_id == "create-story-modal":
             self._process_create_update_submission(payload_values)
-        elif callback_id == "delete-story-modal":
-            return self._process_delete_story(payload_values)
         elif callback_id == "confirm-delete-story-modal":
             md = json.loads(payload['view']['private_metadata'])
             self._process_story_confirm_delete(md)
@@ -676,8 +676,6 @@ class ScrumMaster:
     def process_delete_sequence(self, payload):
         callback_id = payload['view']['callback_id']
         payload_values = list(payload['view']['state']['values'].values())
-        print(
-            f"PROCESS DELETE METADATA: {payload['view']['private_metadata']}")
         if payload['view']['private_metadata'] != "None":
             metadata = json.loads(payload['view']['private_metadata'])
         else:

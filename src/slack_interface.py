@@ -45,7 +45,7 @@ for msg in result["scheduled_messages"]:
 scrum_master = ScrumMaster()
 SCRUM_BOARD = 'data/scrum_board.json'
 view_actions = ['update-story', 'delete-story',
-                'create-story', 'update-swimlane', 'create-swimlane']
+                'create-story', 'update-swimlane', 'create-swimlane', 'delete-swimlane']
 
 # reset sprint info in json:
 scrum_master.reset_sprint_info()
@@ -118,7 +118,6 @@ def handle_interaction():
 
     # A data type of block_actions is received when a user clicks on an interactive block in the channel
     if data['type'] == 'block_actions':
-
         if 'view' in data and data['view']['type'] == 'home':
             if data['actions'][0]['action_id'] in view_actions:
                 action_id = data['actions'][0]['action_id']
@@ -154,7 +153,6 @@ def handle_interaction():
         try:
             callback_id = data['view']['callback_id']
             if callback_id == "start-sprint-modal":
-                print("START SPRINT MODAL SUBMITTED")
                 schedule_sprint_end_message(
                     list(data['view']['state']['values'].values()))
 
@@ -253,7 +251,7 @@ def schedule_sprint_end_message(payload_values):
     exists = scrum_master.check_if_sprint_exists()
     if exists:
         delete_scheduled_message(exists)
-    
+
     # schedule a message:
     end_msg = scrum_master.get_sprint_end_msg(unix_start, unix_end)
     success = schedule_message(unix_end, blocks=end_msg['blocks'])
