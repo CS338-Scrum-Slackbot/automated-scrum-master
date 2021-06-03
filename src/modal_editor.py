@@ -1,3 +1,4 @@
+import re
 import json
 import copy
 import json_reader as jr
@@ -34,6 +35,11 @@ class ModalEditor:
         fields = self.reader.list_fields()
         logs = self.reader.list_logs()[:]
         logs.remove("Archived")
+        for idx in range(len(fields)):
+            f = fields[idx]
+            f = f.title()
+            f = re.sub(pattern='_', string=f, repl=' ')   # Replace underscore
+            fields[idx] = f
 
         # Get option list for field & log lists
         field_block = self._generate_select_options(fields, "field")
@@ -51,8 +57,8 @@ class ModalEditor:
 
         # compile log/swimlane options
         message = "Existing swimlanes:\n"
-        for l in logs:
-            message += f"{l}, "
+        for f in logs:
+            message += f"{f}, "
         message = message[:-2]  # Crop trailing ", "
 
         # Overwrite modal options with the compiled options
