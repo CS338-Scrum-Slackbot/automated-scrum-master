@@ -48,3 +48,27 @@ DELETE_SWIMLANE_MODAL = {
 
     ],
 }
+
+DELETE_NO_SWIMLANES_MODAL = {
+    "type": "modal",
+    "title": {
+            "type": "plain_text",
+        "text": "Delete Swimlane",
+                "emoji": True
+    },
+    "close": {
+        "type": "plain_text",
+        "text": "Close",
+        "emoji": True
+    },
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                    "type": "plain_text",
+                    "text": "No swimlanes can be deleted.",
+                    "emoji": True
+            }
+        }
+    ]
+}

@@ -76,6 +76,9 @@ class ScrumBoard:
         if source_log == "Archived":
             return "Story with \"ID " + str(story_id) + "\" has already been deleted."
 
+        if source_log == "Previous Sprint":
+            return "Story with \"ID " + str(story_id) + "\" cannot be deleted as it is part of `Previous Sprint`."
+
         moved_story, new_log = self.reader.move(
             story_id, "Archived", source_log)
 
