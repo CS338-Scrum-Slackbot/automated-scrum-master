@@ -973,6 +973,8 @@ class ScrumMaster:
     def _process_search_story(self, payload_values):
         lookup_text = self._get_plaintext_input_item(payload_values, 0)
         fields = self._get_static_multi_select_item(payload_values, 1)
+        for idx in range(len(fields)):
+            fields[idx] = re.sub(pattern=" ", string=fields[idx].lower(), repl="_")
         swimlanes = self._get_static_multi_select_item(payload_values, 2)
         include_archived = self._get_checkboxes_action(payload_values, 3)
         include_archived = False if include_archived == [] else True
