@@ -38,7 +38,7 @@ https://www.youtube.com/watch?v=6gHvqXrfjuo
 Finally run:
 
 ```
-./ngrok http [port_addr]
+./ngrok http 5000
 ```
 
 And copy the forwarding address.
